@@ -9,7 +9,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Login</title>
+    <title>Register</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         /* Video de fondo */
@@ -132,16 +132,26 @@
 
 <div class="login-container">
     <div class="login-card">
-        <h3>Ingresa con tu cuenta CINEMAX</h3>
-        <form action="LoginServlet" method="post">
+        <h3>Ingresa tus datos</h3>
+        <form id="registroForm" action="UsuarioServlet?action=insertarcliente" method="post">
             <input type="text" name="username" class="form-control" placeholder="Usuario" required />
             <input type="password" name="password" class="form-control" placeholder="Contraseña" required />
-            <a href="#" class="forgot-link">Olvidé mi contraseña</a>
-            <button type="submit" class="btn btn-login">ENTRAR</button>
-            <button type="button" class="btn btn-register" onclick="window.location.href='Register.jsp'">REGISTRARSE</button>
+            <input type="password" name="passwordconfirm" class="form-control" placeholder="Confirmar Contraseña" required />
+            <button type="submit" class="btn btn-login">Registrar</button>
+            <button type="button" class="btn btn-register" onclick="window.location.href='Login.jsp'">Regresar</button>
         </form>
     </div>
 </div>
+<script>
+document.getElementById("registroForm").addEventListener("submit", function(event) {
+    const pass = document.getElementById("password").value;
+    const confirm = document.getElementById("passwordconfirm").value;
 
+    if (pass !== confirm) {
+        event.preventDefault(); // Evita que se envíe el form
+        alert("Las contraseñas no coinciden !!");
+    }
+});
+</script>
 </body>
 </html>

@@ -35,7 +35,7 @@ public class UsuarioServlet extends HttpServlet {
             } else if ("editar".equals(action)) {
                 mostrarFormularioEditar(request, response);
             } else if ("eliminar".equals(action)) {
-                eliminarUsuario(request, response);
+                //eliminarUsuario(request, response);
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -51,7 +51,9 @@ public class UsuarioServlet extends HttpServlet {
             if ("insertar".equals(action)) {
                 insertarUsuario(request, response);
             } else if ("actualizar".equals(action)) {
-                actualizarUsuario(request, response);
+                //actualizarUsuario(request, response);
+            } else if ("insertarcliente".equals(action)) {
+                insertarUsuarioCliente(request, response);
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -60,8 +62,8 @@ public class UsuarioServlet extends HttpServlet {
 
     private void listarUsuarios(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        //List<Usuario> lista = usuarioDao.listar();
-        //request.setAttribute("listaUsuarios", lista);
+        List<Usuarios> lista = usuarioDao.listar();
+        request.setAttribute("listaUsuarios", lista);
         RequestDispatcher dispatcher = request.getRequestDispatcher("Usuario.jsp");
         dispatcher.forward(request, response);
     }
@@ -90,7 +92,6 @@ public class UsuarioServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String rol = request.getParameter("rol");
-
         Usuarios usuario = new Usuarios();
         usuario.setUsername(username);
         usuario.setPassword(password); // No olvides cifrar la contraseña
@@ -100,6 +101,24 @@ public class UsuarioServlet extends HttpServlet {
         response.sendRedirect("UsuarioServlet?action=listar");
     }
 
+    private void insertarUsuarioCliente(HttpServletRequest request, HttpServletResponse response)
+        throws SQLException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        // El rol siempre será "cliente"
+        String rol = "cliente";
+
+        Usuarios usuario = new Usuarios();
+        usuario.setUsername(username);
+        usuario.setPassword(password);
+        //usuario.setRol(rol);
+
+        usuarioDao.insertar(usuario);
+        //lo mandamos a el login ahora indicando que se registro correctamente
+        response.sendRedirect("Login.jsp");
+    }
+    /*
     private void actualizarUsuario(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
@@ -107,8 +126,8 @@ public class UsuarioServlet extends HttpServlet {
         String password = request.getParameter("password");
         String rol = request.getParameter("rol");
 
-        //usuarios usuario = new usuarios(id, username, password, rol);
-        //usuarioDao.editar(usuario);
+        Usuarios usuario = new Usuarios(id, username, password, rol);
+        usuarioDao.editar(usuario);
         response.sendRedirect("UsuarioServlet?action=listar");
     }
 
@@ -118,4 +137,5 @@ public class UsuarioServlet extends HttpServlet {
         usuarioDao.eliminar(id);
         response.sendRedirect("UsuarioServlet?action=listar");
     }
+*/
 }
