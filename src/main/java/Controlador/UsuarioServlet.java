@@ -10,7 +10,7 @@ import java.util.List;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import modelo.Usuarios;
+import modelo.Usuario;
 import modelo.UsuarioDao;
 
 @WebServlet("/UsuarioServlet")
@@ -62,7 +62,7 @@ public class UsuarioServlet extends HttpServlet {
 
     private void listarUsuarios(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Usuarios> lista = usuarioDao.listar();
+        List<Usuario> lista = usuarioDao.listar();
         request.setAttribute("listaUsuarios", lista);
         RequestDispatcher dispatcher = request.getRequestDispatcher("Usuario.jsp");
         dispatcher.forward(request, response);
@@ -77,7 +77,7 @@ public class UsuarioServlet extends HttpServlet {
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
         int id = Integer.parseInt(request.getParameter("id"));
-        Usuarios usuario = usuarioDao.leer(id);
+        Usuario usuario = usuarioDao.leer(id);
         if (usuario != null) {
             request.setAttribute("usuario", usuario);
             RequestDispatcher dispatcher = request.getRequestDispatcher("EditarUsuario.jsp");
@@ -92,7 +92,7 @@ public class UsuarioServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String rol = request.getParameter("rol");
-        Usuarios usuario = new Usuarios();
+        Usuario usuario = new Usuario();
         usuario.setUsername(username);
         usuario.setPassword(password); // No olvides cifrar la contraseña
         //usuario.setRol(rol);
@@ -109,7 +109,7 @@ public class UsuarioServlet extends HttpServlet {
         // El rol siempre será "cliente"
         String rol = "cliente";
 
-        Usuarios usuario = new Usuarios();
+        Usuario usuario = new Usuario();
         usuario.setUsername(username);
         usuario.setPassword(password);
         //usuario.setRol(rol);

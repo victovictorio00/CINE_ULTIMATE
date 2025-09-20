@@ -105,9 +105,9 @@ public class ProductoServlet extends HttpServlet {
 
         Producto producto = new Producto();
         producto.setNombre(nombre);
-        producto.setPrecio(precio);
         producto.setDescripcion(descripcion);
         producto.setFoto(foto);
+        //producto.setStock(stock);
 
         productoDao.insertar(producto);
         response.sendRedirect("ProductoServlet?action=listar");
@@ -128,9 +128,9 @@ public class ProductoServlet extends HttpServlet {
             foto = inputStream.readAllBytes();
         }
 
-        Producto producto = new Producto(id, nombre, precio, descripcion, foto);
-        productoDao.actualizar(producto);
-        response.sendRedirect("ProductoServlet?action=listar");
+        //Producto producto = new Producto(id, nombre, descripcion, foto, stock);
+        //productoDao.actualizar(producto);
+        //response.sendRedirect("ProductoServlet?action=listar");
     }
 
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)

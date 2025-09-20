@@ -129,7 +129,7 @@ public class PeliculaServlet extends HttpServlet {
         Pelicula pelicula = new Pelicula();
         pelicula.setNombre(nombre);
         pelicula.setSinopsis(sinopsis);
-        pelicula.setHorario(horario);
+        //pelicula.(horario);
         pelicula.setFoto(foto);
 
         peliculaDao.insertar(pelicula);  // Inserta la película en la base de datos
@@ -150,8 +150,8 @@ public class PeliculaServlet extends HttpServlet {
             foto = inputStream.readAllBytes();
         }
 
-        Pelicula pelicula = new Pelicula(id, nombre, sinopsis, horario, foto);
-        peliculaDao.editar(pelicula);  // Actualiza la película en la base de datos
+        //Pelicula pelicula = new Pelicula(id, nombre, sinopsis, horario, foto);
+        //peliculaDao.editar(pelicula);  // Actualiza la película en la base de datos
         response.sendRedirect("PeliculaServlet?action=listar");  // Redirige al listado de películas
     }
 
