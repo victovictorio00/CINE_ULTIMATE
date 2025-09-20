@@ -8,6 +8,6 @@ package Logica;
  *
  * @author Desktop
  */
-public class USUARIOS_TEST {
+public class PRUEBA_TEST {
     
 }
