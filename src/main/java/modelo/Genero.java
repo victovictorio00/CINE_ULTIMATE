@@ -6,27 +6,30 @@ package modelo;
 
 /**
  *
- * @author Desktop
+ * @author ERICK
  */
-public class Roles {
-    private int idRol;
+public class Genero {
+    private int id_genero;
     private String nombre;
-
-    public int getIdRol() {
-        return idRol;
+    
+    public Genero(){
     }
 
-    public void setIdRol(int idRol) {
-        this.idRol = idRol;
+    public int getId_genero() {
+        return id_genero;
     }
 
     public String getNombre() {
         return nombre;
     }
 
+    public void setId_genero(int id_genero) {
+        this.id_genero = id_genero;
+    }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-
-
+    
+    
 }
