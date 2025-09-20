@@ -6,32 +6,31 @@ package modelo;
 
 public class Producto {
 
-    private int id;
+    private int idProducto;
     private String nombre;
-    private String precio;
     private String descripcion;
     private byte[] foto;
+    private int stock;
+
 
     // Constructor vacío
     public Producto() {
     }
 
-    // Constructor con parámetros
-    public Producto(int id, String nombre, String precio, String descripcion, byte[] foto) {
-        this.id = id;
+    public Producto(int idProducto, String nombre, String descripcion, byte[] foto, int stock) {
+        this.idProducto = idProducto;
         this.nombre = nombre;
-        this.precio = precio;
         this.descripcion = descripcion;
         this.foto = foto;
+        this.stock = stock;
     }
 
-    // Getters y Setters
-    public int getId() {
-        return id;
+    public int getIdProducto() {
+        return idProducto;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setIdProducto(int idProducto) {
+        this.idProducto = idProducto;
     }
 
     public String getNombre() {
@@ -40,14 +39,6 @@ public class Producto {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public String getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(String precio) {
-        this.precio = precio;
     }
 
     public String getDescripcion() {
@@ -66,4 +57,11 @@ public class Producto {
         this.foto = foto;
     }
 
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
 }

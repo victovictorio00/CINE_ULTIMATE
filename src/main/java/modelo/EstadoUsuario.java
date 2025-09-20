@@ -11,6 +11,8 @@ package modelo;
 public class EstadoUsuario {
     private int idEstadoUsuario;
     private String nombre;
+    
+    public EstadoUsuario(){}
 
     public int getIdEstadoUsuario() {
         return idEstadoUsuario;

@@ -21,11 +21,11 @@ public class ProductoDao implements DaoCrud<Producto> {
              ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Producto producto = new Producto();
-                producto.setId(rs.getInt("id"));
+                producto.setIdProducto(rs.getInt("id_producto"));
                 producto.setNombre(rs.getString("nombre"));
-                producto.setPrecio(rs.getString("precio"));
                 producto.setDescripcion(rs.getString("descripcion"));
                 producto.setFoto(rs.getBytes("foto"));
+                producto.setStock(rs.getInt("stock"));
                 productos.add(producto);
             }
         }
@@ -35,13 +35,13 @@ public class ProductoDao implements DaoCrud<Producto> {
     // Insertar un producto
     @Override
     public void insertar(Producto producto) throws SQLException {
-        String query = "INSERT INTO productos (nombre, precio, descripcion, foto) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO productos (nombre, descripcion, foto, stock) VALUES (?, ?, ?, ?)";
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
             pst.setString(1, producto.getNombre());
-            pst.setString(2, producto.getPrecio());
-            pst.setString(3, producto.getDescripcion());
-            pst.setBytes(4, producto.getFoto());
+            pst.setString(2, producto.getDescripcion());
+            pst.setBytes(3, producto.getFoto());
+            pst.setInt(4, producto.getStock());
             pst.executeUpdate();
         }
     }
@@ -56,11 +56,11 @@ public class ProductoDao implements DaoCrud<Producto> {
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     Producto producto = new Producto();
-                    producto.setId(rs.getInt("id"));
+                    producto.setIdProducto(rs.getInt("id_producto"));
                     producto.setNombre(rs.getString("nombre"));
-                    producto.setPrecio(rs.getString("precio"));
                     producto.setDescripcion(rs.getString("descripcion"));
                     producto.setFoto(rs.getBytes("foto"));
+                    producto.setStock(rs.getInt("stock"));
                     return producto;
                 }
             }
@@ -71,14 +71,14 @@ public class ProductoDao implements DaoCrud<Producto> {
     // Actualizar un producto
     @Override
     public void editar(Producto producto) throws SQLException {
-        String query = "UPDATE productos SET nombre = ?, precio = ?, descripcion = ?, foto = ?  WHERE id = ?";
+        String query = "UPDATE productos SET nombre = ?, descripcion = ?, foto = , stock = ?  WHERE id = ?";
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
             pst.setString(1, producto.getNombre());
-            pst.setString(2, producto.getPrecio());
-            pst.setString(3, producto.getDescripcion());
-            pst.setBytes(4, producto.getFoto());
-            pst.setInt(5, producto.getId());
+            pst.setString(2, producto.getDescripcion());
+            pst.setBytes(3, producto.getFoto());
+            pst.setInt(4, producto.getStock());
+            pst.setInt(5, producto.getIdProducto());
             pst.executeUpdate();
         }
     }
@@ -97,20 +97,15 @@ public class ProductoDao implements DaoCrud<Producto> {
     
     
 public void actualizar(Producto producto) throws SQLException {
-    String query = "UPDATE productos SET nombre = ?, precio = ?, descripcion = ?, foto = ?  WHERE id = ?";
+    String query = "UPDATE productos SET nombre = ?, descripcion = ?, foto = ?, stock = ? WHERE id = ?";
     try (Connection con = Conexion.getConnection();
          PreparedStatement pst = con.prepareStatement(query)) {
-        pst.setString(1, producto.getNombre());
-        pst.setString(2, producto.getPrecio());  // Si el precio es un String en tu base de datos
-        pst.setString(3, producto.getDescripcion());
-        pst.setBytes(4, producto.getFoto());
-        pst.setInt(5, producto.getId());  // Asegúrate de usar el ID correcto
-        pst.executeUpdate();
+            pst.setString(1, producto.getNombre());
+            pst.setString(2, producto.getDescripcion());
+            pst.setBytes(3, producto.getFoto());
+            pst.setInt(4, producto.getStock());
+            pst.setInt(5, producto.getIdProducto());
+            pst.executeUpdate();
     }
 }
-
-    
-    
-    
-    
 }

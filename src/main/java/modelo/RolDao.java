@@ -27,7 +27,7 @@ public class RolDao {
             
             while (rs.next()) {
                 Rol r = new Rol();
-                r.setId_rol(rs.getInt("id_rol"));
+                r.setIdRol(rs.getInt("id_rol"));
                 r.setNombre(rs.getString("nombre"));
                 lista.add(r);
             }

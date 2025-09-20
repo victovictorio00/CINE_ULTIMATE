@@ -8,23 +8,23 @@ package modelo;
  *
  * @author Desktop
  */
-public class EstadoUsuarios {
-    private int id_estado_usuario;
+public class EstadoFuncion {
+    private int idEstadoFuncion;
     private String nombre;
 
-    public EstadoUsuarios(){}
+    public EstadoFuncion() {}
 
-    public EstadoUsuarios(int id_estado_usuario, String nombre) {
-        this.id_estado_usuario = id_estado_usuario;
+    public EstadoFuncion(int idEstadoFuncion, String nombre) {
+        this.idEstadoFuncion = idEstadoFuncion;
         this.nombre = nombre;
     }
 
-    public int getId_estado_usuario() {
-        return id_estado_usuario;
+    public int getIdEstadoFuncion() {
+        return idEstadoFuncion;
     }
 
-    public void setId_estado_usuario(int id_estado_usuario) {
-        this.id_estado_usuario = id_estado_usuario;
+    public void setIdEstadoFuncion(int idEstadoFuncion) {
+        this.idEstadoFuncion = idEstadoFuncion;
     }
 
     public String getNombre() {

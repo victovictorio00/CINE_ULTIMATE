@@ -7,34 +7,40 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package modelo;
+import java.util.Date;
 
 public class Pelicula {
 
-    private int id;
+    private int idPelicula;
     private String nombre;
     private String sinopsis;
-    private String horario;
+    private Genero idGenero;
     private byte[] foto;
+    private Date fechaEstreno;
+    private Double precio;
 
     // Constructor vacío
     public Pelicula() {
     }
 
     // Constructor con parámetros
-    public Pelicula(int id, String nombre, String sinopsis, String horario, byte[] foto) {
-        this.id = id;
+
+    public Pelicula(int idPelicula, String nombre, String sinopsis, Genero idGenero, byte[] foto, Date fechaEstreno, Double precio) {
+        this.idPelicula = idPelicula;
         this.nombre = nombre;
         this.sinopsis = sinopsis;
-        this.horario = horario;
-        this.foto = foto;//sss
-    }
-    // Getters y Setters
-    public int getId() {
-        return id;
+        this.idGenero = idGenero;
+        this.foto = foto;
+        this.fechaEstreno = fechaEstreno;
+        this.precio = precio;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getIdPelicula() {
+        return idPelicula;
+    }
+
+    public void setIdPelicula(int idPelicula) {
+        this.idPelicula = idPelicula;
     }
 
     public String getNombre() {
@@ -53,14 +59,14 @@ public class Pelicula {
         this.sinopsis = sinopsis;
     }
 
-    public String getHorario() {
-        return horario;
+    public Genero getIdGenero() {
+        return idGenero;
     }
 
-    public void setHorario(String horario) {
-        this.horario = horario;
+    public void setIdGenero(Genero idGenero) {
+        this.idGenero = idGenero;
     }
-    
+
     public byte[] getFoto() {
         return foto;
     }
@@ -68,4 +74,21 @@ public class Pelicula {
     public void setFoto(byte[] foto) {
         this.foto = foto;
     }
+
+    public Date getFechaEstreno() {
+        return fechaEstreno;
+    }
+
+    public void setFechaEstreno(Date fechaEstreno) {
+        this.fechaEstreno = fechaEstreno;
+    }
+
+    public Double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(Double precio) {
+        this.precio = precio;
+    }
+    
 }
