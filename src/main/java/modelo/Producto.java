@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo;
 
 public class Producto {
@@ -11,20 +7,23 @@ public class Producto {
     private String descripcion;
     private byte[] foto;
     private int stock;
-
+    private double precio; // campo faltante
 
     // Constructor vacío
     public Producto() {
     }
 
-    public Producto(int idProducto, String nombre, String descripcion, byte[] foto, int stock) {
+    // Constructor con todos los atributos
+    public Producto(int idProducto, String nombre, String descripcion, byte[] foto, int stock, double precio) {
         this.idProducto = idProducto;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.foto = foto;
         this.stock = stock;
+        this.precio = precio;
     }
 
+    // Getters y setters
     public int getIdProducto() {
         return idProducto;
     }
@@ -63,5 +62,13 @@ public class Producto {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
     }
 }
