@@ -11,14 +11,15 @@ import java.util.regex.Pattern;
  *
  * @author Desktop
  */
-public class TestUsername {
-    private static final String USERNAME_REGEX = "^[A-Za-z][A-Za-z0-9._]{3,19}$";//validamos de q inicie en mayuscula
-    private static final Pattern PATTERN = Pattern.compile(USERNAME_REGEX);
+public class TestPassword {
+    private static final String PASSWORD_REGEX = "^[A-Z][A-Za-z0-9-_.]{5,29}$";//validamos de q inicie en mayuscula
+    private static final Pattern PATTERN = Pattern.compile(PASSWORD_REGEX);
 
-    public static boolean esValida(String Username) {
-        if (Username == null) 
+    public static boolean esValida(String Password) {
+        if (Password == null){
             return false;
-        Matcher matcher = PATTERN.matcher(Username);
+        }
+        Matcher matcher = PATTERN.matcher(Password);
         return matcher.matches();
     }
 }

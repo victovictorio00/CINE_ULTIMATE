@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
  *
  * @author Desktop
  */
-public class TestUsernameTest {
+public class TestPasswordTest {
     
-    public TestUsernameTest() {
+    public TestPasswordTest() {
     }
     
     @BeforeClass
@@ -37,17 +37,17 @@ public class TestUsernameTest {
     }
 
     /**
-     * Test of esValida method, of class TestUsername.
+     * Test of esValida method, of class TestPassword.
      */
     @Test
     public void testEsValida() {
         System.out.println("esValida");
-        String Username = "12ploman";
-        boolean expResult = false;
-        boolean result = TestUsername.esValida(Username);
-        assertEquals(expResult, result);
-        if (result != expResult)
-            fail("The test case is a prototype.");
+        String Password = "";
+        boolean expResult = true;
+        boolean result = TestUsername.esValida(Password);
+        assertEquals("LA CONTRASEÑA NO ES VALIDA (recuerda usar Mayusculas y la cantidad de caracteres 5-20)",expResult, result);
+        if(result != expResult)
+            fail("");
     }
     
 }
