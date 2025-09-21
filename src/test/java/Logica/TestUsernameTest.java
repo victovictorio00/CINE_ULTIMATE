@@ -42,8 +42,18 @@ public class TestUsernameTest {
     @Test
     public void testEsValida() {
         System.out.println("esValida");
+        String Username = "ploman";
+        boolean expResult = true;//es valido (VERDE
+        boolean result = TestUsername.esValida(Username);
+        assertEquals(expResult, result);
+        if (result != expResult)
+            fail("The test case is a prototype.");
+    }
+    @Test
+    public void testNO_EsValida() {
+        System.out.println("esValida");
         String Username = "12ploman";
-        boolean expResult = false;
+        boolean expResult = false; //NO ES VALIDO (verde)
         boolean result = TestUsername.esValida(Username);
         assertEquals(expResult, result);
         if (result != expResult)
