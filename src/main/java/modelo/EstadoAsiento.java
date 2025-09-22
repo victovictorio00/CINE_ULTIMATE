@@ -3,7 +3,16 @@ package modelo;
 public class EstadoAsiento {
     private int idEstadoAsiento;
     private String nombre;
+    private String Descripcion;
 
+    public String getDescripcion() {
+        return Descripcion;
+    }
+
+    public void setDescripcion(String Descripcion) {
+        this.Descripcion = Descripcion;
+    }
+    
     // Constructor
     public EstadoAsiento() {}
 

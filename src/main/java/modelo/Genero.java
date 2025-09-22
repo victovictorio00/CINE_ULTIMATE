@@ -33,6 +33,12 @@ public class Genero {
     }
 
     public void setNombre(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede ser nulo ni vacío");
+        }
+        if (!nombre.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$")) {
+            throw new IllegalArgumentException("El nombre solo puede contener caracteres alfabéticos y espacios");
+        }
         this.nombre = nombre;
     }
 }
