@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * @author Desktop
  */
 public class TestUsername {
-    private static final String USERNAME_REGEX = "^[A-Za-z][A-Za-z0-9._]{3,19}$";//validamos de q inicie en mayuscula
+    private static final String USERNAME_REGEX = "^[A-Za-z][A-Za-z0-9._]{3,19}$";
     private static final Pattern PATTERN = Pattern.compile(USERNAME_REGEX);
 
     public static boolean esValida(String Username) {
