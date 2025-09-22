@@ -37,114 +37,6 @@ public class AsientoTest {
     }
 
     /**
-     * Test of getId_asiento method, of class Asiento.
-     */
-    @Test
-    public void testGetId_asiento() {
-        System.out.println("getId_asiento");
-        Asiento instance = new Asiento();
-        int expResult = 0;
-        int result = instance.getId_asiento();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setId_asiento method, of class Asiento.
-     */
-    @Test
-    public void testSetId_asiento() {
-        System.out.println("setId_asiento");
-        int id_asiento = 0;
-        Asiento instance = new Asiento();
-        instance.setId_asiento(id_asiento);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getId_sala method, of class Asiento.
-     */
-    @Test
-    public void testGetId_sala() {
-        System.out.println("getId_sala");
-        Asiento instance = new Asiento();
-        Sala expResult = null;
-        Sala result = instance.getId_sala();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setId_sala method, of class Asiento.
-     */
-    @Test
-    public void testSetId_sala() {
-        System.out.println("setId_sala");
-        Sala id_sala = null;
-        Asiento instance = new Asiento();
-        instance.setId_sala(id_sala);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getCodigo method, of class Asiento.
-     */
-    @Test
-    public void testGetCodigo() {
-        System.out.println("getCodigo");
-        Asiento instance = new Asiento();
-        String expResult = "";
-        String result = instance.getCodigo();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setCodigo method, of class Asiento.
-     */
-    @Test
-    public void testSetCodigo() {
-        System.out.println("setCodigo");
-        String codigo = "";
-        Asiento instance = new Asiento();
-        instance.setCodigo(codigo);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getId_estado_asiento method, of class Asiento.
-     */
-    @Test
-    public void testGetId_estado_asiento() {
-        System.out.println("getId_estado_asiento");
-        Asiento instance = new Asiento();
-        EstadoAsiento expResult = null;
-        EstadoAsiento result = instance.getId_estado_asiento();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setId_estado_asiento method, of class Asiento.
-     */
-    @Test
-    public void testSetId_estado_asiento() {
-        System.out.println("setId_estado_asiento");
-        EstadoAsiento id_estado_asiento = null;
-        Asiento instance = new Asiento();
-        instance.setId_estado_asiento(id_estado_asiento);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of esCodigoValido method, of class Asiento.
      */
     @Test
@@ -184,7 +76,7 @@ public class AsientoTest {
         instance.setId_estado_asiento(estado);
         instance.ocupar();
         String expResult = "Ocupado";
-        assertEquals(expResult, instance.getId_estado_asiento().getDescripcion());
+        assertEquals(expResult, instance.getId_estado_asiento().getNombre());
     }
 
     /**
@@ -199,7 +91,7 @@ public class AsientoTest {
         instance.liberar();
         
         String expResult = "Disponible";
-        assertEquals(expResult, instance.getId_estado_asiento().getDescripcion());
+        assertEquals(expResult, instance.getId_estado_asiento().getNombre());
     }
 
     /**

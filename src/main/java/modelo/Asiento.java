@@ -50,13 +50,13 @@ public class Asiento {
     // Verificar si esta disponible
     public boolean estaDisponible() {
         return id_estado_asiento != null &&
-               "Disponible".equalsIgnoreCase(id_estado_asiento.getDescripcion());
+               "Disponible".equalsIgnoreCase(id_estado_asiento.getNombre());
     }
 
     //Ocupar asiento
     public void ocupar() {
         if (estaDisponible()) {
-            id_estado_asiento.setDescripcion("Ocupado");
+            id_estado_asiento.setNombre("Ocupado");
         } else {
             throw new IllegalStateException("El asiento no está disponible para ocupar.");
         }
@@ -65,7 +65,7 @@ public class Asiento {
     // Liberar una asiento si esta ocupado
     public void liberar() {
         if (!estaDisponible()) {
-            id_estado_asiento.setDescripcion("Disponible");
+            id_estado_asiento.setNombre("Disponible");
         } else{
             throw new IllegalStateException("El asiento ya estaba disponible");
         }

@@ -121,6 +121,5 @@ public class Usuario {
     public void setNumeroIntentos(int numeroIntentos) {
         this.numeroIntentos = numeroIntentos;
     }
-
     
 }
