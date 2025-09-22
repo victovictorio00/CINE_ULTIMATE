@@ -49,8 +49,11 @@ public class Venta {
     }
 
     public void setTotal(double total) {
-        this.total = total;
-    }
+           if (total < 0) {
+               throw new IllegalArgumentException("El total no puede ser negativo");
+           }
+           this.total = total; // ya sin caracteres raros
+       }
 
     public String getMetodoPago() {
         return metodoPago;
