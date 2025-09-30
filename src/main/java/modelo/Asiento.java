@@ -45,7 +45,9 @@ public class Asiento {
 
     public boolean esCodigoValido() {
         // El codigo seria fila por columna tipo "A12"
-        return codigo != null && codigo.matches("^[A-Z][0-9]{2}$");
+        //return codigo != null && codigo.matches("^[A-Z]+[0-9]+");
+        //return codigo != null && codigo.matches("^[A-Z][0-9]{2}$");
+        return codigo != null && codigo.matches("^[A-ZÑ][0-9]{2}$");
     }
     // Verificar si esta disponible
     public boolean estaDisponible() {
