@@ -20,7 +20,7 @@ public class GeneroDao {
             
             while (rs.next()) {
                 Genero g = new Genero();
-                g.setId_genero(rs.getInt("id_genero"));
+                g.setIdGenero(rs.getInt("id_genero"));
                 g.setNombre(rs.getString("nombre"));
                 lista.add(g);
             }

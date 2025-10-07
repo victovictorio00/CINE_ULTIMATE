@@ -26,7 +26,7 @@ public class AsientoDao implements DaoCrud<Asiento> {
                 asiento.setId_sala(sala);
                 
                 EstadoAsiento estado = new EstadoAsiento();
-                estado.setId_estado_asiento(rs.getInt("id_estado_asiento"));
+                estado.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
                 asiento.setId_estado_asiento(estado);
                 
                 lista.add(asiento);
@@ -43,7 +43,7 @@ public class AsientoDao implements DaoCrud<Asiento> {
             
             pst.setInt(1, asiento.getId_sala().getIdSala());
             pst.setString(2, asiento.getCodigo());
-            pst.setInt(3, asiento.getId_estado_asiento().getId_estado_asiento());
+            pst.setInt(3, asiento.getId_estado_asiento().getIdEstadoAsiento());
             pst.executeUpdate();
         }
     }
@@ -66,7 +66,7 @@ public class AsientoDao implements DaoCrud<Asiento> {
                     asiento.setId_sala(sala);
 
                     EstadoAsiento estado = new EstadoAsiento();
-                    estado.setId_estado_asiento(rs.getInt("id_estado_asiento"));
+                    estado.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
                     asiento.setId_estado_asiento(estado);
 
                     return asiento;
@@ -84,7 +84,7 @@ public class AsientoDao implements DaoCrud<Asiento> {
             
             pst.setInt(1, asiento.getId_sala().getIdSala());
             pst.setString(2, asiento.getCodigo());
-            pst.setInt(3, asiento.getId_estado_asiento().getId_estado_asiento());
+            pst.setInt(3, asiento.getId_estado_asiento().getIdEstadoAsiento());
             pst.setInt(4, asiento.getId_asiento());
             pst.executeUpdate();
         }

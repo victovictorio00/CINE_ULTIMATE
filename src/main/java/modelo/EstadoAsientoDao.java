@@ -17,8 +17,8 @@ public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
 
             while (rs.next()) {
                 EstadoAsiento ea = new EstadoAsiento();
-                ea.setId_estado_asiento(rs.getInt("id_estado_asiento"));
-                ea.setDescripcion(rs.getString("descripcion"));
+                ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
+                ea.setNombre(rs.getString("nombre"));
                 lista.add(ea);
             }
         }
@@ -27,11 +27,11 @@ public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
 
     @Override
     public void insertar(EstadoAsiento ea) throws SQLException {
-        String query = "INSERT INTO estado_asientos (descripcion) VALUES (?)";
+        String query = "INSERT INTO estado_asientos (nombre) VALUES (?)";
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setString(1, ea.getDescripcion());
+            pst.setString(1, ea.getNombre());
             pst.executeUpdate();
         }
     }
@@ -46,8 +46,8 @@ public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     EstadoAsiento ea = new EstadoAsiento();
-                    ea.setId_estado_asiento(rs.getInt("id_estado_asiento"));
-                    ea.setDescripcion(rs.getString("descripcion"));
+                    ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
+                    ea.setNombre(rs.getString("nombre"));
                     return ea;
                 }
             }
@@ -57,12 +57,12 @@ public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
 
     @Override
     public void editar(EstadoAsiento ea) throws SQLException {
-        String query = "UPDATE estado_asientos SET descripcion = ? WHERE id_estado_asiento = ?";
+        String query = "UPDATE estado_asientos SET nombre = ? WHERE id_estado_asiento = ?";
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setString(1, ea.getDescripcion());
-            pst.setInt(2, ea.getId_estado_asiento());
+            pst.setString(1, ea.getNombre());
+            pst.setInt(2, ea.getIdEstadoAsiento());
             pst.executeUpdate();
         }
     }
