@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controlador;
 
 import java.io.IOException;
@@ -155,7 +151,9 @@ public class UsuarioServlet extends HttpServlet {
         //lo mandamos a el login ahora indicando que se registro correctamente
         response.sendRedirect("Login.jsp");
     }
-    /*
+}
+
+/*
     private void actualizarUsuario(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
@@ -175,4 +173,3 @@ public class UsuarioServlet extends HttpServlet {
         response.sendRedirect("UsuarioServlet?action=listar");
     }
 */
-}
