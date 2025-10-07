@@ -135,8 +135,8 @@
         <h3>Ingresa tus datos</h3>
         <form id="registroForm" action="UsuarioServlet?action=insertarcliente" method="post">
             <input type="text" name="username" class="form-control" placeholder="Usuario" required />
-            <input type="password" name="password" class="form-control" placeholder="Contraseña" required />
-            <input type="password" name="passwordconfirm" class="form-control" placeholder="Confirmar Contraseña" required />
+            <input type="password" id="password" name="password" class="form-control" placeholder="Contraseña" required />
+            <input type="password" id="passwordconfirm" name="passwordconfirm" class="form-control" placeholder="Confirmar Contraseña" required />
             <button type="submit" class="btn btn-login">Registrar</button>
             <button type="button" class="btn btn-register" onclick="window.location.href='Login.jsp'">Regresar</button>
         </form>

@@ -41,6 +41,12 @@
             <version>1.3</version>
             <scope>test</scope>
             </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+            <type>jar</type>
+        </dependency>
                <!-- JUnit 5 
           <dependency>
             <groupId>org.junit.jupiter</groupId>

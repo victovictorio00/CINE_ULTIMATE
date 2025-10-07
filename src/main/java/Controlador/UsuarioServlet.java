@@ -7,11 +7,16 @@ package Controlador;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
+import modelo.EstadoUsuario;
+import modelo.Rol;
 import modelo.Usuario;
 import modelo.UsuarioDao;
+import org.mindrot.jbcrypt.BCrypt;
+
 
 @WebServlet("/UsuarioServlet")
 public class UsuarioServlet extends HttpServlet {
@@ -105,14 +110,46 @@ public class UsuarioServlet extends HttpServlet {
         throws SQLException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        
+        
+        // El rol siempre será "cliente" osea id 2
+        Rol rol = new Rol(1,"Cliente");
+        
+        EstadoUsuario estado = new EstadoUsuario();
+        estado.setIdEstadoUsuario(1);
+        estado.setNombre("activo");
+        
+        String nombre_completo = username;
+        
+        String dni = "";
+        Random rand = new Random();
+        int dni2 = 10000000 + rand.nextInt(90000000); // genera entre 10000000 y 99999999
+        dni = "" + dni2;
+        
+        
+        String telefono = "";
+        String email = "";
+        String direccion = "";
 
-        // El rol siempre será "cliente"
-        String rol = "cliente";
-
-        Usuario usuario = new Usuario();
-        usuario.setUsername(username);
-        usuario.setPassword(password);
-        //usuario.setRol(rol);
+        Usuario usuario = new Usuario(
+            0,                // id_usuario (0 si es autoincremental en la BD)
+            rol,              // id_rol
+            estado,           // id_estado_usuario
+            nombre_completo,  // nombre completo
+            dni,              // DNI
+            username,         // nombre de usuario
+            hashedPassword,   // contraseña
+            telefono,         // teléfono
+            email,            // correo
+            direccion,        // dirección
+            0                 // número de intentos (empieza en 0)
+        );
+        
+        
+        
+        
+        
 
         usuarioDao.insertar(usuario);
         //lo mandamos a el login ahora indicando que se registro correctamente
