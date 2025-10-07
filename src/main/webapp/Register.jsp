@@ -53,7 +53,7 @@
         <form id="registroForm" action="UsuarioServlet?action=insertarcliente" method="post" novalidate>
 
             <!-- Ocultos: id_rol (cliente), id_estado_usuario (activo), numeroIntentos (3) -->
-            <input type="hidden" name="idRol" value="2" />
+            <input type="hidden" name="idRol" value="1" />
             <input type="hidden" name="idEstadoUsuario" value="1" />
             <input type="hidden" name="numeroIntentos" value="3" />
 
