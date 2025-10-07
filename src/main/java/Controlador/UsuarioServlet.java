@@ -108,7 +108,6 @@ public class UsuarioServlet extends HttpServlet {
         String password = request.getParameter("password");
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         
-        
         // El rol siempre será "cliente" osea id 2
         Rol rol = new Rol(1,"Cliente");
         
@@ -122,7 +121,6 @@ public class UsuarioServlet extends HttpServlet {
         Random rand = new Random();
         int dni2 = 10000000 + rand.nextInt(90000000); // genera entre 10000000 y 99999999
         dni = "" + dni2;
-        
         
         String telefono = "";
         String email = "";
@@ -142,11 +140,6 @@ public class UsuarioServlet extends HttpServlet {
             0                 // número de intentos (empieza en 0)
         );
         
-        
-        
-        
-        
-
         usuarioDao.insertar(usuario);
         //lo mandamos a el login ahora indicando que se registro correctamente
         response.sendRedirect("Login.jsp");
