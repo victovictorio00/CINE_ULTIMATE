@@ -71,3 +71,16 @@ public class LoginServlet extends HttpServlet {
     }
 }
 */
+
+
+/*
+    // Esto es para detectar el hash y ver si es la misma contra xd
+    String storedHash = usuarioFromDb.getPassword(); // ESTO ES EL HASH DE LABD
+    String attempt = request.getParameter("password");
+
+    if (BCrypt.checkpw(attempt, storedHash)) {
+        // INCORRETA
+        } else {
+        // CORRECTA
+    }
+*/
