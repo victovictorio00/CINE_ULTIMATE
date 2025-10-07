@@ -44,8 +44,7 @@ public class TestPasswordTest {
         System.out.println("esValida");
         String Password = "Contra_Valida";//iniciamos con mayuscula
         boolean expResult = true;
-        boolean result = TestUsername.esValida(Password);
-        assertEquals("LA CONTRASEÑA NO ES VALIDA (recuerda usar Mayusculas y la cantidad de caracteres 5-20)",expResult, result);
+        boolean result = TestPassword.esValida(Password);
         if(result != expResult)
             fail("");
     }
