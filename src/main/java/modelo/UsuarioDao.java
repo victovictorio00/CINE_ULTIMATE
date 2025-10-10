@@ -29,7 +29,6 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     /* =======================
        Helpers internos
        ======================= */
-
     private Usuario mapRow(ResultSet rs) throws SQLException {
         Usuario u = new Usuario();
         u.setIdUsuario(rs.getInt("id_usuario"));
@@ -54,8 +53,11 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     }
 
     private void setNullableInt(PreparedStatement pst, int idx, Integer value) throws SQLException {
-        if (value == null) pst.setNull(idx, Types.INTEGER);
-        else pst.setInt(idx, value);
+        if (value == null) {
+            pst.setNull(idx, Types.INTEGER);
+        } else {
+            pst.setInt(idx, value);
+        }
     }
 
     private boolean looksLikeBCrypt(String s) {
@@ -65,30 +67,27 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     /* =======================
        CRUD
        ======================= */
-
     @Override
     public List<Usuario> listar() throws SQLException {
         List<Usuario> lista = new ArrayList<>();
         String sql = "SELECT " + COLS + " FROM usuarios";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) lista.add(mapRow(rs));
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapRow(rs));
+            }
         }
         return lista;
     }
 
     @Override
     public void insertar(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO usuarios " +
-                "(id_rol, id_estado_usuario, nombre_completo, dni, username, password, telefono, email, direccion, numero_intentos) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String sql = "INSERT INTO usuarios "
+                + "(id_rol, id_estado_usuario, nombre_completo, dni, username, password, telefono, email, direccion, numero_intentos) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
             setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
-
             pst.setString(3, usuario.getNombreCompleto());
             pst.setString(4, usuario.getDni());
             pst.setString(5, usuario.getUsername());
@@ -105,7 +104,9 @@ public class UsuarioDao implements DaoCrud<Usuario> {
             pst.executeUpdate();
 
             try (ResultSet keys = pst.getGeneratedKeys()) {
-                if (keys.next()) usuario.setIdUsuario(keys.getInt(1));
+                if (keys.next()) {
+                    usuario.setIdUsuario(keys.getInt(1));
+                }
             }
         }
     }
@@ -113,11 +114,12 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     @Override
     public Usuario leer(int id) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         }
         return null;
@@ -125,12 +127,11 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     @Override
     public void editar(Usuario usuario) throws SQLException {
-        String sql = "UPDATE usuarios SET " +
-                "id_rol = ?, id_estado_usuario = ?, nombre_completo = ?, dni = ?, username = ?, password = ?, " +
-                "telefono = ?, email = ?, direccion = ?, numero_intentos = ? " +
-                "WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        String sql = "UPDATE usuarios SET "
+                + "id_rol = ?, id_estado_usuario = ?, nombre_completo = ?, dni = ?, username = ?, password = ?, "
+                + "telefono = ?, email = ?, direccion = ?, numero_intentos = ? "
+                + "WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
             setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
             setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
@@ -156,8 +157,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     @Override
     public void eliminar(int id) throws SQLException {
         String sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             pst.executeUpdate();
         }
@@ -166,12 +166,10 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     /* =======================
        Auth / Intentos / Util
        ======================= */
-
     // Traer usuario por username (para leer intentos y estado)
     public Usuario getByUsername(String username) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? LIMIT 1";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, username);
             try (ResultSet rs = pst.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
@@ -180,18 +178,20 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     }
 
     /**
-     * Valida credenciales y retorna el Usuario (o null). Requiere estado ACTIVO.
-     * BCrypt si el almacenado parece hash; fallback temporal a texto plano.
+     * Valida credenciales y retorna el Usuario (o null). Requiere estado
+     * ACTIVO. BCrypt si el almacenado parece hash; fallback temporal a texto
+     * plano.
      */
     public Usuario validateUser(String username, String plainPassword) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, username);
             pst.setInt(2, ESTADO_ACTIVO_ID);
 
             try (ResultSet rs = pst.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
 
                 Usuario u = mapRow(rs);
                 String stored = u.getPassword();
@@ -209,11 +209,10 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     // Decrementa intentos (no baja de 0)
     public void decrementarIntentos(int idUsuario) throws SQLException {
-        String sql = "UPDATE usuarios " +
-                     "SET numero_intentos = GREATEST(numero_intentos - 1, 0) " +
-                     "WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        String sql = "UPDATE usuarios "
+                + "SET numero_intentos = GREATEST(numero_intentos - 1, 0) "
+                + "WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
             pst.executeUpdate();
         }
@@ -224,8 +223,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     // Resetea a 3 tras login correcto
     public void resetearIntentosA3(int idUsuario) throws SQLException {
         String sql = "UPDATE usuarios SET numero_intentos = 3 WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
             pst.executeUpdate();
         }
@@ -234,8 +232,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     // Bloqueo por estado (p.ej., 2 = BLOQUEADO)
     public void bloquearUsuario(int idUsuario, int estadoBloqueadoId) throws SQLException {
         String sql = "UPDATE usuarios SET id_estado_usuario = ? WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, estadoBloqueadoId);
             pst.setInt(2, idUsuario);
             pst.executeUpdate();

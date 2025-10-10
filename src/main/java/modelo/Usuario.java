@@ -1,4 +1,3 @@
-
 package modelo;
 
 /**
@@ -6,6 +5,7 @@ package modelo;
  * @author Desktop
  */
 public class Usuario {
+
     private int idUsuario;
     private Rol idRol;
     private EstadoUsuario idEstadoUsuario;
@@ -17,9 +17,10 @@ public class Usuario {
     private String email;
     private String direccion;
     private int numeroIntentos;
-    
+
     // Constructor
-    public Usuario() {}
+    public Usuario() {
+    }
 
     public Usuario(int idUsuario, Rol idRol, EstadoUsuario idEstadoUsuario, String nombreCompleto, String dni, String username, String password, String telefono, String email, String direccion, int numeroIntentos) {
         this.idUsuario = idUsuario;
@@ -122,6 +123,4 @@ public class Usuario {
     public void setNumeroIntentos(int numeroIntentos) {
         this.numeroIntentos = numeroIntentos;
     }
-    
-    
 }
