@@ -1,0 +1,109 @@
+
+/* Slider */
+.carousel-item img {
+    width: 100%;
+    height: 100vh;
+    max-height: 700px;
+    object-fit: cover;
+}
+
+/* Cabecera */
+.navbar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.3); /* Sombra más suave */
+    border-bottom: 1px solid white; /* Línea blanca debajo de la cabecera */
+    height: 80px;
+    padding-top: 10px;
+}
+
+.navbar-brand, .nav-link {
+    color: white !important;
+}
+
+.navbar-nav {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centra los elementos de la cabecera */
+}
+
+.nav-item {
+    margin: 0 15px; /* Espaciado entre los items */
+    position: relative; /* Necesario para la línea roja */
+}
+
+/* Línea roja al hacer clic en el item de la cabecera */
+.nav-link:hover {
+    color: #FF5733 !important; /* Color del texto al pasar el mouse */
+}
+
+.nav-link:active {
+    color: #FF5733 !important; /* Color del texto al hacer clic */
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-color: #FF5733; /* Línea roja */
+    bottom: 0;
+    left: 0;
+}
+
+/* Películas */
+.pelicula-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.pelicula-card img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Efecto de agrandado al pasar el mouse sobre la imagen */
+.pelicula-card:hover img {
+    transform: scale(1.05);
+}
+
+.pelicula-card .card-body {
+    display: none;
+}
+
+/* Mostrar la información y el botón al hacer hover */
+.pelicula-card:hover .card-body {
+    display: block;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.6);  /* Fondo oscuro con opacidad */
+    color: white;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;  /* Asegura que el contenido no se desborde */
+    transition: background-color 0.3s ease;
+}
+
+.pelicula-card .card-body a {
+    background-color: #FF5733;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Efecto hover sobre la tarjeta (sombra y transformación) */
+.pelicula-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra que aparece al pasar el mouse */
+}
+
+/* Espacio entre las filas de las películas */
+.container .row.mb-4 {
+    margin-bottom: 30px !important; /* Asegúrate de que este estilo no sea sobreescrito */
+}

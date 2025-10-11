@@ -11,9 +11,10 @@ import javax.servlet.http.*;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
+
     private UsuarioDao usuarioDao;
 
-    // ⬇⬇⬇ 1) AGREGA ESTAS CONSTANTES
+    // constantes de lógica
     private static final int MAX_INTENTOS = 3;
     private static final int ESTADO_ACTIVO = 1;     // ajusta al id real de "ACTIVO"
     private static final int ESTADO_BLOQUEADO = 2;  // ajusta al id real de "BLOQUEADO"
@@ -27,101 +28,108 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        final String username = request.getParameter("username");
-        final String password = request.getParameter("password");
+        // Opcional pero recomendado para caracteres especiales
+        request.setCharacterEncoding("UTF-8");
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        String errorMsg = null;
 
         try {
-            // ⬇⬇⬇ Trae al usuario por username (para leer intentos y estado)
+            //Trae al usuario por username (para leer intentos y estado)
             Usuario u = usuarioDao.getByUsername(username);
 
-            // Usuario no existe -> mensaje genérico (no revelar si existe)
+            //Verifica existencia
             if (u == null) {
-                request.setAttribute("error", "Credenciales incorrectas.");
-                request.setAttribute("lastUsername", username);
-                request.getRequestDispatcher("/Login.jsp").forward(request, response);
+                //Mensaje de error genérico
+                errorMsg = "Credenciales incorrectas.";
+                manejarFallo(request, response, username, errorMsg);
                 return;
             }
 
-            int intentosRestantes = Math.max(u.getNumeroIntentos(), 0);
+            int intentosFallidosActuales = u.getNumeroIntentos();
+            int estadoActualId = u.getIdEstadoUsuario() != null ? u.getIdEstadoUsuario().getIdEstadoUsuario() : 0;
 
-            // Ya bloqueado
-            if (u.getIdEstadoUsuario() != null &&
-                u.getIdEstadoUsuario().getIdEstadoUsuario() == ESTADO_BLOQUEADO) {
-                request.setAttribute("error", "Tu cuenta está bloqueada. Contacta al administrador.");
-                request.setAttribute("lastUsername", username);
-                request.getRequestDispatcher("/Login.jsp").forward(request, response);
+            // verifica bloqueo
+            if (estadoActualId == ESTADO_BLOQUEADO) {
+                errorMsg = "Tu cuenta se encuentra bloqueada. Contacta al administrador.";
+                manejarFallo(request, response, username, errorMsg);
                 return;
             }
 
-            // Sin intentos: asegura bloqueo y muestra mensaje
-            if (intentosRestantes <= 0) {
-                usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
-                request.setAttribute("error", "Has superado el límite de intentos. Tu cuenta ha sido bloqueada.");
-                request.setAttribute("lastUsername", username);
-                request.getRequestDispatcher("/Login.jsp").forward(request, response);
+            // verifica numero de intentos
+            if (intentosFallidosActuales > MAX_INTENTOS) {
+                // Si la BD no lo había bloqueado, lo bloqueamos ahora
+                if (estadoActualId == ESTADO_ACTIVO) {
+                    usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
+                }
+                errorMsg = "Has superado el límite de intentos (" + MAX_INTENTOS + "). Tu cuenta ha sido bloqueada.";
+                manejarFallo(request, response, username, errorMsg);
                 return;
             }
 
             // Valida credenciales (BCrypt/fallback dentro del DAO)
-            Usuario ok = usuarioDao.validateUser(username, password);
+            Usuario usuarioAutenticado = usuarioDao.validateUser(username, password);
 
-            if (ok != null) {
+            if (usuarioAutenticado != null) {
                 // Resetear intentos a 3
-                usuarioDao.resetearIntentosA3(ok.getIdUsuario());
-
-                // (Opcional) verifica estado activo si tu DAO no lo filtra
-                if (ok.getIdEstadoUsuario() == null ||
-                    ok.getIdEstadoUsuario().getIdEstadoUsuario() != ESTADO_ACTIVO) {
-                    request.setAttribute("error", "Tu usuario no está activo.");
-                    request.setAttribute("lastUsername", username);
-                    request.getRequestDispatcher("/Login.jsp").forward(request, response);
-                    return;
-                }
-
-                // Crear sesión y redirigir según rol
-                HttpSession session = request.getSession(true);
-                session.setAttribute("userId", ok.getIdUsuario());
-                session.setAttribute("username", ok.getUsername());
-                session.setAttribute("nombreCompleto", ok.getNombreCompleto());
-                Integer rolId = ok.getIdRol() != null ? ok.getIdRol().getIdRol() : null;
-                session.setAttribute("userRoleId", rolId);
-
-                if (rolId != null && rolId == 1) {          // 1 = admin (ajusta)
-                    response.sendRedirect("AdminDashboard.jsp");
-                } else if (rolId != null && rolId == 2) {   // 2 = cliente (ajusta)
-                    response.sendRedirect("ClienteServlet?action=listar");
-                } else {
-                    session.invalidate();
-                    request.setAttribute("error", "Rol no asignado.");
-                    request.setAttribute("lastUsername", username);
-                    request.getRequestDispatcher("/Login.jsp").forward(request, response);
-                }
+                usuarioDao.resetearIntentos(u.getIdUsuario());
+                crearSesionYRedirigir(request, response, usuarioAutenticado);
                 return;
             }
 
-            // Credenciales incorrectas: decrementar e informar
-            usuarioDao.decrementarIntentos(u.getIdUsuario());
-            int restantesPost = Math.max(intentosRestantes - 1, 0);
-            int intentoN = MAX_INTENTOS - restantesPost; // 1, 2, 3
-
-            String msg;
-            if (restantesPost <= 0) {
+            // Fallo de autenticacion 
+            usuarioDao.aumentarIntentos(u.getIdUsuario());
+            int nuevosIntentosFallidos = intentosFallidosActuales + 1;
+            
+            if (nuevosIntentosFallidos > MAX_INTENTOS) {
+                // Bloqueo y mensaje final
                 usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
-                msg = "Has superado el límite de intentos. Tu cuenta ha sido bloqueada.";
+                errorMsg = "¡Último intento fallido! Tu cuenta ha sido bloqueada.";
             } else {
-                msg = "Error de credenciales. Intento " + intentoN + " de " + MAX_INTENTOS +
-                      ". Te quedan " + restantesPost + ".";
+                // Mensaje de advertencia
+                errorMsg = "Credenciales incorrectas. Intento " + nuevosIntentosFallidos + " de " + MAX_INTENTOS + ".";
             }
-
-            request.setAttribute("error", msg);
-            request.setAttribute("lastUsername", username);
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+            
+            manejarFallo(request, response, username, errorMsg);
 
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error al validar las credenciales.");
-            request.setAttribute("lastUsername", username);
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+            errorMsg = "Error interno del servidor al procesar la solicitud.";
+            manejarFallo(request, response, username, errorMsg);
+        }
+    }
+
+    private void manejarFallo(HttpServletRequest request, HttpServletResponse response, String username, String errorMsg)
+            throws ServletException, IOException {
+        request.setAttribute("error", errorMsg);
+        request.setAttribute("lastUsername", username);
+        request.getRequestDispatcher("/Login.jsp").forward(request, response);
+    }
+
+    private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u)
+            throws IOException, ServletException {
+        HttpSession session = request.getSession(true);
+        session.setAttribute("userId", u.getIdUsuario());
+        session.setAttribute("username", u.getUsername());
+        session.setAttribute("nombreCompleto", u.getNombreCompleto());
+        Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
+        session.setAttribute("userRoleId", rolId);
+
+        // Lógica de redirección según el rol
+        if (rolId != null) {
+            if (rolId == 1) { // 1 = Cliente (ajusta si es necesario)
+                response.sendRedirect(request.getContextPath() + "/DashboardServlet");
+            } else if (rolId == 2) { // 2 = Admin (ajusta si es necesario)
+                response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+            } else {
+                session.invalidate();
+                manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+            }
+        } else {
+            session.invalidate();
+            manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
         }
     }
 }

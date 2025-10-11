@@ -208,9 +208,9 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     }
 
     // Decrementa intentos (no baja de 0)
-    public void decrementarIntentos(int idUsuario) throws SQLException {
+    public void aumentarIntentos(int idUsuario) throws SQLException {
         String sql = "UPDATE usuarios "
-                + "SET numero_intentos = GREATEST(numero_intentos - 1, 0) "
+                + "SET numero_intentos = numero_intentos + 1 "
                 + "WHERE id_usuario = ?";
         try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
@@ -221,8 +221,8 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     // SET numero_intentos = CASE WHEN numero_intentos > 0 THEN numero_intentos - 1 ELSE 0 END
 
     // Resetea a 3 tras login correcto
-    public void resetearIntentosA3(int idUsuario) throws SQLException {
-        String sql = "UPDATE usuarios SET numero_intentos = 3 WHERE id_usuario = ?";
+    public void resetearIntentos(int idUsuario) throws SQLException {
+        String sql = "UPDATE usuarios SET numero_intentos = 0 WHERE id_usuario = ?";
         try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
             pst.executeUpdate();

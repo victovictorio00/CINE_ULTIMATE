@@ -21,7 +21,7 @@
     <h3>Gestión de Usuarios</h3>
     
     <!-- Formulario para agregar nuevo usuario -->
-        <form action="UsuarioServlet?action=insertarcliente" method="post">
+        <form action="<%= request.getContextPath()%>/UsuarioServlet?action=insertarcliente" method="post">
         <div class="form-group">
             <label for="nombre_completo">Nombre Completo:</label>
             <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control" required>
