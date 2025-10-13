@@ -52,7 +52,7 @@
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item active"><a class="nav-link" href="<%= request.getContextPath()%>/DashboardServlet">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/CarteleraServlet">Películas</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Dulcería</a></li>
+                <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DulceriaServlet">Dulcería</a></li>
 
                 <%
                     String username = (String) session.getAttribute("username");
