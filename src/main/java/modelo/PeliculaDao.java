@@ -113,65 +113,40 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
         }
         return null; // Retorna null si no encuentra la foto
     }
-    
-    public List<Pelicula> getPeliculasFiltradas(String generoIdString, String filtroFecha) throws SQLException {
+
+    public List<Pelicula> getPeliculasFiltradas(String generoIdString, String fechaSeleccionadaString) throws SQLException {
         List<Pelicula> peliculas = new ArrayList<>();
-        
         // 1. Construcción dinámica de la consulta
-        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM peliculas WHERE 1=1"); // 1=1 permite añadir condiciones fácilmente
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM peliculas WHERE 1=1");
         List<Object> parameters = new ArrayList<>();
-        
-        // --- 1.1 FILTRO POR GÉNERO ---
+        // --- 1.1 FILTRO POR GÉNERO (Se mantiene la lógica) ---
+        // ... (Tu código para el filtro de género, que es correcto) ...
         if (generoIdString != null && !generoIdString.isEmpty()) {
             try {
                 int idGenero = Integer.parseInt(generoIdString);
                 queryBuilder.append(" AND id_genero = ?");
                 parameters.add(idGenero);
             } catch (NumberFormatException e) {
-                // Manejar error si el ID de género no es un número.
-                System.err.println("Advertencia: El ID de género proporcionado no es un número válido.");
+                // Manejo de error...
             }
         }
-
-        if (filtroFecha != null && !filtroFecha.isEmpty()) {
-            
-            // Usamos la fecha actual para comparar
-            Date today = new Date();
-            java.sql.Date sqlToday = new java.sql.Date(today.getTime()); 
-            
-            switch (filtroFecha.toLowerCase()) {
-                case "en cartelera":
-                    // Películas cuya fecha de estreno es HOY o anterior
-                    queryBuilder.append(" AND fecha_estreno <= ?");
-                    parameters.add(sqlToday);
-                    break;
-                case "preventa":
-                    // Películas con fecha de estreno posterior (futura)
-                    // Podrías añadir lógica más estricta si la Preventa tiene un rango específico
-                    queryBuilder.append(" AND fecha_estreno > ?");
-                    parameters.add(sqlToday);
-                    break;
-                case "próximos estrenos":
-                    // Similar a Preventa, ajusta esta lógica si quieres distinguirlos
-                    queryBuilder.append(" AND fecha_estreno > ?");
-                    parameters.add(sqlToday);
-                    break;
-                // Nota: Si usaste otros nombres de filtros en tu JSP, ajústalos aquí (e.g., "proximos_estrenos")
-            }
+        // --- 1.2 FILTRO POR FECHA EXACTA (El cambio importante) ---
+        if (fechaSeleccionadaString != null && !fechaSeleccionadaString.isEmpty()) {
+            // CAMBIO CLAVE: 
+            // 1. Usamos el operador '=' (igual) en lugar de '<=' para buscar la fecha exacta.
+            // 2. Usamos DATE(columna) para ignorar la parte de la hora y garantizar la comparación.
+            queryBuilder.append(" AND DATE(fecha_estreno) = ?");
+            parameters.add(java.sql.Date.valueOf(fechaSeleccionadaString)); // 'YYYY-MM-DD' a SQL Date
         }
-        
-        // 2. Ejecución de la consulta
+        // 2. Ejecución de la consulta (igual que antes)
         String finalQuery = queryBuilder.toString();
-        
         try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(finalQuery)) {
-            
-            // Asignar los parámetros a la consulta preparada
             for (int i = 0; i < parameters.size(); i++) {
                 pst.setObject(i + 1, parameters.get(i));
             }
-            
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
+                    // ... (Tu código para mapear ResultSet a Pelicula)
                     Pelicula pelicula = new Pelicula();
                     pelicula.setIdPelicula(rs.getInt("id_pelicula"));
                     pelicula.setNombre(rs.getString("nombre"));
@@ -180,7 +155,7 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
                     pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
                     pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                     pelicula.setPrecio(rs.getDouble("precio"));
-                    
+
                     peliculas.add(pelicula);
                 }
             }

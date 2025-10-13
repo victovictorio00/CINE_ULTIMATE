@@ -6,6 +6,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="modelo.Genero" %>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -17,231 +18,8 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <link rel="stylesheet" href="Estilos/peliculaClienteStyle.css">
 
-        <style>
-            /* PALETA DE COLORES AJUSTADA PARA FONDO BLANCO */
-            :root {
-                --accent: #FF5733;              /* Tu color de acento: Naranja/Rojo */
-                --main-bg: #FFFFFF;             /* Fondo principal: Blanco */
-                --main-text: #333333;           /* Color de texto oscuro para alto contraste */
-                --secondary-text: #6c757d;      /* Gris para texto secundario */
-                --border-color: #dee2e6;        /* Color de borde claro */
-                --card-bg: #f8f9fa;             /* Fondo sutil para tarjetas o secciones */
-                --shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra suave para el modo claro */
-            }
-
-            /* CUERPO */
-            body {
-                background-color: var(--main-bg);
-                color: var(--main-text);
-                font-family: 'Poppins', sans-serif;
-                padding-top: 80px;
-            }
-
-            /* NAVBAR (Mantenemos tu estilo de fondo transparente oscuro, pero ajustamos colores internos) */
-            .navbar {
-                position: fixed; /* Cambiado a fixed para que el contenido empiece debajo */
-                top: 0;
-                width: 100%;
-                z-index: 1000;
-                background-color: rgba(0,0,0,0.8); /* Tu color oscuro semitransparente */
-                border-bottom: 1px solid white;
-                height: 80px;
-                padding-top: 10px;
-            }
-            .navbar-brand, .nav-link { color: white !important; transition: color .3s ease; }
-            .nav-link:hover { color: var(--accent) !important; }
-            .nav-item.active .nav-link { color: var(--accent) !important; }
-            .nav-item.active::after {
-                content: ''; position: absolute; width: 100%; height: 3px;
-                background-color: var(--accent); bottom: 0; left: 0;
-            }
-            .navbar-nav { width:100%; display:flex; justify-content:center; }
-            .nav-item { margin:0 15px; position:relative; }
-            
-            /* Dropdown de la cuenta (Ajustado para el color oscuro del navbar) */
-            .navbar .dropdown-menu {
-                background-color: #343a40 !important; /* Gris muy oscuro */
-                border: 1px solid rgba(255, 255, 255, 0.15);
-            }
-            .navbar .dropdown-item {
-                color: #f8f9fa !important;
-                background-color: transparent !important;
-            }
-            .navbar .dropdown-item:hover {
-                background-color: var(--accent) !important;
-                color: white !important;
-            }
-
-            /* ESTRUCTURA PRINCIPAL (Filtros + Cartelera) */
-            .page-header {
-                color: var(--main-text); /* Color de texto principal */
-                font-weight: 700;
-                font-size: 2.2rem;
-                margin-bottom: 20px;
-                border-bottom: 2px solid var(--accent); /* Línea de acento */
-                padding-bottom: 10px;
-            }
-            .main-content {
-                display: flex;
-                padding: 20px 0;
-            }
-
-            /* COLUMNA DE FILTROS (IZQUIERDA) */
-            .sidebar {
-                width: 250px;
-                padding-right: 20px;
-                /* Borde claro para separación */
-                border-right: 1px solid var(--border-color); 
-                flex-shrink: 0;
-            }
-            .sidebar h5 {
-                color: var(--main-text);
-                font-size: 1.2rem;
-                font-weight: 700;
-                padding-bottom: 5px;
-                border-bottom: 1px solid var(--border-color);
-            }
-            .sidebar h6 {
-                color: var(--secondary-text); /* Gris oscuro para subtítulos */
-                margin-top: 20px;
-                font-size: 1rem;
-                font-weight: 600;
-            }
-            
-            /* ESTILO DE LOS ENLACES DE FILTRO */
-            .filter-list a {
-                display: block;
-                color: var(--main-text); /* Enlaces de color oscuro */
-                padding: 3px 0;
-                transition: color 0.2s;
-                font-size: 0.95rem;
-            }
-            .filter-list a:hover,
-            .filter-list a.active {
-                color: var(--accent);
-                text-decoration: none;
-                font-weight: 600;
-            }
-
-            /* COLUMNA DE CONTENIDO (DERECHA) */
-            .movie-list-container {
-                flex-grow: 1;
-                padding-left: 30px;
-            }
-
-            /* TARJETAS DE PELÍCULAS (Mantenemos tu efecto de HOVER) */
-            .pelicula-card {
-                position: relative;
-                overflow: hidden;
-                border: 1px solid #eee; /* Borde sutil en modo claro */
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra más sutil */
-                transition: box-shadow .3s ease, transform .3s ease;
-                border-radius: 8px;
-                background: var(--main-bg);
-            }
-
-            .pelicula-card img.card-img-top {
-                width: 100%;
-                height: 400px;
-                object-fit: cover;
-                display: block;
-                transition: transform .3s ease-in-out;
-            }
-            .pelicula-card:hover img.card-img-top {
-                transform: scale(1.05);
-            }
-
-            /* Card body aparece en hover: Mantenemos el fondo oscuro para contraste */
-            .pelicula-card .card-body {
-                display: none;
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                background-color: rgba(0,0,0,0.85); 
-                color: white;
-                padding: 15px;
-                width: 100%;
-                box-sizing: border-box;
-                z-index: 5;
-                min-height: 150px;
-                justify-content: flex-end;
-                flex-direction: column;
-            }
-            .pelicula-card:hover .card-body { display:flex; }
-            
-            .pelicula-card .card-body .card-title {
-                color: var(--accent);
-            }
-            .pelicula-card .card-body .card-text {
-                font-size: 0.9rem;
-                max-height: 80px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .pelicula-card .card-body a.btn-primary {
-                background-color: var(--accent);
-                border-color: var(--accent);
-                color: white;
-            }
-
-            .pelicula-card:hover {
-                box-shadow: var(--shadow); /* Sombra ajustada */
-                transform: translateY(-4px);
-            }
-
-            /* Etiqueta de Promoción */
-            .movie-tag {
-                position: absolute;
-                top: 10px;
-                left: -15px;
-                background-color: var(--accent);
-                color: white;
-                padding: 5px 15px 5px 25px;
-                font-weight: 700;
-                font-size: 0.8rem;
-                transform: rotate(-5deg);
-                z-index: 5;
-                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            }
-
-            /* Placeholder (Mantenemos un fondo oscuro para consistencia con el estilo de la tarjeta) */
-            .placeholder-img {
-                background: #6c757d; /* Gris oscuro para el placeholder */
-                display: none; 
-                align-items: center;
-                justify-content: center;
-                height: 400px;
-                color: #f8f9fa;
-                font-size: 16px;
-                text-align: center;
-                border-radius: 8px 8px 0 0;
-            }
-
-            /* Botón Ver Más */
-            .btn-ver-mas {
-                color: var(--accent);
-                border-color: var(--accent);
-            }
-            .btn-ver-mas:hover {
-                background-color: var(--accent);
-                color: white; /* Blanco en hover para un contraste limpio */
-            }
-
-            /* Footer (Ajustado para que combine con el tema claro) */
-            .footer {
-                background-color: var(--card-bg) !important; /* Gris muy claro */
-                color: var(--secondary-text);
-                border-top: 1px solid var(--border-color);
-            }
-            .footer a {
-                color: var(--secondary-text);
-            }
-            .footer a:hover {
-                color: var(--accent);
-            }
-        </style>
     </head>
     <body>
 
@@ -254,7 +32,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DashboardServlet">Inicio</a></li>
-                    <li class="nav-item active"><a class="nav-link" href="#">Películas</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="<%= request.getContextPath()%>/CarteleraServlet">Películas</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Dulcería</a></li>
 
                     <%
@@ -278,11 +56,11 @@
                             <a class="dropdown-item" href="<%= request.getContextPath()%>/LogoutServlet">Cerrar Sesión</a>
                         </div>
                     </li>
-                    <% } %>
+                    <% }%>
                 </ul>
             </div>
         </nav>
-        
+
         <div class="container-fluid mt-4">
             <div class="container">
                 <h1 class="page-header">Cartelera</h1>
@@ -293,24 +71,67 @@
                     <h5 class="mb-0"><i class="fas fa-filter mr-2"></i> Filtrar Por</h5>
 
                     <div class="filter-section">
-                        <h6>Fecha de Estreno</h6>
-                        <ul class="list-unstyled filter-list">
-                            <li><a href="#" class="active">En Cartelera</a></li>
-                            <li><a href="#">Preventa</a></li>
-                            <li><a href="#">Próximos Estrenos</a></li>
-                        </ul>
+                        <h6>Fecha de Función</h6>
+                        <form action="<%= request.getContextPath()%>/CarteleraServlet" method="GET" class="mb-3">
+                            <div class="form-group">
+                                <input type="date" 
+                                       class="form-control form-control-sm" 
+                                       name="fechaSeleccionada" 
+                                       id="fechaSeleccionada"
+                                       value="<%= (request.getParameter("fechaSeleccionada") != null ? request.getParameter("fechaSeleccionada") : "")%>"
+                                       style="color: var(--main-text); background-color: var(--main-bg); border-color: var(--border-color);" 
+                                       required>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-block" 
+                                    style="background-color: var(--accent); color: white; border: none;">
+                                <i class="fas fa-search"></i> Filtrar Día
+                            </button>
+                        </form>
                     </div>
 
                     <div class="filter-section">
                         <h6>Género</h6>
                         <ul class="list-unstyled filter-list">
                             <%
-                                List<String> generos = Arrays.asList("Acción", "Comedia", "Drama", "Terror", "Animación", "Thriller", "Ciencia Ficción", "Fantasía");
-                                for (String genero : generos) {
+                                // Obtener el filtro de fecha activo del Request (enviado desde el Servlet)
+                                String fechaActiva = (String) request.getAttribute("filtroActivoFecha");
+                                // Crear el segmento de URL para mantener el filtro de fecha (si existe)
+                                String paramFecha = (fechaActiva != null && !fechaActiva.isEmpty()) ? "?fechaSeleccionada=" + fechaActiva : "";
                             %>
-                            <li><a href="#" data-genero="<%= genero.toLowerCase()%>"><%= genero%></a></li>
-                            <% } %>
+                            <a href="<%= request.getContextPath()%>/CarteleraServlet<%= paramFecha%>" class="active">
+                                Todos los Géneros
+                            </a>
+
+                            <%
+                                // 2. Obtener la lista de Géneros del Request
+                                List<modelo.Genero> listaGeneros = (List<modelo.Genero>) request.getAttribute("generos");
+
+                                if (listaGeneros != null) {
+                                    for (modelo.Genero genero : listaGeneros) {
+                                        // Obtiene el ID y el Nombre directamente del objeto Genero
+                                        int idGenero = genero.getIdGenero();
+                                        String nombreGenero = genero.getNombre(); // Asumiendo que Genero tiene getNombre()
+                            %>
+                            <li>
+                                <a href="<%= request.getContextPath()%>/CarteleraServlet?genero=<%= idGenero%>" data-genero="<%= nombreGenero.toLowerCase()%>">
+                                    <%= nombreGenero%>
+                                </a>
+                            </li>
+                            <%
+                                }
+                            } else {
+                            %>
+                            <li><a href="#">Error al cargar géneros</a></li>
+                                <% }%>
                         </ul>
+                    </div>
+
+                    <div class="filter-section mt-3">
+                        <a href="<%= request.getContextPath()%>/CarteleraServlet" 
+                           class="btn btn-block btn-outline-light" 
+                           style="border-color: var(--accent); color: var(--accent); font-weight: 600;">
+                            <i class="fas fa-times-circle mr-2"></i> Limpiar Filtros
+                        </a>
                     </div>
 
                 </div>
@@ -330,43 +151,43 @@
                                 int id = pelicula.getIdPelicula();
                                 String imageUrl = request.getContextPath() + "/ImageServlet?id=" + id;
                                 String detailUrl = request.getContextPath() + "/DetallePeliculaServlet?id=" + id;
-                            %>
+                        %>
 
-                            <div class="col-6 col-sm-4 col-md-3 mb-4">
-                                <div class="card pelicula-card">
+                        <div class="col-6 col-sm-4 col-md-3 mb-4">
+                            <div class="card pelicula-card">
 
-                                    <span class="movie-tag">ESTRENO</span>
+                                <span class="movie-tag">ESTRENO</span>
 
-                                    <a href="<%= detailUrl%>" class="d-block">
-                                        <img
-                                            src="<%= imageUrl%>"
-                                            class="card-img-top"
-                                            alt="<%= title%>"
-                                            loading="lazy"
-                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                            />
-                                    </a>
+                                <a href="<%= detailUrl%>" class="d-block">
+                                    <img
+                                        src="<%= imageUrl%>"
+                                        class="card-img-top"
+                                        alt="<%= title%>"
+                                        loading="lazy"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                        />
+                                </a>
 
-                                    <div class="placeholder-img" role="img" aria-label="Imagen no disponible">
-                                        <%= title%><br/>(Imagen no disponible)
-                                    </div>
+                                <div class="placeholder-img" role="img" aria-label="Imagen no disponible">
+                                    <%= title%><br/>(Imagen no disponible)
+                                </div>
 
-                                    <div class="card-body">
-                                        <h5 class="card-title"><%= title%></h5>
-                                        <p class="card-text">
-                                            <%= sinopsis.length() > 100 ? sinopsis.substring(0, 100) + "..." : sinopsis%>
-                                        </p>
-                                        <a href="<%= detailUrl%>" class="btn btn-primary">Seleccionar</a>
-                                    </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= title%></h5>
+                                    <p class="card-text">
+                                        <%= sinopsis.length() > 100 ? sinopsis.substring(0, 100) + "..." : sinopsis%>
+                                    </p>
+                                    <a href="<%= detailUrl%>" class="btn btn-primary">Seleccionar</a>
                                 </div>
                             </div>
-                            <%
-                                } // for peliculas
-                            %>
+                        </div>
+                        <%
+                            } // for peliculas
+                        %>
 
-                            <div class="col-12 text-center mt-4">
-                                <button class="btn btn-outline-light btn-ver-mas"><i class="fas fa-arrow-down mr-2"></i> Ver más películas</button>
-                            </div>
+                        <div class="col-12 text-center mt-4">
+                            <button class="btn btn-outline-light btn-ver-mas"><i class="fas fa-arrow-down mr-2"></i> Ver más películas</button>
+                        </div>
 
                         <% } // else peliculas %>
                     </div>

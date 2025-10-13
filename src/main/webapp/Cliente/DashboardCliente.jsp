@@ -50,7 +50,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
-                <li class="nav-item active"><a class="nav-link" href="#">Inicio</a></li>
+                <li class="nav-item active"><a class="nav-link" href="<%= request.getContextPath()%>/DashboardServlet">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/CarteleraServlet">Películas</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Dulcería</a></li>
 
