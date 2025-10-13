@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
 
-@WebServlet({"/","/DashboardServlet"})
+@WebServlet("/DashboardServlet")
 public class DashBoardServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(DashBoardServlet.class.getName());
     private PeliculaDao peliculaDao;
