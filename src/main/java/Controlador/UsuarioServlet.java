@@ -18,12 +18,17 @@ import java.net.HttpURLConnection; // Necesario para el método de verificación
 import java.io.DataOutputStream;   // Necesario para el método de verificación
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @WebServlet("/UsuarioServlet")
 public class UsuarioServlet extends HttpServlet {
 
     private String RECAPTCHA_SECRET_KEY; // Clave para la verificación
     private UsuarioDao usuarioDao;
+
+    // Inicializa un Logger estático para la clase
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioServlet.class);
 
     @Override
     public void init() throws ServletException {
@@ -209,6 +214,9 @@ public class UsuarioServlet extends HttpServlet {
                 direccion, // dirección
                 0 // número de intentos (empieza en 0)
         );
+        // LÓGICA DE AUDITORÍA: Registrar la acción
+        String ipAddress = request.getRemoteAddr(); // IP del cliente
+        logger.info("AUDITORIA: Registro de Nuevo Cliente exitoso. Username={}, IP={}", username, ipAddress);
         usuarioDao.insertar(usuario);
         response.sendRedirect("Login.jsp");
     }
