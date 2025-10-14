@@ -4,13 +4,17 @@ import modelo.UsuarioDao;
 import modelo.Usuario;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
+import java.util.Properties;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
+
+    private String RECAPTCHA_SECRET_KEY;
 
     private UsuarioDao usuarioDao;
 
@@ -20,13 +24,73 @@ public class LoginServlet extends HttpServlet {
     private static final int ESTADO_BLOQUEADO = 2;  // ajusta al id real de "BLOQUEADO"
 
     @Override
-    public void init() {
+    public void init() throws ServletException {
+        super.init();
         usuarioDao = new UsuarioDao();
+
+        // Cargar la clave secreta desde el archivo de propiedades
+        Properties props = new Properties();
+
+        // La ruta es relativa a la raíz de la aplicación web (WEB-INF)
+        try (InputStream input = getServletContext().getResourceAsStream("/WEB-INF/secrets_temp.properties")) {
+            if (input == null) {
+                // Si el archivo no se encuentra (típico si el compañero olvida crearlo)
+                System.err.println("ERROR CRÍTICO: No se encontró /WEB-INF/secret.properties.");
+                // Asigna un valor vacío para que la validación del doPost falle de forma controlada
+                RECAPTCHA_SECRET_KEY = "";
+            } else {
+                props.load(input);
+                RECAPTCHA_SECRET_KEY = props.getProperty("recaptcha.secret.key");
+
+                if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
+                    System.err.println("ERROR CRÍTICO: La clave 'recaptcha.secret.key' está vacía en el archivo.");
+                    RECAPTCHA_SECRET_KEY = ""; // Asegura que la verificación falle
+                } else {
+                    System.out.println("DEBUG: Clave de reCAPTCHA cargada exitosamente. Longitud: " + RECAPTCHA_SECRET_KEY.length());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo de propiedades: " + e.getMessage());
+            // Lanza una excepción para detener el servlet si la configuración es crítica
+            throw new ServletException("Fallo en la configuración de la clave secreta.", e);
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Validación de Clave Secreta (Verificar que se cargó algo en init())
+        if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
+             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
+             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
+             request.getRequestDispatcher("Login.jsp").forward(request, response);
+             return;
+        }
+
+        // 1. Obtener la respuesta de reCAPTCHA
+        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+
+        // 2. Validación Inicial: ¿El usuario hizo clic en la casilla?
+        if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty()) {
+            request.setAttribute("error", "Por favor, complete el reCAPTCHA.");
+            request.getRequestDispatcher("Login.jsp").forward(request, response);
+            return;
+        }
+
+        // 3. Verificación con Google (La parte que llama al servidor)
+        try {
+            if (!verifyRecaptcha(gRecaptchaResponse)) {
+                request.setAttribute("error", "Verificación de reCAPTCHA fallida. Intente de nuevo.");
+                request.getRequestDispatcher("Login.jsp").forward(request, response);
+                return;
+            }
+        } catch (Exception e) {
+            // Manejar errores de conexión (ej: la máquina no tiene internet)
+            request.setAttribute("error", "Error de conexión con el servicio de Captcha.");
+            request.getRequestDispatcher("Login.jsp").forward(request, response);
+            return;
+        }
 
         // Opcional pero recomendado para caracteres especiales
         request.setCharacterEncoding("UTF-8");
@@ -82,7 +146,7 @@ public class LoginServlet extends HttpServlet {
             // Fallo de autenticacion 
             usuarioDao.aumentarIntentos(u.getIdUsuario());
             int nuevosIntentosFallidos = intentosFallidosActuales + 1;
-            
+
             if (nuevosIntentosFallidos > MAX_INTENTOS) {
                 // Bloqueo y mensaje final
                 usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
@@ -91,7 +155,7 @@ public class LoginServlet extends HttpServlet {
                 // Mensaje de advertencia
                 errorMsg = "Credenciales incorrectas. Intento " + nuevosIntentosFallidos + " de " + MAX_INTENTOS + ".";
             }
-            
+
             manejarFallo(request, response, username, errorMsg);
 
         } catch (SQLException e) {
@@ -130,6 +194,44 @@ public class LoginServlet extends HttpServlet {
         } else {
             session.invalidate();
             manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
+        }
+    }
+
+    /**
+     * Método auxiliar para enviar la solicitud de verificación a Google.
+     */
+    private boolean verifyRecaptcha(String gRecaptchaResponse) throws Exception {
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+
+        // Construir la URL con parámetros: clave secreta y respuesta del usuario
+        String postParams = "secret=" + RECAPTCHA_SECRET_KEY
+                + "&response=" + gRecaptchaResponse;
+
+        // Abrir conexión
+        java.net.URL obj = new java.net.URL(url);
+        java.net.HttpURLConnection con = (java.net.HttpURLConnection) obj.openConnection();
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+
+        // Enviar parámetros
+        try (java.io.DataOutputStream wr = new java.io.DataOutputStream(con.getOutputStream())) {
+            wr.writeBytes(postParams);
+            wr.flush();
+        }
+
+        // Leer la respuesta JSON
+        try (java.io.BufferedReader in = new java.io.BufferedReader(
+                new java.io.InputStreamReader(con.getInputStream()))) {
+
+            StringBuilder responseData = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                responseData.append(inputLine);
+            }
+
+            // Simplemente busca la cadena "success": true. 
+            // Idealmente, usarías una librería JSON (Gson) aquí.
+            return responseData.toString().contains("\"success\": true");
         }
     }
 }

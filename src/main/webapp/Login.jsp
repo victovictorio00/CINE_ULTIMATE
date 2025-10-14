@@ -12,6 +12,7 @@
         <title>Login</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="Estilos/loginStyle.css">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
         <div class="video-bg">
@@ -47,6 +48,10 @@
                            autocomplete="current-password" />
 
                     <a href="#" class="forgot-link">Olvidé mi contraseña</a>
+
+                    <div class="g-recaptcha" 
+                         data-sitekey="6Lf6HOorAAAAAOh0rkyVn0DXPsJklpcECHSygiHf">
+                    </div>
 
                     <button type="submit" class="btn btn-login">ENTRAR</button>
                     <button type="button" class="btn btn-register" onclick="window.location.href = 'Register.jsp'">REGISTRARSE</button>
