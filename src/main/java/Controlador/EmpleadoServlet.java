@@ -114,39 +114,62 @@ public class EmpleadoServlet extends HttpServlet {
     }
 
     private void insertarEmpleado(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
-        String nombre = request.getParameter("nombre");
-        String direccion = request.getParameter("direccion");
-        String telefono = request.getParameter("telefono");
-        String cargo = request.getParameter("cargo");
-        String salarioStr = request.getParameter("salario");
-        Double salario = Double.parseDouble(salarioStr);
+        throws SQLException, IOException {
+    String nombre = request.getParameter("nombre");
+    String direccion = request.getParameter("direccion");
+    String telefono = request.getParameter("telefono");
+    String cargo = request.getParameter("cargo");
+    String salarioStr = request.getParameter("salario");
 
-        Empleado emp = new Empleado();
-        emp.setNombre(nombre);
-        emp.setDireccion(direccion);
-        emp.setTelefono(telefono);
-        emp.setCargo(cargo);
-        emp.setSalario(salario);
-
-        empleadoDao.insertar(emp);
-        response.sendRedirect("EmpleadoServlet?action=listar");
+    double salario = 0.0;
+    if (salarioStr != null && !salarioStr.isEmpty()) {
+        salario = Double.parseDouble(salarioStr);
     }
 
-    private void actualizarEmpleado(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+    Empleado emp = new Empleado();
+    emp.setNombre(nombre);
+    emp.setDireccion(direccion);
+    emp.setTelefono(telefono);
+    emp.setCargo(cargo);
+    emp.setSalario(salario);
+
+    empleadoDao.insertar(emp);
+    response.sendRedirect("EmpleadoServlet?action=listar");
+}
+
+
+  private void actualizarEmpleado(HttpServletRequest request, HttpServletResponse response)
+        throws SQLException, IOException {
+    try {
         int id = Integer.parseInt(request.getParameter("id"));
         String nombre = request.getParameter("nombre");
         String direccion = request.getParameter("direccion");
         String telefono = request.getParameter("telefono");
         String cargo = request.getParameter("cargo");
         String salarioStr = request.getParameter("salario");
-        Double salario = Double.parseDouble(salarioStr);
 
-        Empleado emp = new Empleado(id, nombre, direccion, telefono, cargo, salario);
+        double salario = 0.0;
+        if (salarioStr != null && !salarioStr.isEmpty()) {
+            salario = Double.parseDouble(salarioStr);
+        }
+
+        Empleado emp = new Empleado();
+        emp.setIdEmpleado(id);  // ✅ usar idEmpleado
+        emp.setNombre(nombre);
+        emp.setDireccion(direccion);
+        emp.setTelefono(telefono);
+        emp.setCargo(cargo);
+        emp.setSalario(salario);
+
         empleadoDao.editar(emp);
+
         response.sendRedirect("EmpleadoServlet?action=listar");
+
+    } catch (NumberFormatException e) {
+        response.getWriter().println("Error: ID o salario inválido.");
     }
+}
+
 
     private void eliminarEmpleado(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {

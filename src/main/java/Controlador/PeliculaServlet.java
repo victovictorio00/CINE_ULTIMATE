@@ -18,6 +18,9 @@ import modelo.Pelicula;
 import modelo.PeliculaDao;
 import java.util.List;
 import javax.servlet.annotation.MultipartConfig;
+import modelo.Genero;
+import modelo.GeneroDao;
+
 
 @WebServlet("/PeliculaServlet")
 @MultipartConfig
@@ -35,10 +38,12 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
         // Control de acceso
         HttpSession session = request.getSession(false);
-        if (session == null || !"admin".equals(session.getAttribute("userRole"))) {
+       if (session == null || session.getAttribute("userRoleId") == null 
+        || (int) session.getAttribute("userRoleId") != 2) { // 2 = Admin
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
             return;
         }
+
 
         String action = request.getParameter("action");
 
@@ -62,10 +67,14 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
         // Control de acceso
         HttpSession session = request.getSession(false);
-        if (session == null || !"admin".equals(session.getAttribute("userRole"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
-            return;
-        }
+        //-
+        if (session == null || session.getAttribute("userRoleId") == null 
+             || (int) session.getAttribute("userRoleId") != 2) {
+         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
+         return;
+     }
+
+
 
         String action = request.getParameter("action");
 
@@ -91,69 +100,104 @@ public class PeliculaServlet extends HttpServlet {
     }
 
     // Método para mostrar el formulario de nueva película
-    private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("CrearPelicula.jsp");
-        dispatcher.forward(request, response);  // Redirige al formulario de creación
+ private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        GeneroDao generoDao = new GeneroDao();
+        List<Genero> listaGeneros = generoDao.getTodosLosGeneros();
+        request.setAttribute("listaGeneros", listaGeneros);
+    } catch (SQLException e) {
+        throw new ServletException(e);
     }
+
+    RequestDispatcher dispatcher = request.getRequestDispatcher("CrearPelicula.jsp");
+    dispatcher.forward(request, response);
+}
+
 
     // Método para mostrar el formulario de edición de película
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, SQLException {
-        int id = Integer.parseInt(request.getParameter("id"));  // Obtiene el ID de la película
-        Pelicula pelicula = peliculaDao.leer(id);  // Recupera la película de la base de datos
+        throws ServletException, IOException, SQLException {
+    int id = Integer.parseInt(request.getParameter("id"));
+    Pelicula pelicula = peliculaDao.leer(id);
 
-        if (pelicula != null) {
-            request.setAttribute("pelicula", pelicula);  // Pasa la película al formulario de edición
-            RequestDispatcher dispatcher = request.getRequestDispatcher("EditarPelicula.jsp");
-            dispatcher.forward(request, response);  // Redirige al formulario de edición
-        } else {
-            response.getWriter().println("Película no encontrada");  // Si no se encuentra la película
-        }
+    if (pelicula != null) {
+        GeneroDao generoDao = new GeneroDao();
+        List<Genero> listaGeneros = generoDao.getTodosLosGeneros();
+        request.setAttribute("listaGeneros", listaGeneros);
+
+        request.setAttribute("pelicula", pelicula);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("EditarPelicula.jsp");
+        dispatcher.forward(request, response);
+    } else {
+        response.getWriter().println("Película no encontrada");
     }
+}
+
 
     // Método para insertar una nueva película
     private void insertarPelicula(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException, ServletException {
-        String nombre = request.getParameter("nombre");
-        String sinopsis = request.getParameter("sinopsis");
-        String horario = request.getParameter("horario");
-        // Imagen
-        Part filePart = request.getPart("foto");  // nombre del campo en el formulario
-        byte[] foto = null;
-        if (filePart != null && filePart.getSize() > 0) {
-            InputStream inputStream = filePart.getInputStream();
+        throws SQLException, IOException, ServletException {
+    String nombre = request.getParameter("nombre");
+    String sinopsis = request.getParameter("sinopsis");
+    int idGenero = Integer.parseInt(request.getParameter("idGenero"));
+    java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
+    double precio = Double.parseDouble(request.getParameter("precio"));
+
+    // Imagen
+    Part filePart = request.getPart("foto");
+    byte[] foto = null;
+    if (filePart != null && filePart.getSize() > 0) {
+        try (InputStream inputStream = filePart.getInputStream()) {
             foto = inputStream.readAllBytes();
         }
-
-        Pelicula pelicula = new Pelicula();
-        pelicula.setNombre(nombre);
-        pelicula.setSinopsis(sinopsis);
-        //pelicula.(horario);
-        pelicula.setFoto(foto);
-
-        peliculaDao.insertar(pelicula);  // Inserta la película en la base de datos
-        response.sendRedirect("PeliculaServlet?action=listar");  // Redirige a la acción listar para actualizar la vista
     }
+
+    Pelicula pelicula = new Pelicula();
+    pelicula.setNombre(nombre);
+    pelicula.setSinopsis(sinopsis);
+    pelicula.setIdGenero(new Genero(idGenero, null));
+    pelicula.setFechaEstreno(fechaEstreno);
+    pelicula.setPrecio(precio);
+    pelicula.setFoto(foto);
+
+    peliculaDao.insertar(pelicula);
+    response.sendRedirect("PeliculaServlet?action=listar");
+}
+
 
     // Método para actualizar una película
     private void actualizarPelicula(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException, ServletException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        String nombre = request.getParameter("nombre");
-        String sinopsis = request.getParameter("sinopsis");
-        String horario = request.getParameter("horario");
-        Part filePart = request.getPart("foto");
-        byte[] foto = null;
-        if (filePart != null && filePart.getSize() > 0) {
-            InputStream inputStream = filePart.getInputStream();
+        throws SQLException, IOException, ServletException {
+    int id = Integer.parseInt(request.getParameter("id"));
+    String nombre = request.getParameter("nombre");
+    String sinopsis = request.getParameter("sinopsis");
+    int idGenero = Integer.parseInt(request.getParameter("idGenero"));
+    java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
+    double precio = Double.parseDouble(request.getParameter("precio"));
+
+    // Foto (opcional)
+    Part filePart = request.getPart("foto");
+    byte[] foto = null;
+    if (filePart != null && filePart.getSize() > 0) {
+        try (InputStream inputStream = filePart.getInputStream()) {
             foto = inputStream.readAllBytes();
         }
-
-        //Pelicula pelicula = new Pelicula(id, nombre, sinopsis, horario, foto);
-        //peliculaDao.editar(pelicula);  // Actualiza la película en la base de datos
-        response.sendRedirect("PeliculaServlet?action=listar");  // Redirige al listado de películas
     }
+
+    Pelicula pelicula = new Pelicula();
+    pelicula.setIdPelicula(id);
+    pelicula.setNombre(nombre);
+    pelicula.setSinopsis(sinopsis);
+    pelicula.setIdGenero(new Genero(idGenero, null));
+    pelicula.setFechaEstreno(fechaEstreno);
+    pelicula.setPrecio(precio);
+    pelicula.setFoto(foto); // si es null, el DAO mantiene la foto existente
+
+    peliculaDao.editar(pelicula);
+    response.sendRedirect("PeliculaServlet?action=listar");
+}
+
 
     // Método para eliminar una película
     private void eliminarPelicula(HttpServletRequest request, HttpServletResponse response)

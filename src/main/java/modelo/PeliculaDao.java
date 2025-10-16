@@ -30,21 +30,41 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
         return peliculas;
     }
 
-    @Override
-    public void insertar(Pelicula pelicula) throws SQLException {
-        String query = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+   @Override
+public void insertar(Pelicula pelicula) throws SQLException {
+    String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio) VALUES (?, ?, ?, ?, ?, ?)";
 
-            pst.setString(1, pelicula.getNombre());
-            pst.setString(2, pelicula.getSinopsis());
-            pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+    try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+
+        pst.setString(1, pelicula.getNombre());
+        pst.setString(2, pelicula.getSinopsis());
+        pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+
+        // Foto (puede ser null)
+        if (pelicula.getFoto() != null) {
             pst.setBytes(4, pelicula.getFoto());
-            pst.setDate(5, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-            pst.setDouble(6, pelicula.getPrecio());
-
-            pst.executeUpdate();
+        } else {
+            pst.setNull(4, Types.BLOB);
         }
+
+        // Fecha (puede ser null)
+        if (pelicula.getFechaEstreno() != null) {
+            pst.setDate(5, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+        } else {
+            pst.setNull(5, Types.DATE);
+        }
+
+        // Precio (default 0 si es null)
+        if (pelicula.getPrecio() != null) {
+            pst.setDouble(6, pelicula.getPrecio());
+        } else {
+            pst.setNull(6, Types.DECIMAL);
+        }
+
+        pst.executeUpdate();
     }
+}
+
 
     @Override
     public Pelicula leer(int id) throws SQLException {
@@ -69,33 +89,59 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
         }
         return null;
     }
+//-
 
-    @Override
-    public void editar(Pelicula pelicula) throws SQLException {
-        String query = "UPDATE peliculas SET nombre = ?, sinopsis = ?, id_genero = ?, foto = ?, fecha_estreno = ?, precio = ? WHERE id_pelicula = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+@Override
+public void editar(Pelicula pelicula) throws SQLException {
+    String sql;
+    boolean actualizarFoto = (pelicula.getFoto() != null);
 
-            pst.setString(1, pelicula.getNombre());
-            pst.setString(2, pelicula.getSinopsis());
-            pst.setInt(3, pelicula.getIdGenero().getIdGenero());
-            pst.setBytes(4, pelicula.getFoto());
-            pst.setDate(5, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-            pst.setDouble(6, pelicula.getPrecio());
-            pst.setInt(7, pelicula.getIdPelicula());
-
-            pst.executeUpdate();
-        }
+    if (actualizarFoto) {
+        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, foto=? WHERE id_pelicula=?";
+    } else {
+        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=? WHERE id_pelicula=?";
     }
 
-    @Override
-    public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM peliculas WHERE id_pelicula = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+    try (Connection con = Conexion.getConnection();
+         PreparedStatement pst = con.prepareStatement(sql)) {
 
+        pst.setString(1, pelicula.getNombre());
+        pst.setString(2, pelicula.getSinopsis());
+        pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+        pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+        pst.setDouble(5, pelicula.getPrecio());
+
+        if (actualizarFoto) {
+            pst.setBytes(6, pelicula.getFoto());
+            pst.setInt(7, pelicula.getIdPelicula());
+        } else {
+            pst.setInt(6, pelicula.getIdPelicula());
+        }
+
+        pst.executeUpdate();
+    }
+}
+
+
+    @Override
+public void eliminar(int id) throws SQLException {
+    try (Connection con = Conexion.getConnection()) {
+        // 1. Eliminar funciones asociadas a la película
+        String sqlFunciones = "DELETE FROM funciones WHERE id_pelicula = ?";
+        try (PreparedStatement pst = con.prepareStatement(sqlFunciones)) {
+            pst.setInt(1, id);
+            pst.executeUpdate();
+        }
+
+        // 2. Eliminar la película
+        String sqlPelicula = "DELETE FROM peliculas WHERE id_pelicula = ?";
+        try (PreparedStatement pst = con.prepareStatement(sqlPelicula)) {
             pst.setInt(1, id);
             pst.executeUpdate();
         }
     }
+}
+
 
     // Método con debug para depurar ImageServlet
     public byte[] obtenerFotoPorId(int idPelicula) throws SQLException {

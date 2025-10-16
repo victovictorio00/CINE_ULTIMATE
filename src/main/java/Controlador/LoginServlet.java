@@ -184,19 +184,22 @@ public class LoginServlet extends HttpServlet {
         session.setAttribute("userRoleId", rolId);
 
         // Lógica de redirección según el rol
-        if (rolId != null) {
-            if (rolId == 1) { // 1 = Cliente (ajusta si es necesario)
-                response.sendRedirect(request.getContextPath() + "/DashboardServlet");
-            } else if (rolId == 2) { // 2 = Admin (ajusta si es necesario)
-                response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
-            } else {
-                session.invalidate();
-                manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
-            }
-        } else {
-            session.invalidate();
-            manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
-        }
+       if (rolId != null) {
+    if (rolId == 1) { // Cliente
+        session.setAttribute("userRole", "cliente");
+        response.sendRedirect(request.getContextPath() + "/DashboardServlet");
+    } else if (rolId == 2) { // Admin
+        session.setAttribute("userRole", "admin");
+        response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+    } else {
+        session.invalidate();
+        manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+    }
+} else {
+    session.invalidate();
+    manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
+}
+
     }
 
     /**

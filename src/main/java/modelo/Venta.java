@@ -1,5 +1,6 @@
 package modelo;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Venta {
@@ -20,6 +21,15 @@ public class Venta {
         this.metodoPago = metodoPago;
     }
 
+    
+     public void setTotal(double total) {
+           if (total < 0) {
+               throw new IllegalArgumentException("El total no puede ser negativo");
+           }
+           this.total = total; // ya sin caracteres raros
+       }
+     
+     
     public int getIdVenta() {
         return idVenta;
     }
@@ -40,20 +50,28 @@ public class Venta {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
+    public void setFecha(String fechaStr) {
+        if (fechaStr == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula");
+        }
+
+        // Patrón específico
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy - HH:mm");
+        sdf.setLenient(false); // no acepta fechas "raras" como 32/13/25
+
+        try {
+            Date fecha = sdf.parse(fechaStr);
+            this.fecha = fecha;
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Formato de fecha inválido. Debe ser dd/MM/yy - HH:mm");
+        }
     }
 
     public double getTotal() {
         return total;
     }
 
-    public void setTotal(double total) {
-           if (total < 0) {
-               throw new IllegalArgumentException("El total no puede ser negativo");
-           }
-           this.total = total; // ya sin caracteres raros
-       }
+   
 
     public String getMetodoPago() {
         return metodoPago;
