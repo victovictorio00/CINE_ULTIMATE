@@ -45,10 +45,10 @@
                         for (Pelicula pelicula : listaPeliculas) {
                     %>
                     <tr>
-                        <td><%= pelicula.getId()%></td>
+                        <td><%= pelicula.getIdPelicula()%></td>
                         <td><%= pelicula.getNombre()%></td>
                         <td><%= pelicula.getSinopsis()%></td>
-                        <td><%= pelicula.getHorario()%></td>
+                        <td><%= pelicula.getFechaEstreno()%></td>
                         <td>
                             <%
                                 byte[] foto = pelicula.getFoto();
@@ -64,8 +64,8 @@
                         </td>
                         <td>
                             <!-- Enlaces para editar y eliminar -->
-                            <a href="PeliculaServlet?action=editar&id=<%= pelicula.getId()%>" class="btn btn-primary btn-sm">Editar</a>
-                            <a href="PeliculaServlet?action=eliminar&id=<%= pelicula.getId()%>" class="btn btn-danger btn-sm"
+                            <a href="PeliculaServlet?action=editar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="PeliculaServlet?action=eliminar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-danger btn-sm"
                                onclick="return confirm('¿Está seguro de eliminar esta película?');">Eliminar</a>
                         </td>
                     </tr>

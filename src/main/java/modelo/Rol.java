@@ -6,25 +6,32 @@
 package modelo;
 
 public class Rol {
-    private int id_rol;
+    private int idRol;
     private String nombre;
 
     public Rol() {
     }
 
-    public int getId_rol() {
-        return id_rol;
+    public Rol(int idRol, String nombre) {
+        this.idRol = idRol;
+        this.nombre = nombre;
+    }
+
+    public int getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(int idRol) {
+        this.idRol = idRol;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public void setId_rol(int id_rol) {
-        this.id_rol = id_rol;
-    }
-
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    
 }

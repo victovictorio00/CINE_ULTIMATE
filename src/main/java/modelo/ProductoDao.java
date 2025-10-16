@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo;
 
 import java.sql.*;
@@ -11,106 +7,95 @@ import Conexion.Conexion;
 
 public class ProductoDao implements DaoCrud<Producto> {
 
-    // Listar productos
     @Override
     public List<Producto> listar() throws SQLException {
         List<Producto> productos = new ArrayList<>();
-        String query = "SELECT * FROM productos";
+        String sql = "SELECT id_producto, nombre, descripcion, foto, stock, precio FROM productos";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
+
             while (rs.next()) {
-                Producto producto = new Producto();
-                producto.setId(rs.getInt("id"));
-                producto.setNombre(rs.getString("nombre"));
-                producto.setPrecio(rs.getString("precio"));
-                producto.setDescripcion(rs.getString("descripcion"));
-                producto.setFoto(rs.getBytes("foto"));
-                productos.add(producto);
+                Producto p = new Producto();
+                p.setIdProducto(rs.getInt("id_producto"));
+                p.setNombre(rs.getString("nombre"));
+                p.setDescripcion(rs.getString("descripcion"));
+                p.setFoto(rs.getBytes("foto"));
+                p.setStock(rs.getInt("stock"));
+                p.setPrecio(rs.getDouble("precio"));   // << precio
+                productos.add(p);
             }
         }
         return productos;
     }
 
-    // Insertar un producto
     @Override
-    public void insertar(Producto producto) throws SQLException {
-        String query = "INSERT INTO productos (nombre, precio, descripcion, foto) VALUES (?, ?, ?, ?)";
+    public void insertar(Producto p) throws SQLException {
+        String sql = "INSERT INTO productos (nombre, descripcion, foto, stock, precio) VALUES (?, ?, ?, ?, ?)";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setString(1, producto.getNombre());
-            pst.setString(2, producto.getPrecio());
-            pst.setString(3, producto.getDescripcion());
-            pst.setBytes(4, producto.getFoto());
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, p.getNombre());
+            pst.setString(2, p.getDescripcion());
+            pst.setBytes(3, p.getFoto());
+            pst.setInt(4, p.getStock());
+            pst.setDouble(5, p.getPrecio());          // << precio
             pst.executeUpdate();
         }
     }
 
-    // Leer un producto por su ID
     @Override
     public Producto leer(int id) throws SQLException {
-        String query = "SELECT * FROM productos WHERE id = ?";
+        String sql = "SELECT id_producto, nombre, descripcion, foto, stock, precio FROM productos WHERE id_producto = ?";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    Producto producto = new Producto();
-                    producto.setId(rs.getInt("id"));
-                    producto.setNombre(rs.getString("nombre"));
-                    producto.setPrecio(rs.getString("precio"));
-                    producto.setDescripcion(rs.getString("descripcion"));
-                    producto.setFoto(rs.getBytes("foto"));
-                    return producto;
+                    Producto p = new Producto();
+                    p.setIdProducto(rs.getInt("id_producto"));
+                    p.setNombre(rs.getString("nombre"));
+                    p.setDescripcion(rs.getString("descripcion"));
+                    p.setFoto(rs.getBytes("foto"));
+                    p.setStock(rs.getInt("stock"));
+                    p.setPrecio(rs.getDouble("precio")); // << precio
+                    return p;
                 }
             }
         }
         return null;
     }
 
-    // Actualizar un producto
     @Override
-    public void editar(Producto producto) throws SQLException {
-        String query = "UPDATE productos SET nombre = ?, precio = ?, descripcion = ?, foto = ?  WHERE id = ?";
+    public void editar(Producto p) throws SQLException {
+        String sql = "UPDATE productos SET nombre = ?, descripcion = ?, foto = ?, stock = ?, precio = ? WHERE id_producto = ?";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setString(1, producto.getNombre());
-            pst.setString(2, producto.getPrecio());
-            pst.setString(3, producto.getDescripcion());
-            pst.setBytes(4, producto.getFoto());
-            pst.setInt(5, producto.getId());
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, p.getNombre());
+            pst.setString(2, p.getDescripcion());
+            pst.setBytes(3, p.getFoto());
+            pst.setInt(4, p.getStock());
+            pst.setDouble(5, p.getPrecio());          // << precio
+            pst.setInt(6, p.getIdProducto());
             pst.executeUpdate();
         }
     }
 
-    // Eliminar un producto
     @Override
     public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM productos WHERE id = ?";
+        String sql = "DELETE FROM productos WHERE id_producto = ?";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, id);
             pst.executeUpdate();
         }
     }
-    
-    
-    
-public void actualizar(Producto producto) throws SQLException {
-    String query = "UPDATE productos SET nombre = ?, precio = ?, descripcion = ?, foto = ?  WHERE id = ?";
-    try (Connection con = Conexion.getConnection();
-         PreparedStatement pst = con.prepareStatement(query)) {
-        pst.setString(1, producto.getNombre());
-        pst.setString(2, producto.getPrecio());  // Si el precio es un String en tu base de datos
-        pst.setString(3, producto.getDescripcion());
-        pst.setBytes(4, producto.getFoto());
-        pst.setInt(5, producto.getId());  // Asegúrate de usar el ID correcto
-        pst.executeUpdate();
-    }
-}
 
-    
-    
-    
-    
+    // Si quieres mantener un método "actualizar" separado, que llame a editar(...)
+    public void actualizar(Producto p) throws SQLException {
+        editar(p);
+    }
 }

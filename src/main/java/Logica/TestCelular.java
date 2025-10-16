@@ -3,7 +3,7 @@ import java.util.regex.*;
         
 public class TestCelular {
     
-    private static final String TLF_REGEX = "^[0-9]{9}";
+    private static final String TLF_REGEX = "^9[0-9]{8}";
     private static final Pattern NAME_PATTERN = Pattern.compile(TLF_REGEX);
     
     public static boolean numeroValido(String numero){

@@ -66,7 +66,7 @@
 
                     %>
                     <tr>
-                        <td><%= producto.getId()%></td>
+                        <td><%= producto.getIdProducto()%></td>
                         <td><%= producto.getNombre()%></td>
                         <td>S/ <%= producto.getPrecio()%></td>
                         <td><%= producto.getDescripcion()%></td>
@@ -84,8 +84,8 @@
                             <% }%>
                         </td>
                         <td class="acciones">
-                            <a href="ProductoServlet?action=editar&id=<%= producto.getId()%>" class="btn btn-sm btn-info">Editar</a>
-                            <a href="ProductoServlet?action=eliminar&id=<%= producto.getId()%>" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este producto?');">Eliminar</a>
+                            <a href="ProductoServlet?action=editar&id=<%= producto.getIdProducto()%>" class="btn btn-sm btn-info">Editar</a>
+                            <a href="ProductoServlet?action=eliminar&id=<%= producto.getIdProducto()%>" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este producto?');">Eliminar</a>
                         </td>
                     </tr>
                     <%

@@ -1,104 +1,124 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo;
 
+import Conexion.Conexion;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import Conexion.Conexion;
+import org.mindrot.jbcrypt.BCrypt;
 
-public class UsuarioDao implements DaoCrud<Usuarios> {
+public class UsuarioDao implements DaoCrud<Usuario> {
 
+    // Columnas explícitas (evita SELECT *)
+    private static final String COLS = String.join(",",
+            "id_usuario",
+            "id_rol",
+            "id_estado_usuario",
+            "nombre_completo",
+            "dni",
+            "username",
+            "password",
+            "telefono",
+            "email",
+            "direccion",
+            "numero_intentos"
+    );
+
+    // Ajusta según tu catálogo
+    private static final int ESTADO_ACTIVO_ID = 1;
+
+    /* =======================
+       Helpers internos
+       ======================= */
+    private Usuario mapRow(ResultSet rs) throws SQLException {
+        Usuario u = new Usuario();
+        u.setIdUsuario(rs.getInt("id_usuario"));
+        u.setNombreCompleto(rs.getString("nombre_completo"));
+        u.setDni(rs.getString("dni"));
+        u.setUsername(rs.getString("username"));
+        u.setPassword(rs.getString("password")); // hash o texto plano (temporal)
+        u.setTelefono(rs.getString("telefono"));
+        u.setEmail(rs.getString("email"));
+        u.setDireccion(rs.getString("direccion"));
+        u.setNumeroIntentos(rs.getInt("numero_intentos"));
+
+        Rol rol = new Rol();
+        rol.setIdRol(rs.getInt("id_rol"));
+        u.setIdRol(rol);
+
+        EstadoUsuario estado = new EstadoUsuario();
+        estado.setIdEstadoUsuario(rs.getInt("id_estado_usuario"));
+        u.setIdEstadoUsuario(estado);
+
+        return u;
+    }
+
+    private void setNullableInt(PreparedStatement pst, int idx, Integer value) throws SQLException {
+        if (value == null) {
+            pst.setNull(idx, Types.INTEGER);
+        } else {
+            pst.setInt(idx, value);
+        }
+    }
+
+    private boolean looksLikeBCrypt(String s) {
+        return s != null && (s.startsWith("$2a$") || s.startsWith("$2b$") || s.startsWith("$2y$"));
+    }
+
+    /* =======================
+       CRUD
+       ======================= */
     @Override
-    public List<Usuarios> listar() throws SQLException {
-        List<Usuarios> lista = new ArrayList<>();
-        String query = "SELECT * FROM usuarios";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
-            
+    public List<Usuario> listar() throws SQLException {
+        List<Usuario> lista = new ArrayList<>();
+        String sql = "SELECT " + COLS + " FROM usuarios";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
-                Usuarios usuario = new Usuarios();
-                usuario.setId_usuario(rs.getInt("id_usuario"));
-                usuario.setNombre_completo(rs.getString("nombre_completo"));
-                usuario.setDni(rs.getString("dni"));
-                usuario.setUsername(rs.getString("username"));
-                usuario.setPassword(rs.getString("password"));
-                usuario.setTelefono(rs.getString("telefono"));
-                usuario.setEmail(rs.getString("email"));
-                usuario.setDireccion(rs.getString("direccion"));
-                usuario.setNumero_intentos(rs.getInt("numero_intentos"));
-                
-                //ROL
-                //Rol rol = new Rol();
-                //rol.setId_rol(rs.getInt("id_rol"));
-                //usuario.setId_rol(rol);
-                //Estado usuarios
-                EstadoUsuarios estado = new EstadoUsuarios();
-                estado.setId_estado_usuario(rs.getInt("id_estado_usuario"));
-                usuario.setId_estado_usuario(estado);
-                
-                lista.add(usuario);    
+                lista.add(mapRow(rs));
             }
         }
         return lista;
     }
 
     @Override
-    public void insertar(Usuarios usuario) throws SQLException {
-        String query = "INSERT INTO usuarios (id_rol, id_estado_usuario, nombre_completo, dni, username, password, telefono, email, direccion, numero_intentos) "
+    public void insertar(Usuario usuario) throws SQLException {
+        String sql = "INSERT INTO usuarios "
+                + "(id_rol, id_estado_usuario, nombre_completo, dni, username, password, telefono, email, direccion, numero_intentos) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            
-            //pst.setInt(1, usuario.getId_rol().getId_rol());
-            pst.setInt(2, usuario.getId_estado_usuario().getId_estado_usuario());
-            pst.setString(3, usuario.getNombre_completo());
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
+            setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
+            pst.setString(3, usuario.getNombreCompleto());
             pst.setString(4, usuario.getDni());
             pst.setString(5, usuario.getUsername());
-            pst.setString(6, usuario.getPassword());
+
+            String rawOrHash = usuario.getPassword();
+            String toStore = looksLikeBCrypt(rawOrHash) ? rawOrHash : BCrypt.hashpw(rawOrHash, BCrypt.gensalt());
+            pst.setString(6, toStore);
+
             pst.setString(7, usuario.getTelefono());
             pst.setString(8, usuario.getEmail());
             pst.setString(9, usuario.getDireccion());
-            pst.setInt(10, usuario.getNumero_intentos());
+            pst.setInt(10, usuario.getNumeroIntentos()); // Asegúrate de poner 3 en el servlet de registro
+
             pst.executeUpdate();
+
+            try (ResultSet keys = pst.getGeneratedKeys()) {
+                if (keys.next()) {
+                    usuario.setIdUsuario(keys.getInt(1));
+                }
+            }
         }
     }
 
     @Override
-    public Usuarios leer(int id) throws SQLException {
-        String query = "SELECT * FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-
+    public Usuario leer(int id) throws SQLException {
+        String sql = "SELECT " + COLS + " FROM usuarios WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    Usuarios usuario = new Usuarios();
-                    usuario.setId_usuario(rs.getInt("id_usuario"));
-                    usuario.setNombre_completo(rs.getString("nombre_completo"));
-                    usuario.setDni(rs.getString("dni"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setPassword(rs.getString("password"));
-                    usuario.setTelefono(rs.getString("telefono"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setDireccion(rs.getString("direccion"));
-                    usuario.setNumero_intentos(rs.getInt("numero_intentos"));
-
-                    // Rol
-                    //Rol rol = new Rol();
-                    //rol.setId_rol(rs.getInt("id_rol"));
-                    //usuario.setId_rol(rol);
-
-                    // Estado usuario
-                    EstadoUsuarios estado = new EstadoUsuarios();
-                    estado.setId_estado_usuario(rs.getInt("id_estado_usuario"));
-                    usuario.setId_estado_usuario(estado);
-
-                    return usuario;
+                    return mapRow(rs);
                 }
             }
         }
@@ -106,23 +126,29 @@ public class UsuarioDao implements DaoCrud<Usuarios> {
     }
 
     @Override
-    public void editar(Usuarios usuario) throws SQLException {
-        String query = "UPDATE usuarios SET id_rol = ?, id_estado_usuario = ?, nombre_completo = ?, dni = ?, username = ?, password = ?, telefono = ?, email = ?, direccion = ?, numero_intentos = ? "
-                     + "WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+    public void editar(Usuario usuario) throws SQLException {
+        String sql = "UPDATE usuarios SET "
+                + "id_rol = ?, id_estado_usuario = ?, nombre_completo = ?, dni = ?, username = ?, password = ?, "
+                + "telefono = ?, email = ?, direccion = ?, numero_intentos = ? "
+                + "WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
-            //pst.setInt(1, usuario.getId_rol().getId_rol());
-            pst.setInt(2, usuario.getId_estado_usuario().getId_estado_usuario());
-            pst.setString(3, usuario.getNombre_completo());
+            setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
+            setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
+
+            pst.setString(3, usuario.getNombreCompleto());
             pst.setString(4, usuario.getDni());
             pst.setString(5, usuario.getUsername());
-            pst.setString(6, usuario.getPassword());
+
+            String rawOrHash = usuario.getPassword();
+            String toStore = looksLikeBCrypt(rawOrHash) ? rawOrHash : BCrypt.hashpw(rawOrHash, BCrypt.gensalt());
+            pst.setString(6, toStore);
+
             pst.setString(7, usuario.getTelefono());
             pst.setString(8, usuario.getEmail());
             pst.setString(9, usuario.getDireccion());
-            pst.setInt(10, usuario.getNumero_intentos());
-            pst.setInt(11, usuario.getId_usuario());
+            pst.setInt(10, usuario.getNumeroIntentos());
+            pst.setInt(11, usuario.getIdUsuario());
 
             pst.executeUpdate();
         }
@@ -130,50 +156,86 @@ public class UsuarioDao implements DaoCrud<Usuarios> {
 
     @Override
     public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM usuarios WHERE id = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            
+        String sql = "DELETE FROM usuarios WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             pst.executeUpdate();
         }
     }
-    
-   
-    // Validación de usuario por username y password
-    public boolean validateUser(String username, String password) throws SQLException {
-        String query = "SELECT * FROM usuarios WHERE username = ? AND password = ?";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            
+    /* =======================
+       Auth / Intentos / Util
+       ======================= */
+    // Traer usuario por username (para leer intentos y estado)
+    public Usuario getByUsername(String username) throws SQLException {
+        String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? LIMIT 1";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, username);
-            pst.setString(2, password);
             try (ResultSet rs = pst.executeQuery()) {
-                return rs.next(); // Si encuentra al menos un usuario, validación OK
+                return rs.next() ? mapRow(rs) : null;
             }
         }
     }
 
-    // Obtener Rol por username
-    /*public Rol getRolByUsername(String username) throws SQLException {
-        String query = "SELECT id_rol FROM usuarios WHERE username = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-
+    /**
+     * Valida credenciales y retorna el Usuario (o null). Requiere estado
+     * ACTIVO. BCrypt si el almacenado parece hash; fallback temporal a texto
+     * plano.
+     */
+    public Usuario validateUser(String username, String plainPassword) throws SQLException {
+        String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, username);
+            pst.setInt(2, ESTADO_ACTIVO_ID);
+
             try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Rol rol = new Rol();
-                    rol.setId_rol(rs.getInt("id_rol"));
-                    return rol;
+                if (!rs.next()) {
+                    return null;
                 }
+
+                Usuario u = mapRow(rs);
+                String stored = u.getPassword();
+
+                boolean ok;
+                if (looksLikeBCrypt(stored)) {
+                    ok = BCrypt.checkpw(plainPassword, stored);
+                } else {
+                    ok = plainPassword != null && plainPassword.equals(stored);
+                }
+                return ok ? u : null;
             }
         }
-        return null; // Si no encuentra el usuario, devuelve null
     }
-    */
+
+    // Decrementa intentos (no baja de 0)
+    public void aumentarIntentos(int idUsuario) throws SQLException {
+        String sql = "UPDATE usuarios "
+                + "SET numero_intentos = numero_intentos + 1 "
+                + "WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, idUsuario);
+            pst.executeUpdate();
+        }
+    }
+    // (Alternativa si tu motor no soporta GREATEST)
+    // SET numero_intentos = CASE WHEN numero_intentos > 0 THEN numero_intentos - 1 ELSE 0 END
+
+    // Resetea a 3 tras login correcto
+    public void resetearIntentos(int idUsuario) throws SQLException {
+        String sql = "UPDATE usuarios SET numero_intentos = 0 WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, idUsuario);
+            pst.executeUpdate();
+        }
+    }
+
+    // Bloqueo por estado (p.ej., 2 = BLOQUEADO)
+    public void bloquearUsuario(int idUsuario, int estadoBloqueadoId) throws SQLException {
+        String sql = "UPDATE usuarios SET id_estado_usuario = ? WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, estadoBloqueadoId);
+            pst.setInt(2, idUsuario);
+            pst.executeUpdate();
+        }
+    }
 }
-
-    
-

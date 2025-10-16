@@ -38,13 +38,13 @@
                     // Itera a través de la lista y muestra los empleados
                     for (Empleado empleado : lista) {
                         out.println("<tr>");
-                        out.println("<td>" + empleado.getId() + "</td>");
+                        out.println("<td>" + empleado.getIdEmpleado() + "</td>");
                         out.println("<td>" + empleado.getNombre() + "</td>");
                         out.println("<td>" + empleado.getDireccion() + "</td>");
                         out.println("<td>" + empleado.getTelefono() + "</td>");
                         out.println("<td>");
-                        out.println("<a href='EmpleadoServlet?action=editar&id=" + empleado.getId() + "' class='btn btn-primary btn-sm'>Editar</a>");
-                        out.println("<a href='EmpleadoServlet?action=eliminar&id=" + empleado.getId() + "' class='btn btn-danger btn-sm' onclick='return confirm(\"¿Está seguro de eliminar este empleado?\");'>Eliminar</a>");
+                        out.println("<a href='EmpleadoServlet?action=editar&id=" + empleado.getIdEmpleado() + "' class='btn btn-primary btn-sm'>Editar</a>");
+                        out.println("<a href='EmpleadoServlet?action=eliminar&id=" + empleado.getIdEmpleado() + "' class='btn btn-danger btn-sm' onclick='return confirm(\"¿Está seguro de eliminar este empleado?\");'>Eliminar</a>");
                         out.println("</td>");
                         out.println("</tr>");
                     }

@@ -35,7 +35,7 @@
     <div class="form-container">
         <h3>Editar Producto</h3>
         <form action="ProductoServlet?action=actualizar" method="POST"  enctype="multipart/form-data">
-            <input type="hidden" name="id" value="${producto.id}" />
+            <input type="hidden" name="id" value="${producto.idProducto}" />
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
                 <input type="text" class="form-control" name="nombre" id="nombre" value="${producto.nombre}" required />

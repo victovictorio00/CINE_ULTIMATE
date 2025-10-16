@@ -1,4 +1,9 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package modelo;
+
 
 /**
  *
@@ -6,8 +11,8 @@ package modelo;
  */
 public class Usuarios {
     private int id_usuario;
-    //private Rol id_rol;
-    private EstadoUsuarios id_estado_usuario;
+    private Rol id_rol;
+    private EstadoUsuario id_estado_usuario;
     private String nombre_completo;
     private String dni;
     private String username;
@@ -20,7 +25,7 @@ public class Usuarios {
     // Constructor
     public Usuarios() {}
 
-    /*public Usuarios(int id_usuario, Rol id_rol, EstadoUsuarios id_estado_usuario, String nombre_completo, String dni, String username, String password, String telefono, String email, String direccion, int numero_intentos) {
+    public Usuarios(int id_usuario, Rol id_rol, EstadoUsuario id_estado_usuario, String nombre_completo, String dni, String username, String password, String telefono, String email, String direccion, int numero_intentos) {
         this.id_usuario = id_usuario;
         this.id_rol = id_rol;
         this.id_estado_usuario = id_estado_usuario;
@@ -33,7 +38,7 @@ public class Usuarios {
         this.direccion = direccion;
         this.numero_intentos = numero_intentos;
     }
-    */
+    
     public int getId_usuario() {
         return id_usuario;
     }
@@ -42,19 +47,19 @@ public class Usuarios {
         this.id_usuario = id_usuario;
     }
 
-    /*public Rol getId_rol() {
+    public Rol getId_rol() {
         return id_rol;
     }
 
     public void setId_rol(Rol id_rol) {
         this.id_rol = id_rol;
     }
-    */
-    public EstadoUsuarios getId_estado_usuario() {
+    
+    public EstadoUsuario getId_estado_usuario() {
         return id_estado_usuario;
     }
 
-    public void setId_estado_usuario(EstadoUsuarios id_estado_usuario) {
+    public void setId_estado_usuario(EstadoUsuario id_estado_usuario) {
         this.id_estado_usuario = id_estado_usuario;
     }
 

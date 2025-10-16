@@ -13,6 +13,6 @@
     </session-config>
     <!-- Aquí agregas el archivo de inicio -->
     <welcome-file-list>
-        <welcome-file>Cliente/DashboardCliente.jsp</welcome-file>
+        <welcome-file>DashboardServlet</welcome-file>
     </welcome-file-list>
 </web-app>

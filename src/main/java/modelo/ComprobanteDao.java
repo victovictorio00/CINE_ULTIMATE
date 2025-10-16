@@ -21,8 +21,8 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
                 comp.setTipo_comprobante(rs.getString("tipo_comprobante"));
                 comp.setFecha_emision(rs.getDate("fecha_emision"));
 
-                Ventas venta = new Ventas();
-                venta.setId_venta(rs.getInt("id_venta"));
+                Venta venta = new Venta();
+                venta.setIdVenta(rs.getInt("id_venta"));
                 comp.setId_venta(venta);
 
                 lista.add(comp);
@@ -37,7 +37,7 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getId_venta().getId_venta());
+            pst.setInt(1, comp.getId_venta().getIdVenta());
             pst.setString(2, comp.getTipo_comprobante());
             pst.setDate(3, new java.sql.Date(comp.getFecha_emision().getTime()));
             pst.executeUpdate();
@@ -58,8 +58,8 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
                     comp.setTipo_comprobante(rs.getString("tipo_comprobante"));
                     comp.setFecha_emision(rs.getDate("fecha_emision"));
 
-                    Ventas venta = new Ventas();
-                    venta.setId_venta(rs.getInt("id_venta"));
+                    Venta venta = new Venta();
+                    venta.setIdVenta(rs.getInt("id_venta"));
                     comp.setId_venta(venta);
 
                     return comp;
@@ -75,7 +75,7 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getId_venta().getId_venta());
+            pst.setInt(1, comp.getId_venta().getIdVenta());
             pst.setString(2, comp.getTipo_comprobante());
             pst.setDate(3, new java.sql.Date(comp.getFecha_emision().getTime()));
             pst.setInt(4, comp.getId_comprobante());

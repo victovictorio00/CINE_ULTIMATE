@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Comprobante {
     private int id_comprobante;
-    private Ventas id_venta;
+    private Venta id_venta;
     private String tipo_comprobante;
     private Date fecha_emision;
 
@@ -18,11 +18,11 @@ public class Comprobante {
         this.id_comprobante = id_comprobante;
     }
 
-    public Ventas getId_venta() {
+    public Venta getId_venta() {
         return id_venta;
     }
 
-    public void setId_venta(Ventas id_venta) {
+    public void setId_venta(Venta id_venta) {
         this.id_venta = id_venta;
     }
 
