@@ -13,6 +13,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Película</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    
+    <script>
+        // Función para validar tamaño de la imagen antes de enviar el formulario
+        function validarFormulario() {
+            const inputFoto = document.getElementById("foto");
+            const archivo = inputFoto.files[0];
+            const maxSize = 1024 * 1024; // 1 MB
+
+            if (archivo && archivo.size > maxSize) {
+                alert("La imagen es demasiado grande. El tamaño máximo permitido es 1 MB.");
+                inputFoto.value = ""; // Limpiar selección
+                return false; // Evitar envío del formulario
+            }
+            return true; // Permitir envío
+        }
+    </script>
 </head>
 <body>
 
@@ -24,7 +40,7 @@
     <h3>Agregar Nueva Película</h3>
 
     <!-- Formulario para agregar una nueva película -->
-    <form action="PeliculaServlet?action=insertar" method="POST" enctype="multipart/form-data">
+    <form action="PeliculaServlet?action=insertar" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
         
         <!-- Nombre -->
         <div class="form-group">
@@ -67,6 +83,7 @@
         <div class="form-group">
             <label for="foto">Foto de Película:</label>
             <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*" required>
+            <small class="form-text text-muted">Tamaño máximo permitido: 1 MB</small>
         </div>
 
         <button type="submit" class="btn btn-primary">Agregar Película</button>

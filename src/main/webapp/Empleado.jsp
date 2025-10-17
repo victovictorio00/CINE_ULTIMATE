@@ -1,13 +1,17 @@
-<%@page import="java.util.List"%>
-<%@page import="modelo.Usuario"%>
-<%@page import="modelo.Rol"%>
-<%@page import="modelo.EstadoUsuario"%>
-<%@page contentType="text/html; charset=UTF-8" language="java" %>
+<%-- 
+    Document   : Empleado
+    Created on : 17 oct. 2025, 11:40:50
+    Author     : ERICK
+--%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="modelo.Empleado" %>
+<%@ page import="java.util.List" %>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Lista de Usuarios</title>
+    <meta charset="UTF-8">
+    <title>Lista de Empleados</title>
 
     <!-- Bootstrap 4 CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
@@ -67,13 +71,13 @@
             width: 100%;
         }
 
-        /* Tabla de usuarios */
+        /* Tabla */
         .table-container {
             background: white;
             padding: 1.5rem;
             border-radius: 0.5rem;
             box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-            max-width: 1100px;
+            max-width: 900px;
             margin: auto;
         }
         .btn-agregar {
@@ -100,13 +104,13 @@
             <a href="AdminDashboard.jsp" class="nav-link">
                 <i class="fas fa-th-large mr-2"></i>Dashboard
             </a>
-            <a href="UsuarioServlet?action=listar" class="nav-link active">
+            <a href="UsuarioServlet?action=listar" class="nav-link">
                 <i class="fas fa-users mr-2"></i>Usuarios
             </a>
             <a href="ProductoServlet?action=listar" class="nav-link">
                 <i class="fas fa-box mr-2"></i>Productos
             </a>
-            <a href="EmpleadoServlet?action=listar" class="nav-link">
+            <a href="EmpleadoServlet?action=listar" class="nav-link active">
                 <i class="fas fa-user-tie mr-2"></i>Empleados
             </a>
             <a href="PeliculaServlet?action=listar" class="nav-link">
@@ -121,55 +125,45 @@
     <!-- Contenido principal -->
     <main class="content">
         <div class="table-container">
-            <h3 class="text-center">Lista de Usuarios</h3>
+            <h3 class="text-center">Lista de Empleados</h3>
 
-            <!-- Botón para agregar nuevo usuario -->
-            <a href="UsuarioServlet?action=nuevo" class="btn btn-primary btn-agregar">Agregar Usuario</a>
+            <!-- Botón para agregar nuevo empleado -->
+            <a href="EmpleadoServlet?action=nuevo" class="btn btn-success mb-3">Agregar Empleado</a>
 
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Nombre Completo</th>
-                    <th>DNI</th>
-                    <th>Usuario</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Dirección</th>
-                    <th>Acciones</th>
-                </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Acciones</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <%
-                    List<Usuario> listaUsuarios = (List<Usuario>) request.getAttribute("listaUsuarios");
-                    if (listaUsuarios != null && !listaUsuarios.isEmpty()) {
-                        for (Usuario usuario : listaUsuarios) {
-                %>
-                <tr>
-                    <td><%= usuario.getIdUsuario() %></td>
-                    <td><%= usuario.getIdRol() != null ? usuario.getIdRol().getNombre() : "Sin rol" %></td>
-                    <td><%= usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getNombre() : "Sin estado" %></td>
-                    <td><%= usuario.getNombreCompleto() %></td>
-                    <td><%= usuario.getDni() %></td>
-                    <td><%= usuario.getUsername() %></td>
-                    <td><%= usuario.getTelefono() %></td>
-                    <td><%= usuario.getEmail() %></td>
-                    <td><%= usuario.getDireccion() %></td>
-                    <td class="acciones">
-                        <a href="UsuarioServlet?action=editar&idUsuario=<%= usuario.getIdUsuario() %>" class="btn btn-sm btn-info">Editar</a>
-                        <a href="UsuarioServlet?action=eliminar&id=<%= usuario.getIdUsuario() %>" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este usuario?');">Eliminar</a>
-                    </td>
-                </tr>
-                <%
-                    }
-                } else {
-                %>
-                <tr>
-                    <td colspan="10" class="text-center">No hay usuarios registrados.</td>
-                </tr>
-                <% } %>
+                    <%
+                        List<Empleado> lista = (List<Empleado>) request.getAttribute("listaEmpleados");
+                        if (lista != null && !lista.isEmpty()) {
+                            for (Empleado empleado : lista) {
+                    %>
+                    <tr>
+                        <td><%= empleado.getIdEmpleado() %></td>
+                        <td><%= empleado.getNombre() %></td>
+                        <td><%= empleado.getDireccion() %></td>
+                        <td><%= empleado.getTelefono() %></td>
+                        <td class="acciones">
+                            <a href="EmpleadoServlet?action=editar&id=<%= empleado.getIdEmpleado() %>" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="EmpleadoServlet?action=eliminar&id=<%= empleado.getIdEmpleado() %>" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar este empleado?');">Eliminar</a>
+                        </td>
+                    </tr>
+                    <%
+                            }
+                        } else {
+                    %>
+                    <tr>
+                        <td colspan="5" class="text-center">No hay empleados disponibles.</td>
+                    </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>
@@ -179,5 +173,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </body>
 </html>
