@@ -1,50 +1,91 @@
-<%-- 
-    Document   : EditarUsuario
-    Created on : 26 may. 2025, 17:54:34
-    Author     : Proyecto
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.List"%>
 <%@page import="modelo.Usuario"%>
-<%@page import="java.sql.SQLException"%>
-
+<%@page import="modelo.Rol"%>
+<%@page import="modelo.EstadoUsuario"%>
+<%@page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuario</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h3>Editar Usuario</h3>
+<div class="container mt-5">
+    <h3>Editar Usuario</h3>
+    <%
+        Usuario usuario = (Usuario) request.getAttribute("usuario");
+        List<Rol> roles = (List<Rol>) request.getAttribute("roles");
+        List<EstadoUsuario> estados = (List<EstadoUsuario>) request.getAttribute("estados");
+    %>
 
-        <% 
-            // Obtener el objeto usuario desde la solicitud
-            Usuario usuario = (Usuario) request.getAttribute("usuario");
-        %>
+    <form action="<%= request.getContextPath() %>/UsuarioServlet" method="post">
+        <input type="hidden" name="action" value="actualizar">
+        <input type="hidden" name="idUsuario" value="<%= usuario.getIdUsuario() %>">
 
-        <form action="UsuarioServlet?action=actualizar" method="post">
-            <input type="hidden" name="id" value="<%= usuario.getId() %>">
-            <div class="form-group">
-                <label for="username">Nombre de Usuario:</label>
-                <input type="text" id="username" name="username" class="form-control" value="<%= usuario.getUsername() %>" required>
+        <div class="form-group">
+            <label>Nombre Completo</label>
+            <input type="text" name="nombreCompleto" class="form-control" value="<%= usuario.getNombreCompleto() %>" required>
+        </div>
 
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" class="form-control" value="<%= usuario.getPassword() %>" required>
+        <div class="form-group">
+            <label>DNI</label>
+            <input type="text" name="dni" class="form-control" value="<%= usuario.getDni() %>" required>
+        </div>
 
-                <label for="rol">Rol:</label>
-                <select id="rol" name="rol" class="form-control" required>
-                    <option value="admin" <%= usuario.getRol().equals("admin") ? "selected" : "" %>>Administrador</option>
-                    <option value="cliente" <%= usuario.getRol().equals("cliente") ? "selected" : "" %>>Cliente</option>
-                </select>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" value="<%= usuario.getUsername() %>" required>
+        </div>
 
-                <br>
-                <button type="submit" class="btn btn-primary">Actualizar</button>
-                <a href="UsuarioServlet?action=listar" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
-    </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Dejar vacío si no desea cambiar">
+        </div>
+
+        <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" class="form-control" value="<%= usuario.getTelefono() %>">
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" value="<%= usuario.getEmail() %>">
+        </div>
+
+        <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" name="direccion" class="form-control" value="<%= usuario.getDireccion() %>">
+        </div>
+
+        <div class="form-group">
+            <label>Rol</label>
+            <select name="idRol" class="form-control" required>
+                <% for (Rol r : roles) { %>
+                    <option value="<%= r.getIdRol() %>" <%= r.getIdRol() == usuario.getIdRol().getIdRol() ? "selected" : "" %>>
+                        <%= r.getNombre() %>
+                    </option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Estado</label>
+            <select name="idEstadoUsuario" class="form-control" required>
+                <% for (EstadoUsuario e : estados) { %>
+                    <option value="<%= e.getIdEstadoUsuario() %>" <%= e.getIdEstadoUsuario() == usuario.getIdEstadoUsuario().getIdEstadoUsuario() ? "selected" : "" %>>
+                        <%= e.getNombre() %>
+                    </option>
+                <% } %>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Actualizar Usuario</button>
+        <a href="UsuarioServlet?action=listar" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

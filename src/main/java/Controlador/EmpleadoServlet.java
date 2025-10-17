@@ -76,11 +76,11 @@ public class EmpleadoServlet extends HttpServlet {
         List<Empleado> lista = empleadoDao.listar();  // Esto debería devolver la lista de empleados desde la base de datos
         if (lista != null && !lista.isEmpty()) {
             request.setAttribute("listaEmpleados", lista);
-            // Asegúrate de que los empleados se están pasando correctamente al JSP
+            // Asegurando de que los empleados se están pasando correctamente al JSP
         } else {
             request.setAttribute("mensaje", "No hay empleados disponibles.");  // Agregar mensaje cuando no hay empleados
         }
-        RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");  // Verifica que 'index.jsp' sea el nombre correcto
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Empleado.jsp");  
         dispatcher.forward(request, response);
     }
 
@@ -154,7 +154,7 @@ public class EmpleadoServlet extends HttpServlet {
         }
 
         Empleado emp = new Empleado();
-        emp.setIdEmpleado(id);  // ✅ usar idEmpleado
+        emp.setIdEmpleado(id);  
         emp.setNombre(nombre);
         emp.setDireccion(direccion);
         emp.setTelefono(telefono);
