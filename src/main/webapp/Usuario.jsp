@@ -3,6 +3,17 @@
 <%@page import="modelo.Rol"%>
 <%@page import="modelo.EstadoUsuario"%>
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
+<%
+    // 🔐 Verificación de sesión y rol
+    HttpSession sesion = request.getSession(false);
+
+    if (sesion == null || sesion.getAttribute("rol") == null ||
+        !"admin".equals(sesion.getAttribute("rol"))) {
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -112,9 +123,13 @@
             <a href="PeliculaServlet?action=listar" class="nav-link">
                 <i class="fas fa-film mr-2"></i>Películas
             </a>
-            <a href="http://localhost:8080/CineJ3/ClienteServlet?action=listar" class="nav-link">
-                <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+            <a href="FuncionServlet?action=listar" class="nav-link">
+                <i class="fas fa-clock mr-2"></i>Funciones
+            </a>            
+            <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
+
         </nav>
     </nav>
 

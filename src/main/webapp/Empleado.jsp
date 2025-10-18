@@ -6,6 +6,18 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="modelo.Empleado" %>
 <%@ page import="java.util.List" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%
+    // 🔐 VERIFICACIÓN DE SESIÓN ADMINISTRADOR
+    HttpSession sesion = request.getSession(false);
+
+    if (sesion == null || sesion.getAttribute("rol") == null ||
+        !"admin".equals(sesion.getAttribute("rol"))) {
+        // Si no hay sesión o el rol no es admin → redirige al login
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        return;
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -116,9 +128,13 @@
             <a href="PeliculaServlet?action=listar" class="nav-link">
                 <i class="fas fa-film mr-2"></i>Películas
             </a>
-            <a href="http://localhost:8080/CineJ3/ClienteServlet?action=listar" class="nav-link">
-                <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+             <a href="FuncionServlet?action=listar" class="nav-link">
+                <i class="fas fa-clock mr-2"></i>Funciones
+            </a>           
+            <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
+
         </nav>
     </nav>
 

@@ -113,9 +113,13 @@
             <a href="PeliculaServlet?action=listar" class="nav-link active">
                 <i class="fas fa-film mr-2"></i>Películas
             </a>
-            <a href="http://localhost:8080/CineJ3/ClienteServlet?action=listar" class="nav-link">
-                <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+            <a href="FuncionServlet?action=listar" class="nav-link">
+                <i class="fas fa-clock mr-2"></i>Funciones
+            </a>            
+            <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
+
         </nav>
     </nav>
 

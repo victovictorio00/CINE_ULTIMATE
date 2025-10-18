@@ -36,7 +36,7 @@ public class DashBoardServlet extends HttpServlet {
             // Establecer la lista como atributo en el request
             request.setAttribute("peliculas", lista);
             // Hacer forward al JSP
-            request.getRequestDispatcher("/Cliente/DashboardCliente.jsp").forward(request, response);
+            request.getRequestDispatcher("/Cliente/home.jsp").forward(request, response);
             System.out.println("Número de películas: " + lista.size());
         } catch (SQLException e) {
             logger.severe("Error al listar películas: " + e.getMessage());

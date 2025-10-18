@@ -173,34 +173,36 @@ public class LoginServlet extends HttpServlet {
         request.setAttribute("lastUsername", username);
         request.getRequestDispatcher("/Login.jsp").forward(request, response);
     }
-
+    
     private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u)
-            throws IOException, ServletException {
-        HttpSession session = request.getSession(true);
-        session.setAttribute("userId", u.getIdUsuario());
-        session.setAttribute("username", u.getUsername());
-        session.setAttribute("nombreCompleto", u.getNombreCompleto());
-        Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
-        session.setAttribute("userRoleId", rolId);
+        throws IOException, ServletException {
+    HttpSession session = request.getSession(true);
+    session.setAttribute("userId", u.getIdUsuario());
+    session.setAttribute("username", u.getUsername());
+    session.setAttribute("nombreCompleto", u.getNombreCompleto());
+    Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
+    session.setAttribute("userRoleId", rolId);
 
-        // Lógica de redirección según el rol
-       if (rolId != null) {
-    if (rolId == 1) { // Cliente
-        session.setAttribute("userRole", "cliente");
-        response.sendRedirect(request.getContextPath() + "/DashboardServlet");
-    } else if (rolId == 2) { // Admin
-        session.setAttribute("userRole", "admin");
-        response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+    // 🔹 NUEVO: atributo "rol" que usarán tus JSP para validación
+    if (rolId != null) {
+        if (rolId == 1) { // Cliente
+            session.setAttribute("rol", "cliente");  // ← añadido
+            response.sendRedirect(request.getContextPath() + "/DashboardServlet");
+        } else if (rolId == 2) { // Admin
+            session.setAttribute("rol", "admin");    // ← añadido
+            response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+        } else {
+            session.invalidate();
+            manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+        }
     } else {
         session.invalidate();
-        manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+        manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
     }
-} else {
-    session.invalidate();
-    manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
 }
 
-    }
+
+
 
     /**
      * Método auxiliar para enviar la solicitud de verificación a Google.
