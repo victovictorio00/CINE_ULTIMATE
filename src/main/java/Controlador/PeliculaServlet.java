@@ -149,7 +149,7 @@ public class PeliculaServlet extends HttpServlet {
         int idGenero = Integer.parseInt(request.getParameter("idGenero"));
         java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
         double precio = Double.parseDouble(request.getParameter("precio"));
-
+        
         // Imagen
         Part filePart = request.getPart("foto");
         byte[] foto = null;
@@ -158,6 +158,7 @@ public class PeliculaServlet extends HttpServlet {
                 foto = inputStream.readAllBytes();
             }
         }
+        String trailerUrl = request.getParameter("trailerUrl");
 
         Pelicula pelicula = new Pelicula();
         pelicula.setNombre(nombre);
@@ -166,7 +167,8 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setFechaEstreno(fechaEstreno);
         pelicula.setPrecio(precio);
         pelicula.setFoto(foto);
-
+        pelicula.setTrailerUrl(trailerUrl);
+     
         peliculaDao.insertar(pelicula);
         response.sendRedirect("PeliculaServlet?action=listar");
     }
@@ -189,7 +191,7 @@ public class PeliculaServlet extends HttpServlet {
                 foto = inputStream.readAllBytes();
             }
         }
-
+        String trailerUrl = request.getParameter("trailerUrl");
         Pelicula pelicula = new Pelicula();
         pelicula.setIdPelicula(id);
         pelicula.setNombre(nombre);
@@ -198,7 +200,7 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setFechaEstreno(fechaEstreno);
         pelicula.setPrecio(precio);
         pelicula.setFoto(foto);
-
+        pelicula.setTrailerUrl(trailerUrl);
         peliculaDao.editar(pelicula);
         response.sendRedirect("PeliculaServlet?action=listar");
     }

@@ -140,7 +140,9 @@
                         <th>Sinopsis</th>
                         <th>Horario</th>
                         <th>Foto</th>
+                        <th>Tráiler</th>
                         <th>Acciones</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -154,6 +156,7 @@
                         <td><%= pelicula.getNombre()%></td>
                         <td><%= pelicula.getSinopsis()%></td>
                         <td><%= pelicula.getFechaEstreno()%></td>
+                       
                         <td>
                             <%
                                 byte[] foto = pelicula.getFoto();
@@ -167,6 +170,22 @@
                             Sin foto
                             <% } %>
                         </td>
+                         <td>
+    <%
+        String trailerUrl = pelicula.getTrailerUrl();
+        if (trailerUrl != null && !trailerUrl.isEmpty()) {
+    %>
+        <a href="<%= trailerUrl %>" target="_blank" class="btn btn-outline-info btn-sm">
+            <i class="fas fa-play"></i> Ver tráiler
+        </a>
+    <%
+        } else {
+    %>
+        <span class="text-muted">No disponible</span>
+    <%
+        }
+    %>
+</td>
                         <td>
                             <a href="PeliculaServlet?action=editar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-primary btn-sm">Editar</a>
                             <a href="PeliculaServlet?action=eliminar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-danger btn-sm"
@@ -192,4 +211,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
-

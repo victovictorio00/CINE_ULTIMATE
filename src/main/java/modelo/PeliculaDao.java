@@ -1,3 +1,6 @@
+
+
+
 package modelo;
 
 import java.sql.*;
@@ -23,7 +26,7 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
                 pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
                 pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                 pelicula.setPrecio(rs.getDouble("precio"));
-
+                pelicula.setTrailerUrl(rs.getString("trailer_url"));
                 peliculas.add(pelicula);
             }
         }
@@ -32,7 +35,7 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
 
    @Override
 public void insertar(Pelicula pelicula) throws SQLException {
-    String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio) VALUES (?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio,trailer_url) VALUES (?, ?, ?, ?, ?, ?,?)";
 
     try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
@@ -60,7 +63,12 @@ public void insertar(Pelicula pelicula) throws SQLException {
         } else {
             pst.setNull(6, Types.DECIMAL);
         }
-
+          // ⚡ Faltaba este campo: trailer_url
+        if (pelicula.getTrailerUrl() != null) {
+            pst.setString(7, pelicula.getTrailerUrl());
+        } else {
+            pst.setNull(7, Types.VARCHAR);
+        }
         pst.executeUpdate();
     }
 }
@@ -82,7 +90,7 @@ public void insertar(Pelicula pelicula) throws SQLException {
                     pelicula.setFoto(rs.getBytes("foto"));
                     pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                     pelicula.setPrecio(rs.getDouble("precio"));
-
+                    pelicula.setTrailerUrl(rs.getString("trailer_url"));
                     return pelicula;
                 }
             }
@@ -97,9 +105,9 @@ public void editar(Pelicula pelicula) throws SQLException {
     boolean actualizarFoto = (pelicula.getFoto() != null);
 
     if (actualizarFoto) {
-        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, foto=? WHERE id_pelicula=?";
+        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=?, foto=? WHERE id_pelicula=?";
     } else {
-        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=? WHERE id_pelicula=?";
+        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=? WHERE id_pelicula=?";
     }
 
     try (Connection con = Conexion.getConnection();
@@ -110,17 +118,19 @@ public void editar(Pelicula pelicula) throws SQLException {
         pst.setInt(3, pelicula.getIdGenero().getIdGenero());
         pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
         pst.setDouble(5, pelicula.getPrecio());
+        pst.setString(6, pelicula.getTrailerUrl());
 
         if (actualizarFoto) {
-            pst.setBytes(6, pelicula.getFoto());
-            pst.setInt(7, pelicula.getIdPelicula());
+            pst.setBytes(7, pelicula.getFoto());
+            pst.setInt(8, pelicula.getIdPelicula());
         } else {
-            pst.setInt(6, pelicula.getIdPelicula());
+            pst.setInt(7, pelicula.getIdPelicula());
         }
 
         pst.executeUpdate();
     }
 }
+
 
 
     @Override

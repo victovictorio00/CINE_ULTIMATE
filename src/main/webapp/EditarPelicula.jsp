@@ -1,8 +1,3 @@
-<%-- 
-    Document   : EditarPelicula
-    Created on : 27 may. 2025, 23:28:19
-    Author     : Proyecto
---%>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="modelo.Pelicula" %>
@@ -71,6 +66,26 @@
             <label for="precio">Precio:</label>
             <input type="number" step="0.01" name="precio" id="precio" 
                    class="form-control" value="<%= peli.getPrecio() %>" required>
+        </div>
+
+        <!-- Tráiler -->
+        <div class="form-group">
+            <label for="trailerUrl">Enlace del Tráiler (YouTube, Vimeo, etc.):</label>
+            <input type="url" name="trailerUrl" id="trailerUrl" 
+                   class="form-control" placeholder="https://www.youtube.com/watch?v=..." 
+                   value="<%= peli.getTrailerUrl() != null ? peli.getTrailerUrl() : "" %>">
+            <small class="form-text text-muted">
+                Si ya tiene un tráiler, puedes reemplazar el enlace o dejarlo igual.
+            </small>
+            <% if (peli.getTrailerUrl() != null && !peli.getTrailerUrl().isEmpty()) { %>
+                <div class="mt-3">
+                    <label>Vista previa:</label><br>
+                    <iframe width="400" height="225"
+                        src="<%= peli.getTrailerUrl().replace("watch?v=", "embed/") %>"
+                        frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>
+            <% } %>
         </div>
 
         <!-- Foto -->
