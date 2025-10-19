@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     
     <script>
-        // Función para validar tamaño de la imagen antes de enviar el formulario
+        // Validar tamaño de imagen antes de enviar
         function validarFormulario() {
             const inputFoto = document.getElementById("foto");
             const archivo = inputFoto.files[0];
@@ -23,10 +23,10 @@
 
             if (archivo && archivo.size > maxSize) {
                 alert("La imagen es demasiado grande. El tamaño máximo permitido es 1 MB.");
-                inputFoto.value = ""; // Limpiar selección
-                return false; // Evitar envío del formulario
+                inputFoto.value = ""; 
+                return false;
             }
-            return true; // Permitir envío
+            return true;
         }
     </script>
 </head>
@@ -77,6 +77,12 @@
         <div class="form-group">
             <label for="precio">Precio:</label>
             <input type="number" step="0.01" name="precio" id="precio" class="form-control" required>
+        </div>
+
+        <!-- URL del Tráiler -->
+        <div class="form-group">
+            <label for="trailerUrl">Enlace del Tráiler (YouTube, Vimeo, etc.):</label>
+            <input type="url" name="trailerUrl" id="trailerUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
         </div>
 
         <!-- Foto -->

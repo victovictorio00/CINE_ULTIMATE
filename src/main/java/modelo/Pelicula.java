@@ -1,4 +1,3 @@
-
 package modelo;
 import java.util.Date;
 
@@ -11,14 +10,15 @@ public class Pelicula {
     private byte[] foto;
     private Date fechaEstreno;
     private Double precio;
+    private String trailerUrl; // 🔹 Nuevo campo: enlace del tráiler
 
     // Constructor vacío
     public Pelicula() {
     }
 
     // Constructor con parámetros
-
-    public Pelicula(int idPelicula, String nombre, String sinopsis, Genero idGenero, byte[] foto, Date fechaEstreno, Double precio) {
+    public Pelicula(int idPelicula, String nombre, String sinopsis, Genero idGenero, byte[] foto,
+                    Date fechaEstreno, Double precio, String trailerUrl) {
         this.idPelicula = idPelicula;
         this.nombre = nombre;
         this.sinopsis = sinopsis;
@@ -26,8 +26,10 @@ public class Pelicula {
         this.foto = foto;
         this.fechaEstreno = fechaEstreno;
         this.precio = precio;
+        this.trailerUrl = trailerUrl;
     }
 
+    // Getters y Setters
     public int getIdPelicula() {
         return idPelicula;
     }
@@ -82,5 +84,13 @@ public class Pelicula {
 
     public void setPrecio(Double precio) {
         this.precio = precio;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
     }
 }
