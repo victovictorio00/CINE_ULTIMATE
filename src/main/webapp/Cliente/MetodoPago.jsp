@@ -284,9 +284,10 @@
                     * Algunas de las tarjetas de débito con CVV podrían ser rechazadas por la plataforma de pago que utilizamos debido a las políticas de seguridad del banco
                 </div>
 
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn-continue">Continuar</button>
-                </div>
+               <div class="text-center mt-4">
+    <a href="<%= request.getContextPath() %>/Cliente/Voucher.jsp" class="btn-continue">Continuar</a>
+</div>
+
             </form>
         </div>
         <footer>
