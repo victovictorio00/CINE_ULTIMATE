@@ -53,11 +53,9 @@ public class CarteleraServlet extends HttpServlet {
             request.setAttribute("peliculas", peliculas);
             request.setAttribute("generos", listaGeneros);
 
-            // También enviamos los filtros activos para que el JSP pueda resaltarlos
             request.setAttribute("filtroActivoGenero", generoIdString);
             request.setAttribute("filtroActivoFecha", fechaSeleccionada);
 
-            // --- 5. Redireccionar al JSP del Cliente ---
             request.getRequestDispatcher("/Cliente/PeliculaCliente.jsp").forward(request, response);
 
         } catch (SQLException e) {

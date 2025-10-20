@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
 import modelo.Cliente.Pelicula;
 import modelo.Cliente.PeliculaDaoCliente;
-import modelo.Cliente.Asiento;  // Asegúrate de importar la clase Asiento
+import modelo.Cliente.Asiento;
 import java.util.List;
 import java.util.ArrayList;
 
