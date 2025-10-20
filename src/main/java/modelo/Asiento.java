@@ -79,4 +79,13 @@ public class Asiento {
                this.codigo != null &&
                this.codigo.equals(otro.getCodigo());
     }
+    public Asiento(int id_asiento, boolean disponible) {
+        this.id_asiento = id_asiento;
+        this.id_estado_asiento = new EstadoAsiento();
+        if (disponible) {
+            this.id_estado_asiento.setNombre("Disponible");
+        } else {
+            this.id_estado_asiento.setNombre("Ocupado");
+        }
+    }
 }

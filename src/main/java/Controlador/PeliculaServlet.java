@@ -28,11 +28,9 @@ public class PeliculaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 🔐 Control de acceso: solo administradores
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("rol") == null ||
             !"admin".equals(session.getAttribute("rol"))) {
-            // 🚪 Si no hay sesión o no es admin → redirige al Login.jsp
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -67,11 +65,9 @@ public class PeliculaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 🔐 Control de acceso: solo administradores
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("rol") == null ||
             !"admin".equals(session.getAttribute("rol"))) {
-            // 🚪 Redirige al login si no es admin
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -94,9 +90,7 @@ public class PeliculaServlet extends HttpServlet {
         }
     }
 
-    // ==============================
-    // MÉTODOS CRUD
-    // ==============================
+
 
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {

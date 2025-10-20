@@ -76,17 +76,23 @@ public void insertar(Pelicula pelicula) throws SQLException {
 
     @Override
     public Pelicula leer(int id) throws SQLException {
-        String query = "SELECT * FROM peliculas WHERE id_pelicula = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+        String query = "SELECT p.*, g.nombre AS nombre_genero " +
+                       "FROM peliculas p " +
+                       "INNER JOIN generos g ON p.id_genero = g.id_genero " +
+                       "WHERE p.id_pelicula = ?";
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setInt(1, id);
+
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     Pelicula pelicula = new Pelicula();
                     pelicula.setIdPelicula(rs.getInt("id_pelicula"));
                     pelicula.setNombre(rs.getString("nombre"));
                     pelicula.setSinopsis(rs.getString("sinopsis"));
-                    pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
+                    pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), rs.getString("nombre_genero")));
                     pelicula.setFoto(rs.getBytes("foto"));
                     pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                     pelicula.setPrecio(rs.getDouble("precio"));

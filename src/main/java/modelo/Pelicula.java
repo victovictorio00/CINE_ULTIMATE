@@ -10,7 +10,7 @@ public class Pelicula {
     private byte[] foto;
     private Date fechaEstreno;
     private Double precio;
-    private String trailerUrl; // 🔹 Nuevo campo: enlace del tráiler
+    private String trailerUrl; 
 
     // Constructor vacío
     public Pelicula() {
