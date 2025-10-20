@@ -287,11 +287,6 @@
   <a href="http://localhost:8080/CineJ3/Cliente/Voucher.jsp" class="btn-link-continue">Continuar</a>
 </div>
 
-
-
-
-
-  
 </div>
 
 <footer>

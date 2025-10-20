@@ -72,6 +72,8 @@ public class ClienteServlet extends HttpServlet {
                 mostrarSeleccionAsiento(request, response);
             } else if ("confirmarPago".equals(action)) {
                 mostrarVoucher(request, response);
+            } else if ("metodoPago".equals(action)) {
+                mostrarMetodoPago(request, response);
             }
         } catch (SQLException e) {
             throw new ServletException("Error al listar películas", e);
@@ -183,6 +185,12 @@ public class ClienteServlet extends HttpServlet {
         request.setAttribute("total", total);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Voucher.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void mostrarMetodoPago(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/MetodoPago.jsp");
         dispatcher.forward(request, response);
     }
 
