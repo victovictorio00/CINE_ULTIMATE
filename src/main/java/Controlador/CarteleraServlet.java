@@ -20,20 +20,20 @@ public class CarteleraServlet extends HttpServlet {
 
     // Instancias de los DAOs
     private final PeliculaDao peliculaDao = new PeliculaDao();
-    private final GeneroDao generoDao = new GeneroDao(); // Necesario para el menú de filtros
+    private final GeneroDao generoDao = new GeneroDao(); // Para filtros de géneros
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Evitar caché para que siempre cargue imágenes nuevas
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
-        // --- 1. Obtener Parámetros de Filtrado ---
-        // 'genero' contendrá el ID numérico del género si se filtra por enlace.
-        String generoIdString = request.getParameter("genero");
 
-        // 'fechaSeleccionada' contendrá la fecha en formato YYYY-MM-DD si se filtra por formulario.
-        String fechaSeleccionada = request.getParameter("fechaSeleccionada");
+        // --- 1. Obtener Parámetros de Filtrado ---
+        String generoIdString = request.getParameter("genero"); // filtro por género
+        String fechaSeleccionada = request.getParameter("fechaSeleccionada"); // filtro por fecha
 
         List<Pelicula> peliculas;
         List<Genero> listaGeneros;
@@ -41,22 +41,17 @@ public class CarteleraServlet extends HttpServlet {
         try {
             // --- 2. Lógica de Filtrado de Películas ---
             if (generoIdString != null || fechaSeleccionada != null) {
-                // Si hay al menos un filtro activo (género O fecha), filtramos.
                 peliculas = peliculaDao.getPeliculasFiltradas(generoIdString, fechaSeleccionada);
             } else {
-                // Si no hay filtros, cargamos todas las películas para la cartelera inicial.
                 peliculas = peliculaDao.listar();
             }
 
-            // --- 3. Cargar la lista de Géneros para la Interfaz de Filtros ---
-            // Esta lista es necesaria para poblar la barra lateral de filtros en el JSP.
+            // --- 3. Cargar la lista de Géneros para filtros en la vista ---
             listaGeneros = generoDao.getTodosLosGeneros();
 
-            // --- 4. Establecer Atributos en el Request ---
+            // --- 4. Setear atributos al request ---
             request.setAttribute("peliculas", peliculas);
             request.setAttribute("generos", listaGeneros);
-
-            // También enviamos los filtros activos para que el JSP pueda resaltarlos
             request.setAttribute("filtroActivoGenero", generoIdString);
             request.setAttribute("filtroActivoFecha", fechaSeleccionada);
 
@@ -64,10 +59,8 @@ public class CarteleraServlet extends HttpServlet {
             request.getRequestDispatcher("/Cliente/PeliculaCliente.jsp").forward(request, response);
 
         } catch (SQLException e) {
-            // Manejo de errores de base de datos
-            e.printStackTrace(); // Recomendado para depuración
-            request.setAttribute("error", "Error del sistema al cargar la cartelera: " + e.getMessage());
-            // Si hay un error, redirigir a una página de error o al mismo dashboard.
+            e.printStackTrace(); // Log para depuración
+            request.setAttribute("error", "Error al cargar la cartelera: " + e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
