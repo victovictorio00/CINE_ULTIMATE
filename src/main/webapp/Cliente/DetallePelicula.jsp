@@ -223,7 +223,6 @@
                         String horarioInicio = sdf.format(funcion.getFechaInicio());
                         String horarioFin = sdf.format(funcion.getFechaFin());
             %>
-                <h3>Horarios</h3>
                 <button class="btn btn-primary"><%= horarioInicio %> - <%= horarioFin %></button>
             <%
                     } // fin del for
