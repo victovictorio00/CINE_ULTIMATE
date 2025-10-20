@@ -1,49 +1,71 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo.Cliente;
 
-public class Pelicula {
-    private int id;
-    private String title;
-    private String sinopsis;
-    private String imagePath;
-    private String genero; // Agregado el campo genero
-    private String trailerUrl; // Agregado el campo trailerUrl
+import java.sql.Date;
 
-    // Constructor
-    public Pelicula(int id, String title, String sinopsis, String imagePath, String genero, String trailerUrl) {
-        this.id = id;
-        this.title = title;
+public class Pelicula {
+    private int idPelicula;
+    private String nombre;
+    private String sinopsis;
+    private String genero;
+    private String trailerUrl;
+    private String foto; // ruta o base64 de la imagen
+
+    public Pelicula() {}
+
+    public Pelicula(int idPelicula, String nombre, String sinopsis, String genero, String trailerUrl, String foto) {
+        this.idPelicula = idPelicula;
+        this.nombre = nombre;
         this.sinopsis = sinopsis;
-        this.imagePath = imagePath;
         this.genero = genero;
         this.trailerUrl = trailerUrl;
+        this.foto = foto;
     }
 
-    // Métodos getter y setter
-    public int getId() {
-        return id;
+    public int getIdPelicula() {
+        return idPelicula;
     }
 
-    public String getTitle() {
-        return title;
+    public void setIdPelicula(int idPelicula) {
+        this.idPelicula = idPelicula;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getSinopsis() {
         return sinopsis;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public void setSinopsis(String sinopsis) {
+        this.sinopsis = sinopsis;
     }
 
     public String getGenero() {
         return genero;
     }
 
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
     public String getTrailerUrl() {
         return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }
