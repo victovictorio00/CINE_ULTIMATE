@@ -214,6 +214,8 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     /* =======================
        Auth / Intentos / Util
        ======================= */
+    private static final int LIMITE_INTENTOS = 3;
+
     public Usuario getByUsername(String username) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? LIMIT 1";
         try (Connection con = Conexion.getConnection();
@@ -289,7 +291,19 @@ public class UsuarioDao implements DaoCrud<Usuario> {
             }
         }
     }
-
+    public void registrarIntentoFallido(int idUsuario) throws SQLException {
+        aumentarIntentos(idUsuario); // +1
+        String sql = "SELECT numero_intentos FROM usuarios WHERE id_usuario = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, idUsuario);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next() && rs.getInt("numero_intentos") >= LIMITE_INTENTOS) {
+                    bloquearUsuario(idUsuario, 2); // 2 = bloqueado
+                }
+            }
+        }
+    }
     public boolean existeDNI(String dni) throws SQLException {
         String sql = "SELECT COUNT(*) FROM usuarios WHERE dni = ?";
         try (Connection con = Conexion.getConnection();
