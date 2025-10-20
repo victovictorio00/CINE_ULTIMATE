@@ -25,6 +25,9 @@ public class CarteleraServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
         // --- 1. Obtener Parámetros de Filtrado ---
         // 'genero' contendrá el ID numérico del género si se filtra por enlace.
         String generoIdString = request.getParameter("genero");

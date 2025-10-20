@@ -20,6 +20,9 @@ public class LogoutServlet extends HttpServlet {
         if (sesion != null) {
             sesion.invalidate();
         }
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        response.setDateHeader("Expires", 0); // Proxies
 
         // ✅ Redirige al login después de cerrar sesión
         response.sendRedirect(request.getContextPath());
