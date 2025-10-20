@@ -16,20 +16,19 @@
 
         <style>
             :root {
-                --accent: #FF5733;              /* Tu color de acento: Naranja/Rojo */
+                --accent: #FF5733;            
             }
             body {
                 background-color: #f7f7f7;
                 margin: 0;
                 font-family: 'Poppins', sans-serif;
             }
-            /* NAVBAR (Mantenemos tu estilo de fondo transparente oscuro, pero ajustamos colores internos) */
             .navbar {
-                position: fixed; /* Cambiado a fixed para que el contenido empiece debajo */
+                position: fixed;
                 top: 0;
                 width: 100%;
                 z-index: 1000;
-                background-color: rgba(0,0,0,0.8); /* Tu color oscuro semitransparente */
+                background-color: rgba(0,0,0,0.8); 
                 border-bottom: 1px solid white;
                 height: 80px;
                 padding-top: 10px;
@@ -63,9 +62,8 @@
                 position:relative;
             }
 
-            /* Dropdown de la cuenta (Ajustado para el color oscuro del navbar) */
             .navbar .dropdown-menu {
-                background-color: #343a40 !important; /* Gris muy oscuro */
+                background-color: #343a40 !important; /* Gris oscuro */
                 border: 1px solid rgba(255, 255, 255, 0.15);
             }
             .navbar .dropdown-item {
@@ -77,7 +75,7 @@
                 color: white !important;
             }
             .movie-video {
-                width: 100%;
+                width: 80%;
                 height: 60vh;
                 overflow: hidden;
                 margin-top: 70px;
@@ -206,7 +204,7 @@
             </div>
         </nav>
 
-        <!-- VIDEO TRAILER -->
+        <!--  TRAILER -->
         <%
             String trailer = pelicula.getTrailerUrl();
             if (trailer != null && !trailer.trim().isEmpty()) {
@@ -225,13 +223,63 @@
             }
         %>
 
-        <div class="movie-video" style="margin-top: 80px">
-            <iframe src="<%= trailer%>" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-            </iframe>
+        <div class="movie-video" style="position:relative; margin-top:80px; width:100%; height:60vh;">
+            <!-- Miniatura -->
+            <img id="videoThumb" 
+                 src="https://img.youtube.com/vi/<%= trailer.substring(trailer.lastIndexOf('/')+1) %>/hqdefault.jpg"
+                 style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+
+            <div id="playerContainer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+
+            <div id="playOverlay" 
+                 style="position:absolute; top:0; left:0; width:100%; height:100%; 
+                        display:flex; justify-content:center; align-items:center; 
+                        cursor:pointer;">
+                <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,87,51,0.85);
+                            display:flex; justify-content:center; align-items:center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5V19L19 12L8 5Z"/>
+                    </svg>
+                </div>
+            </div>
         </div>
+        <script src="https://www.youtube.com/iframe_api"></script>
+        <script>
+            const overlay = document.getElementById('playOverlay');
+            const container = document.getElementById('playerContainer');
+            const videoId = "<%= trailer.substring(trailer.lastIndexOf('/')+1) %>";
+            let player;
+
+            overlay.addEventListener('click', () => {
+                player = new YT.Player('playerContainer', {
+                    videoId: videoId,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 0,
+                        rel: 0,
+                        modestbranding: 1,
+                        disablekb: 1,
+                        playsinline: 1,
+                        loop: 1,
+                        playlist: videoId
+                    },
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+
+                overlay.style.display = 'none';
+            });
+
+            function onPlayerStateChange(event) {
+                if (event.data === YT.PlayerState.ENDED) {
+                    player.seekTo(0);
+                    player.playVideo();
+                }
+            }
+        </script>
 
         <!-- DETALLES MEJORADOS (con precio) -->
         <div class="container movie-details-container">
@@ -256,19 +304,18 @@
                         String precioFormateado = fmt.format(pelicula.getPrecio());
                     %>
 
-                    <!-- Título y meta -->
+                    <!-- Titulo -->
                     <div class="d-flex align-items-center justify-content-between" style="gap:12px;">
                         <div style="flex:1;">
                             <h1 class="mb-1" style="font-size:1.9rem;"><%= pelicula.getNombre()%></h1>
                             <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
                         </div>
 
-                        <!-- Precio destacado -->
-                        <div style="min-width:120px; text-align:right;">
-                            <div style="background: linear-gradient(90deg,#FF6B3A,#ff8a61); padding:10px 14px; border-radius:10px; box-shadow:0 6px 18px rgba(255,107,58,0.12);">
-                                <div style="font-size:0.9rem; color:rgba(255,255,255,0.9);">Entrada</div>
-                                <div style="font-weight:800; font-size:1.15rem; color:white;"><%= precioFormateado%></div>
-                            </div>
+                        <!-- Precio -->
+                        <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61); 
+                            padding:12px 18px; border-radius:16px; box-shadow:0 6px 18px rgba(255,107,58,0.15);">
+                            <div style="font-size:0.85rem; color:rgba(255,255,255,0.9); font-weight:500;">Entrada</div>
+                            <div style="font-weight:700; font-size:1.3rem; color:white; margin-top:2px;"><%= precioFormateado %></div>
                         </div>
                     </div>
 
@@ -323,7 +370,6 @@
                         %>
                     </div>
 
-                    <!-- Acciones: formulario que envía action=reservar&id=...&idFuncion=... -->
                     <div class="mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center" style="gap:12px;">
                         <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="get" class="mb-2 mb-sm-0">
                             <input type="hidden" name="action" value="reservar">
@@ -351,21 +397,17 @@
             <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
         </footer>
 
-        <!-- Script que habilita Reservar solo tras seleccionar un horario y actualiza el texto con el precio -->
         <script>
             (function () {
-                // Evitar ejecutar si no hay botones de horario
                 const horarioBtns = Array.from(document.querySelectorAll('.horario-btn'));
                 const btnReservar = document.getElementById('btnReservar');
                 const inputIdFuncion = document.getElementById('inputIdFuncion');
 
-                // Precio que viene del servidor (formateado). Lo usamos para actualizar el botón.
                 const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; // string seguro
 
                 if (!btnReservar || !inputIdFuncion)
                     return;
 
-                // Reset inicial: deshabilitado
                 btnReservar.disabled = true;
                 btnReservar.setAttribute('aria-disabled', 'true');
 
@@ -383,17 +425,14 @@
                     btnReservar.innerHTML = "🎟 Reservar";
                 }
 
-                // Inicializar (por si)
                 clearSelection();
 
                 horarioBtns.forEach(btn => {
                     btn.addEventListener('click', function () {
-                        // Toggle: si ya seleccionado, deselecciona
                         const wasSelected = this.classList.contains('active');
                         clearSelection();
                         if (!wasSelected) {
                             this.classList.add('active');
-                            // Estilos visuales para selección
                             this.style.background = window.getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#FF5733';
                             this.style.color = '#fff';
                             this.style.borderColor = 'transparent';
@@ -406,12 +445,10 @@
                             btnReservar.title = "Reservar " + (this.dataset.label || '');
                             // Actualizar texto del botón con el precio
                             btnReservar.innerHTML = "🎟 Reservar · " + precioServidor;
-                            // opcional: focus para accesibilidad
                             btnReservar.focus();
                         }
                     });
 
-                    // keyboard accessibility
                     btn.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
