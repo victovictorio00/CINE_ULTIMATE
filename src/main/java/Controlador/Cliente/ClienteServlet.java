@@ -26,6 +26,30 @@ public class ClienteServlet extends HttpServlet {
 @Override
 protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+    
+        // --- INICIO DE VALIDACIÓN DE SESIÓN ---
+        // 1. Obtener la sesión existente (sin crear una nueva)
+        HttpSession session = request.getSession(false);
+        String username = (session != null) ? (String) session.getAttribute("username") : null;
+
+        // 2. Comprobar si el usuario NO está logueado
+        if (username == null || username.isEmpty()) {
+
+            // Opcional: Construir la URL de login con parámetro de redirección
+            // Esto permite que el LoginServlet sepa a dónde enviar al usuario después de loguearse.
+            String requestedId = request.getParameter("id");
+            String loginUrl = request.getContextPath() + "/Login.jsp";
+
+            if (requestedId != null && !requestedId.isEmpty()) {
+                // Se asume que /Login.jsp tiene un mecanismo para leer 'redirect' y volver aquí.
+                loginUrl += "?redirect=DetallePeliculaServlet&id=" + requestedId;
+            }
+
+            // Redirigir al usuario a la página de login
+            response.sendRedirect(loginUrl);
+            return; // ¡IMPORTANTE! Detener la ejecución del doGet aquí.
+        }
+        // --- FIN DE VALIDACIÓN DE SESIÓN ---
     String action = request.getParameter("action");
 
     if ("listar".equals(action)) {

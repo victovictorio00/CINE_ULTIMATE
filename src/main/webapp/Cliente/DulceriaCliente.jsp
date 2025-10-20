@@ -309,14 +309,6 @@
                     }
                 %>
             </div>
-
-
-            <div class="col-12 text-center mt-4">
-                <button class="btn btn-lg" 
-                        style="background-color: transparent; border: 2px solid var(--accent); color: var(--accent); font-weight: 600;">
-                    <i class="fas fa-arrow-down mr-2"></i> Ver más productos
-                </button>
-            </div>
         </div>
 
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
