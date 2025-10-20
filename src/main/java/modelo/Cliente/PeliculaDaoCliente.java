@@ -1,40 +1,79 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo.Cliente;
 
+import Conexion.Conexion;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PeliculaDaoCliente {
 
-    // Lista estática que simula las películas disponibles para el cliente
-    private static List<Pelicula> peliculas = new ArrayList<>();
-
-    static {
-        // Agregamos algunas películas ficticias
-peliculas.add(new Pelicula(1, "Lilo y Stitch", "Aventura Familiar | 2h 44m | Una historia sobre una extraterrestre y una niña...", "Cliente/images/bladerunner.jpg", "Ciencia Ficción", "abcd1234"));
-peliculas.add(new Pelicula(2, "Django Unchained", "18+ | 2h 45m | Un western épico...", "Cliente/images/django.jpg", "Western", "efgh5678"));
-peliculas.add(new Pelicula(3, "Max Payne", "18+ | 1h 58m | Un thriller de acción...", "Cliente/images/maxpayne.jpg", "Acción", "ijkl91011"));
-peliculas.add(new Pelicula(4, "Red Coat", "16+ | 2h 30m | Una historia de espionaje...", "Cliente/images/redcoat.jpg", "Espionaje", "mnop121314"));
-peliculas.add(new Pelicula(5, "Lilo y Stitch", "Aventura Familiar | 1h 30m | Una historia sobre una extraterrestre y una niña...", "Cliente/images/liloystitch.jpg", "Familiar", "qrst151617"));
-
-        // Agrega más películas según sea necesario
-    }
-
-    // Método para obtener todas las películas disponibles
+    // 🔹 Listar todas las películas para el cliente
     public List<Pelicula> listar() {
-        return peliculas;
+        List<Pelicula> lista = new ArrayList<>();
+        String sql = "SELECT p.id_pelicula, p.nombre, p.sinopsis, g.nombre AS genero, p.trailer_url, p.foto " +
+                     "FROM peliculas p " +
+                     "INNER JOIN generos g ON p.id_genero = g.id_genero";
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Pelicula peli = new Pelicula(
+                        rs.getInt("id_pelicula"),
+                        rs.getString("nombre"),
+                        rs.getString("sinopsis"),
+                        rs.getString("genero"),
+                        rs.getString("trailer_url"),
+                        convertirFotoEnBase64(rs.getBytes("foto"))
+                );
+                lista.add(peli);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
     }
 
-    // Método para obtener una película específica por ID
+    // 🔹 Obtener una película por ID
     public Pelicula getPeliculaById(int id) {
-        for (Pelicula pelicula : peliculas) {
-            if (pelicula.getId() == id) {
-                return pelicula;
+        Pelicula pelicula = null;
+        String sql = "SELECT p.id_pelicula, p.nombre, p.sinopsis, g.nombre AS genero, p.trailer_url, p.foto " +
+                     "FROM peliculas p " +
+                     "INNER JOIN generos g ON p.id_genero = g.id_genero " +
+                     "WHERE p.id_pelicula = ?";
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                pelicula = new Pelicula(
+                        rs.getInt("id_pelicula"),
+                        rs.getString("nombre"),
+                        rs.getString("sinopsis"),
+                        rs.getString("genero"),
+                        rs.getString("trailer_url"),
+                        convertirFotoEnBase64(rs.getBytes("foto"))
+                );
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return null;  // Si no se encuentra la película
+
+        return pelicula;
+    }
+
+    // 🔹 Convierte BLOB → Base64 para mostrar imagen
+    private String convertirFotoEnBase64(byte[] fotoBytes) {
+        if (fotoBytes == null) {
+            return "";
+        }
+        return "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(fotoBytes);
     }
 }
