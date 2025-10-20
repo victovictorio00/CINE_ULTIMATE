@@ -426,7 +426,7 @@
                             <span class="amount">S/. <span id="total">0.00</span></span>
                         </div>
                     </div>
-                    <a href="<%=request.getContextPath()%>/DulceriaServlet" class="btn-continue">Continuar</a>
+                    <button id="btnContinue" class="btn-continue" type="button" disabled>Continuar</button>
                 </div>
             </div>
         </div>
@@ -438,36 +438,75 @@
         </footer>
 
         <script>
-            const pricePerSeat = parseFloat('<%= request.getAttribute("precioButaca")%>') || 0;
-            const selectedSeats = new Set();
-            const selectedSeatsText = document.getElementById('selected-seats-list');
-            const selectedCountSpan = document.getElementById('selected-count');
-            const totalSpan = document.getElementById('total');
+            (function(){
+                // Variables del DOM
+                const pricePerSeat = parseFloat('<%= request.getAttribute("precioButaca")%>') || 0;
+                const selectedSeats = new Set();
+                const selectedSeatsText = document.getElementById('selected-seats-list');
+                const selectedCountSpan = document.getElementById('selected-count');
+                const totalSpan = document.getElementById('total');
+                const btnContinue = document.getElementById('btnContinue');
 
-            function updateSummary() {
-                const count = selectedSeats.size;
-                const total = count * pricePerSeat;
-                selectedCountSpan.textContent = count;
-                totalSpan.textContent = total.toFixed(2);
-                selectedSeatsText.textContent = count
-                        ? Array.from(selectedSeats).join(', ')
-                        : 'Ninguna butaca seleccionada';
-            }
+                // Helper: actualizar resumen y estado del botón
+                function updateSummary() {
+                    const count = selectedSeats.size;
+                    const total = count * pricePerSeat;
+                    selectedCountSpan.textContent = count;
+                    totalSpan.textContent = total.toFixed(2);
+                    selectedSeatsText.textContent = count ? Array.from(selectedSeats).join(', ') : 'Ninguna butaca seleccionada';
 
-            document.querySelectorAll('.seat.available').forEach(seat => {
-                seat.addEventListener('click', () => {
-                    const seatId = seat.dataset.seat;
+                    // Habilitar el botón SOLO si hay al menos 1 butaca seleccionada
+                    if (count > 0) {
+                        btnContinue.disabled = false;
+                        // Mostrar total en el texto del botón para mejor UX
+                        btnContinue.textContent = 'Continuar · S/. ' + total.toFixed(2);
+                    } else {
+                        btnContinue.disabled = true;
+                        btnContinue.textContent = 'Continuar';
+                    }
+                }
+
+                // Toggle selección en click/teclado
+                function toggleSeatElement(el) {
+                    const seatId = el.dataset.seat;
+                    if (!seatId) return;
+                    if (el.classList.contains('seat-occupied')) return; // no interactuar con ocupadas
                     if (selectedSeats.has(seatId)) {
                         selectedSeats.delete(seatId);
-                        seat.classList.remove('selected');
+                        el.classList.remove('selected');
                     } else {
                         selectedSeats.add(seatId);
-                        seat.classList.add('selected');
+                        el.classList.add('selected');
                     }
                     updateSummary();
+                }
+
+                // Attach listeners a todas las butacas disponibles
+                document.querySelectorAll('.seat.available').forEach(seat => {
+                    seat.addEventListener('click', () => toggleSeatElement(seat));
+                    // keyboard support: space/enter toggles
+                    seat.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSeatElement(seat);
+                        }
+                    });
                 });
-            });
-            updateSummary();
+
+                // Acción del botón: si habilitado, redirige pasando selectedSeats y total (GET)
+                btnContinue.addEventListener('click', function(){
+                    if (btnContinue.disabled) return;
+                    const seatsCSV = encodeURIComponent(Array.from(selectedSeats).join(','));
+                    const total = (selectedSeats.size * pricePerSeat).toFixed(2);
+                    // Redirigir al servlet que necesites. Ahora uso DulceriaServlet como en tu original.
+                    // Cambia la URL si prefieres POST o enviar a otro servlet.
+                    const url = '<%=request.getContextPath()%>/DulceriaServlet?selectedSeats=' + seatsCSV + '&total=' + total;
+                    window.location.href = url;
+                });
+
+                // Inicializar estado
+                updateSummary();
+            })();
         </script>
     </body>
 </html>
