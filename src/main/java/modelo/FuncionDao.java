@@ -94,6 +94,52 @@ public List<Funcion> listar() throws SQLException {
     return lista;
 }
 
+        public List<Funcion> obtenerFunciones(int idPelicula) throws SQLException {
+        List<Funcion> lista = new ArrayList<>();
+        String sql = "SELECT f.id_funcion, f.fecha_inicio, f.fecha_fin, f.asientos_disponibles, " +
+                     "p.id_pelicula, p.nombre AS pelicula, " +
+                     "s.id_sala, s.nombre AS sala, " +
+                     "e.id_estado_funcion, e.nombre AS estado " +
+                     "FROM funciones f " +
+                     "JOIN peliculas p ON f.id_pelicula = p.id_pelicula " +
+                     "JOIN salas s ON f.id_sala = s.id_sala " +
+                     "JOIN estado_funciones e ON f.id_estado_funcion = e.id_estado_funcion " +
+                     "WHERE p.id_pelicula = ?";  // ← filtro por película
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idPelicula);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Funcion f = new Funcion();
+                    f.setIdFuncion(rs.getInt("id_funcion"));
+
+                    Pelicula p = new Pelicula();
+                    p.setIdPelicula(rs.getInt("id_pelicula"));
+                    p.setNombre(rs.getString("pelicula"));
+                    f.setPelicula(p);
+
+                    Sala s = new Sala();
+                    s.setIdSala(rs.getInt("id_sala"));
+                    s.setNombre(rs.getString("sala"));
+                    f.setSala(s);
+
+                    EstadoFuncion e = new EstadoFuncion();
+                    e.setIdEstadoFuncion(rs.getInt("id_estado_funcion"));
+                    e.setNombre(rs.getString("estado"));
+                    f.setEstadoFuncion(e);
+
+                    f.setFechaInicio(rs.getTimestamp("fecha_inicio"));
+                    f.setFechaFin(rs.getTimestamp("fecha_fin"));
+                    f.setAsientosDisponibles(rs.getInt("asientos_disponibles"));
+
+                    lista.add(f);
+                }
+            }
+        }
+        return lista;
+    }
 
     // Obtener una función por ID
     public Funcion obtener(int idFuncion) throws SQLException {

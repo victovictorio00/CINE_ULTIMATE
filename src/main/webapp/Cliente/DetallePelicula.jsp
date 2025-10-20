@@ -1,3 +1,7 @@
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.List"%>
+<%@page import="modelo.FuncionDao"%>
+<%@page import="modelo.Funcion"%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="modelo.Pelicula" %>
 <%@ page import="modelo.PeliculaDao" %>
@@ -129,6 +133,10 @@
 
     PeliculaDao dao = new PeliculaDao();
     Pelicula pelicula = dao.leer(id);
+    
+    FuncionDao dao2 = new FuncionDao();
+    List<Funcion> funciones = new ArrayList<>();
+    funciones = dao2.obtenerFunciones(id);
 
     if (pelicula == null) {
         out.println("<div class='container mt-5'><h2>Película no encontrada.</h2></div>");
@@ -201,11 +209,26 @@
             <p><%= pelicula.getSinopsis() %></p>
 
             <h3>Horarios</h3>
-            <div class="mb-3">
-                <button class="btn btn-primary">09:30 PM</button>
-                <button class="btn btn-primary">12:00 PM</button>
-                <button class="btn btn-primary">02:30 PM</button>
-            </div>
+            <%
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a"); // 12h + AM/PM
+                if (funciones == null || funciones.isEmpty()) {
+            %>
+                <div class="alert alert-info col-12"
+                     style="background-color: var(--card-bg); color: var(--secondary-text); border-color: var(--border-color);">
+                    No hay funciones disponibles
+                </div>
+            <%
+                } else {
+                    for (modelo.Funcion funcion : funciones) {
+                        String horarioInicio = sdf.format(funcion.getFechaInicio());
+                        String horarioFin = sdf.format(funcion.getFechaFin());
+            %>
+                <h3>Horarios</h3>
+                <button class="btn btn-primary"><%= horarioInicio %> - <%= horarioFin %></button>
+            <%
+                    } // fin del for
+                } // fin del else
+            %>
 
             <a href="<%= request.getContextPath() %>/ClienteServlet?action=reservar&id=<%= pelicula.getIdPelicula() %>" 
                class="btn btn-dark mt-2">🎟 Reservar</a>
