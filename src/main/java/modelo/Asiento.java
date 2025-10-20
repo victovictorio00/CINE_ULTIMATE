@@ -5,9 +5,38 @@ public class Asiento {
     private Sala id_sala;
     private String codigo;
     private EstadoAsiento id_estado_asiento;
+    private String estadoActual;
+    private boolean ocupado;
 
     public Asiento() {}
+    
+    public String getEstadoActual() {
+        return estadoActual;
+    }
 
+    public void setEstadoActual(String estadoActual) {
+        this.estadoActual = estadoActual;
+    }
+
+    // Métodos útiles para el JSP
+    public String getFila() {
+        if (codigo != null && codigo.length() > 0) {
+            return codigo.substring(0, 1); // Extrae "A" de "A1"
+        }
+        return "";
+    }
+    
+    public int getNumero() {
+        if (codigo != null && codigo.length() > 1) {
+            try {
+                return Integer.parseInt(codigo.substring(1)); // Extrae "1" de "A1"
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+    
     public int getId_asiento() {
         return id_asiento;
     }
@@ -87,5 +116,11 @@ public class Asiento {
         } else {
             this.id_estado_asiento.setNombre("Ocupado");
         }
+    }
+    public boolean isOcupado() {   // ← faltaba
+        return ocupado;
+    }
+    public void setOcupado(boolean ocupado) {
+        this.ocupado = ocupado;
     }
 }

@@ -11,7 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
-import modelo.Cliente.Asiento;  // Asegúrate de importar la clase Asiento
+import modelo.Asiento;  // Tu clase Asiento real
+import modelo.AsientoDao;  // Tu DAO de asientos
+import modelo.Funcion;  // Necesitarás esta clase
+import modelo.FuncionDao;  // Y su DAO
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,10 +22,14 @@ import java.util.ArrayList;
 public class ClienteServlet extends HttpServlet {
 
     private PeliculaDao peliculaDao;
+    private AsientoDao asientoDao;
+    private FuncionDao funcionDao;
 
     @Override
     public void init() {
         peliculaDao = new PeliculaDao();
+        asientoDao = new AsientoDao();
+        funcionDao = new FuncionDao();
     }
 
     @Override
@@ -40,29 +47,22 @@ public class ClienteServlet extends HttpServlet {
         }
 
         if (username == null || username.isEmpty()) {
-
-            // Construir la URL de destino (URI + query)
-            String uri = request.getRequestURI(); // ej: /MiApp/DulceriaServlet
-            String query = request.getQueryString(); // ej: action=listar&cat=dulces
+            String uri = request.getRequestURI();
+            String query = request.getQueryString();
             String fullRedirectUrl = uri + (query != null && !query.isEmpty() ? "?" + query : "");
 
-            // Seguridad: asegurarse que la URL es interna (evitar open-redirects)
-            String context = request.getContextPath(); // ej: /MiApp
+            String context = request.getContextPath();
             if (!fullRedirectUrl.startsWith(context)) {
-                // fallback seguro: ir a la raíz de la app
                 fullRedirectUrl = context + "/";
             }
 
-            // Codificar el destino para usarlo como parámetro
             String encodedUrl = java.net.URLEncoder.encode(fullRedirectUrl, java.nio.charset.StandardCharsets.UTF_8.name());
-
-            // Construir login URL y aplicar encodeRedirectURL por si las cookies están deshabilitadas
             String loginUrl = response.encodeRedirectURL(context + "/Login.jsp?redirect=" + encodedUrl);
 
             response.sendRedirect(loginUrl);
             return;
         }
-// --- FIN DE VALIDACIÓN DE SESIÓN ---
+        // --- FIN DE VALIDACIÓN DE SESIÓN ---
 
         String action = request.getParameter("action");
         try {
@@ -76,7 +76,7 @@ public class ClienteServlet extends HttpServlet {
                 mostrarMetodoPago(request, response);
             }
         } catch (SQLException e) {
-            throw new ServletException("Error al listar películas", e);
+            throw new ServletException("Error al procesar la solicitud", e);
         }
     }
 
@@ -85,27 +85,29 @@ public class ClienteServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
 
-        if ("seleccionarCombo".equals(action)) {
-            seleccionarCombo(request, response);
-        } else if ("confirmarAsiento".equals(action)) {
-            procesarSeleccionAsiento(request, response);
-        } else if ("procesarPago".equals(action)) {
-            procesarPago(request, response);
+        try {
+            if ("seleccionarCombo".equals(action)) {
+                seleccionarCombo(request, response);
+            } else if ("confirmarAsiento".equals(action)) {
+                procesarSeleccionAsiento(request, response);
+            } else if ("procesarPago".equals(action)) {
+                procesarPago(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al procesar la acción", e);
         }
     }
 
     private void procesarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String idPelicula = request.getParameter("idPelicula");
+        String idFuncion = request.getParameter("idFuncion");
         String asientoSeleccionado = request.getParameter("asientoSeleccionado");
 
-        // Aquí puedes guardar en sesión si quieres simular estado
         HttpSession session = request.getSession();
-        session.setAttribute("idPelicula", idPelicula);
+        session.setAttribute("idFuncion", idFuncion);
         session.setAttribute("asientoSeleccionado", asientoSeleccionado);
 
-        // Por ejemplo, redirige a un JSP de pago o voucher
-        request.setAttribute("idPelicula", idPelicula);
+        request.setAttribute("idFuncion", idFuncion);
         request.setAttribute("asientoSeleccionado", asientoSeleccionado);
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/MetodoPago.jsp");
         dispatcher.forward(request, response);
@@ -119,52 +121,83 @@ public class ClienteServlet extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
+    /**
+     * MÉTODO ACTUALIZADO: Muestra la selección de asientos con datos reales de la BD
+     */
     private void mostrarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        int idPelicula = Integer.parseInt(request.getParameter("id"));
-        Pelicula pelicula = peliculaDao.leer(idPelicula);
-        request.setAttribute("pelicula", pelicula);
-
-        // Simulación lista de asientos
-        List<Asiento> asientos = new ArrayList<>();
-        for (int i = 1; i <= 30; i++) {
-            asientos.add(new Asiento(i, true)); // todos disponibles
+        
+        // IMPORTANTE: Ahora necesitas recibir el ID de la FUNCIÓN, no solo de la película
+        String idFuncionParam = request.getParameter("idFuncion");
+        
+        if (idFuncionParam == null || idFuncionParam.isEmpty()) {
+            // Si no viene idFuncion, redirigir a la página de selección de función
+            response.sendRedirect(request.getContextPath() + "/Cliente/SeleccionFuncion.jsp");
+            return;
         }
+        
+        int idFuncion = Integer.parseInt(idFuncionParam);
+        
+        // Obtener información de la función
+        Funcion funcion = funcionDao.leer(idFuncion);
+        
+        if (funcion == null) {
+            request.setAttribute("error", "Función no encontrada");
+            RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Error.jsp");
+            dispatcher.forward(request, response);
+            return;
+        }
+        
+        // Obtener información de la película
+        Pelicula pelicula = peliculaDao.leer(funcion.getPelicula().getIdPelicula());
+        
+        // Obtener asientos con su estado actual para esta función
+        List<Asiento> asientos = asientoDao.obtenerAsientosPorSalaYFuncion(
+            funcion.getSala().getIdSala(), 
+            idFuncion
+        );
+        
+        // Pasar datos al JSP
         request.setAttribute("asientos", asientos);
-        request.setAttribute("idPelicula", idPelicula);
-
+        request.setAttribute("pelicula", pelicula);
+        request.setAttribute("funcion", funcion);
+        request.setAttribute("idFuncion", idFuncion);
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp");
         dispatcher.forward(request, response);
     }
 
-    private void seleccionarCombo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void seleccionarCombo(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException, SQLException {
         String selectedSeats = request.getParameter("selectedSeats");
-        // Guardar butacas seleccionadas en sesión para uso futuro
-        request.getSession().setAttribute("selectedSeats", selectedSeats);
-
-        // Redirigir a la página de selección de combos
+        String idFuncion = request.getParameter("idFuncion");
+        
+        // Guardar en sesión
+        HttpSession session = request.getSession();
+        session.setAttribute("selectedSeats", selectedSeats);
+        session.setAttribute("idFuncion", idFuncion);
+        
+        // Validar que los asientos estén disponibles antes de continuar
+        // (Opcional pero recomendado)
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/SeleccionarCombo.jsp");
         dispatcher.forward(request, response);
     }
 
-    protected void procesarPago(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Obtener datos de la tarjeta (simulación)
+    protected void procesarPago(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
         String cardNumber = request.getParameter("cardNumber");
         String expiryDate = request.getParameter("expiryDate");
         String cvv = request.getParameter("cvv");
 
-        // Aquí iría la lógica para validar y procesar el pago, por ahora simulado
+        // Aquí iría la lógica para validar y procesar el pago
         System.out.println("Procesando pago con tarjeta: " + cardNumber);
 
-        // Después de procesar, redirigir a página de confirmación o resumen
         response.sendRedirect(request.getContextPath() + "/Cliente/Confirmacion.jsp");
     }
 
     private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // No hay conexión DB, puedes pasar datos ficticios o datos de sesión si quieres
-        // Ejemplo: request.setAttribute("numeroVoucher", "ABC12345");
-
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Voucher.jsp");
         dispatcher.forward(request, response);
     }
@@ -193,5 +226,4 @@ public class ClienteServlet extends HttpServlet {
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/MetodoPago.jsp");
         dispatcher.forward(request, response);
     }
-
 }
