@@ -154,12 +154,18 @@
 <!-- VIDEO TRAILER -->
 <%
     String trailer = pelicula.getTrailerUrl();
-
-    // Si el trailer no es nulo, convertir enlace normal de YouTube a formato embed
-    if (trailer != null && trailer.contains("watch?v=")) {
-        trailer = trailer.replace("watch?v=", "embed/");
-    } else if (trailer == null || trailer.trim().isEmpty()) {
-        // Si no tiene trailer, usar uno por defecto
+    if (trailer != null && !trailer.trim().isEmpty()) {
+        String videoId = "";
+        if (trailer.contains("watch?v=")) {
+            videoId = trailer.substring(trailer.indexOf("watch?v=") + 8);
+            if (videoId.contains("&")) { // eliminar parámetros extra
+                videoId = videoId.substring(0, videoId.indexOf("&"));
+            }
+        } else {
+            videoId = trailer; // por si ya es un embed
+        }
+        trailer = "https://www.youtube.com/embed/" + videoId;
+    } else {
         trailer = "https://www.youtube.com/embed/HeTE7j9dcGg";
     }
 %>
