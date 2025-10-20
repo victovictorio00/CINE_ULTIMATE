@@ -22,7 +22,7 @@ public class LogoutServlet extends HttpServlet {
         }
 
         // ✅ Redirige al login después de cerrar sesión
-        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        response.sendRedirect(request.getContextPath());
     }
 
     @Override
