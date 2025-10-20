@@ -171,13 +171,13 @@ body {
     </div>
 
     <div class="details-info">
-      <p><strong>Cine:</strong> Alcazar</p>
-      <p><strong>Película:</strong> Asu Mare 2 2D DOB</p>
-      <p><strong>Sala:</strong> 06</p>
-      <p><strong>Función:</strong> 11/04/2015 18:00</p>
-      <p><strong>Butacas:</strong> N10, N11</p>
+      <p><strong>Cine:</strong> Cine Pobre</p>
+      <p><strong>Película:</strong> El Padrino</p>
+      <p><strong>Sala:</strong> 01</p>
+      <p><strong>Función:</strong> 18:00-20:30</p>
+      <p><strong>Butacas:</strong> A1, J9</p>
       <p><strong>Cant. butacas:</strong> 2</p>
-      <p><strong>Cliente:</strong> cesar becerra alvarado</p>
+      <p><strong>Cliente:</strong> Angel Rojas</p>
     </div>
   </div>
 
@@ -193,10 +193,10 @@ body {
     </thead>
     <tbody>
       <tr>
-        <td>General may 12 años</td>
-        <td>S/. 22.00</td>
+        <td>               </td>
+        <td>S/. 20.00</td>
         <td>2</td>
-        <td>S/. 44.00</td>
+        <td>S/. 40.00</td>
       </tr>
     </tbody>
   </table>
@@ -214,21 +214,20 @@ body {
     <tbody>
       <tr>
         <td>
-          Combo 3 Regular<br/>
-          1 Chicha Morada Mediana<br/>
-          1 Pepsi Mediana<br/>
-          1 Pop Corn Grande
+          Gaseosa Grande<br/>
+          Hamburguesa<br/>
+        
         </td>
-        <td>S/. 20.50</td>
+        <td>S/. 18.00</td>
         <td>1</td>
-        <td>S/. 20.50</td>
+        <td>S/. 18.00</td>
       </tr>
     </tbody>
   </table>
 
   <div class="total-section">
-    <div><span>Total Compra</span> S/. 64.50</div>
-    <div><span>Total en dólares</span> USD 20.80</div>
+    <div><span>Total Compra</span> S/. 58.00</div>
+    <div><span>Total en dólares</span> USD 17.40</div>
   </div>
 
   <div class="notes">
