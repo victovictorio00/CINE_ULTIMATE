@@ -1,3 +1,6 @@
+DetallePelicula.jsp
+
+
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
 <%@page import="modelo.FuncionDao"%>
@@ -241,8 +244,8 @@
                 <div class="col-12 col-md-5 mb-4 mb-md-0 movie-poster text-center">
                     <img 
                         src="<%= (pelicula.getFoto() != null && pelicula.getFoto().length > 0)
-                                ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula())
-                                : (request.getContextPath() + "/Cliente/images/pelicula6.jpg")%>" 
+            ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis())
+            : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>" 
                         alt="Póster de <%= pelicula.getNombre()%>" 
                         class="img-fluid poster-img"
                         style="border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.35); max-height:520px; object-fit:cover;">
@@ -428,3 +431,4 @@
 
     </body>
 </html>
+
