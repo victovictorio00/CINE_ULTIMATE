@@ -13,14 +13,50 @@
 </head>
 <body>
 
-    <!-- CARRUSEL -->
+    <!-- CARRUSEL DINÁMICO CON PELÍCULAS -->
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="margin-top:0;">
         <ol class="carousel-indicators">
-            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+            <%
+                List<Pelicula> peliculas = (List<Pelicula>) request.getAttribute("peliculas");
+                if (peliculas != null && !peliculas.isEmpty()) {
+                    for (int i = 0; i < peliculas.size(); i++) {
+            %>
+                <li data-target="#carouselExampleIndicators" data-slide-to="<%= i %>" class="<%= (i == 0) ? "active" : "" %>"></li>
+            <%
+                    }
+                } else {
+            %>
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+            <%
+                }
+            %>
         </ol>
+
         <div class="carousel-inner">
+            <%
+                if (peliculas != null && !peliculas.isEmpty()) {
+                    for (int i = 0; i < peliculas.size(); i++) {
+                        Pelicula pelicula = peliculas.get(i);
+                        String imageUrl = request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula();
+                        String title = pelicula.getNombre() == null ? "Sin título" : pelicula.getNombre();
+                        String sinopsis = (pelicula.getSinopsis() != null && !pelicula.getSinopsis().isEmpty())
+                                ? pelicula.getSinopsis()
+                                : "Sin sinopsis disponible.";
+            %>
+            <div class="carousel-item <%= (i == 0) ? "active" : "" %>">
+                <img src="<%= imageUrl %>" class="d-block w-100" alt="<%= title %>"
+                     onerror="this.src='<%= request.getContextPath() %>/Cliente/images/fallback.jpg'">
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-3">
+                    <h5><%= title %></h5>
+                    <p><%= sinopsis.length() > 100 ? sinopsis.substring(0, 100) + "..." : sinopsis %></p>
+                </div>
+            </div>
+            <%
+                    }
+                } else {
+            %>
             <div class="carousel-item active">
                 <img src="<%= request.getContextPath() %>/Cliente/images/slide1.jpg" class="d-block w-100" alt="Slide 1">
             </div>
@@ -30,20 +66,24 @@
             <div class="carousel-item">
                 <img src="<%= request.getContextPath() %>/Cliente/images/slide3.jpg" class="d-block w-100" alt="Slide 3">
             </div>
+            <%
+                }
+            %>
         </div>
+
         <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
+            <span class="sr-only">Anterior</span>
         </a>
         <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
+            <span class="sr-only">Siguiente</span>
         </a>
     </div>
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand" href="#">CineOnline</a>
+        <a class="navbar-brand" href="#">CineMax</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -85,7 +125,6 @@
         <div class="container mb-5"><h3>Películas Disponibles</h3></div>
 
         <%
-            List<Pelicula> peliculas = (List<Pelicula>) request.getAttribute("peliculas");
             if (peliculas == null || peliculas.isEmpty()) {
         %>
         <div class="alert alert-info">No hay películas disponibles actualmente.</div>
@@ -104,7 +143,6 @@
             %>
             <div class="col-md-3 mb-4">
                 <div class="card pelicula-card">
-                    <!-- img visible por defecto. onerror mostrará el placeholder -->
                     <img
                         src="<%= imageUrl %>"
                         data-id="<%= id %>"
@@ -114,7 +152,6 @@
                         onerror="(function(img){ img.style.display='none'; var ph=img.nextElementSibling; if(ph) ph.style.display='flex'; img.closest('.pelicula-card').classList.add('no-image'); })(this);"
                         onload="(function(img){ var ph=img.nextElementSibling; if(ph) ph.style.display='none'; img.closest('.pelicula-card').classList.add('has-image'); })(this);" />
 
-                    <!-- Placeholder oculto inicialmente; solo aparece si onerror o fallback lo activa -->
                     <div class="placeholder-img" role="img" aria-label="Imagen no disponible">
                         <% if (title.length() > 20) { %>
                             <%= title.substring(0, 20) + "..." %>
@@ -134,10 +171,10 @@
                 </div>
             </div>
             <%
-                } // for peliculas
+                }
             %>
         </div>
-        <% } // else peliculas %>
+        <% } %>
     </div>
 
     <!-- FOOTER -->
@@ -152,27 +189,20 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script>
-        // Fallback/robusto: comprueba estado de cada imagen y ajusta placeholder si hace falta
+        // Fallback para placeholders de imágenes
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.pelicula-card').forEach(function(card){
                 var img = card.querySelector('img.card-img-top');
                 var ph  = card.querySelector('.placeholder-img');
-
                 if (!img) return;
-
-                // Si ya cargó con éxito
                 if (img.complete && img.naturalHeight > 0) {
                     card.classList.add('has-image');
                     if (ph) ph.style.display = 'none';
-                }
-                // Si completó pero no tiene altura (contenido inválido)
-                else if (img.complete && img.naturalHeight === 0) {
+                } else if (img.complete && img.naturalHeight === 0) {
                     img.style.display = 'none';
                     if (ph) ph.style.display = 'flex';
                     card.classList.add('no-image');
                 }
-
-                // Eventos (en caso no se usen inline)
                 img.addEventListener('load', function(){
                     card.classList.add('has-image');
                     if (ph) ph.style.display = 'none';
