@@ -53,6 +53,13 @@
                          data-sitekey="6Lf6HOorAAAAAOh0rkyVn0DXPsJklpcECHSygiHf">
                     </div>
 
+                    <% 
+        String redirectUrl = request.getParameter("redirect");
+        if (redirectUrl != null) {
+            // El valor a enviar debe ser el mismo que se recibió.
+    %>
+        <input type="hidden" name="redirectUrl" value="<%= redirectUrl %>">
+    <% } %>
                     <button type="submit" class="btn btn-login">ENTRAR</button>
                     <button type="button" class="btn btn-register" onclick="window.location.href = 'Register.jsp'">REGISTRARSE</button>
                 </form>

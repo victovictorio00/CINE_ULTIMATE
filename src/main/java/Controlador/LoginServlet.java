@@ -64,10 +64,10 @@ public class LoginServlet extends HttpServlet {
 
         // Validación de Clave Secreta (Verificar que se cargó algo en init())
         if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
-             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
-             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
-             request.getRequestDispatcher("Login.jsp").forward(request, response);
-             return;
+            System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
+            request.setAttribute("error", "Error de configuración del servidor (Captcha).");
+            request.getRequestDispatcher("Login.jsp").forward(request, response);
+            return;
         }
 
         // 1. Obtener la respuesta de reCAPTCHA
@@ -94,21 +94,15 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // Opcional pero recomendado para caracteres especiales
-        request.setCharacterEncoding("UTF-8");
-
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        String errorMsg = null;
-
         try {
-            //Trae al usuario por username (para leer intentos y estado)
+            request.setCharacterEncoding("UTF-8");
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            String errorMsg = null;
             Usuario u = usuarioDao.getByUsername(username);
 
-            //Verifica existencia
+            // 1. Verificar existencia y bloqueo (SE MANTIENE CORRECTO)
             if (u == null) {
-                //Mensaje de error genérico
                 errorMsg = "Credenciales incorrectas.";
                 manejarFallo(request, response, username, errorMsg);
                 return;
@@ -117,16 +111,13 @@ public class LoginServlet extends HttpServlet {
             int intentosFallidosActuales = u.getNumeroIntentos();
             int estadoActualId = u.getIdEstadoUsuario() != null ? u.getIdEstadoUsuario().getIdEstadoUsuario() : 0;
 
-            // verifica bloqueo
             if (estadoActualId == ESTADO_BLOQUEADO) {
                 errorMsg = "Tu cuenta se encuentra bloqueada. Contacta al administrador.";
                 manejarFallo(request, response, username, errorMsg);
                 return;
             }
 
-            // verifica numero de intentos
-            if (intentosFallidosActuales > MAX_INTENTOS) {
-                // Si la BD no lo había bloqueado, lo bloqueamos ahora
+            if (intentosFallidosActuales >= MAX_INTENTOS) {
                 if (estadoActualId == ESTADO_ACTIVO) {
                     usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
                 }
@@ -135,35 +126,55 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
-            // Valida credenciales (BCrypt/fallback dentro del DAO)
+            // 2. Autenticar Contraseña (El corazón del Login)
             Usuario usuarioAutenticado = usuarioDao.validateUser(username, password);
 
             if (usuarioAutenticado != null) {
-                // Resetear intentos a 3
-                usuarioDao.resetearIntentos(u.getIdUsuario());
-                crearSesionYRedirigir(request, response, usuarioAutenticado);
-                return;
-            }
+                // ==========================================================
+                // LOGIC FLOW CORREGIDO: LOGIN EXITOSO
+                // ==========================================================
 
-            // Fallo de autenticacion 
-            usuarioDao.aumentarIntentos(u.getIdUsuario());
-            int nuevosIntentosFallidos = intentosFallidosActuales + 1;
+                usuarioDao.resetearIntentos(u.getIdUsuario()); // Resetear intentos
 
-            if (nuevosIntentosFallidos > MAX_INTENTOS) {
-                // Bloqueo y mensaje final
-                usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
-                errorMsg = "¡Último intento fallido! Tu cuenta ha sido bloqueada.";
+                // Obtener la URL de destino de retorno
+                String redirectUrlParam = request.getParameter("redirectUrl");
+                String destino = request.getContextPath() + "/DashboardServlet"; // URL por defecto
+
+                if (redirectUrlParam != null && !redirectUrlParam.isEmpty()) {
+                    try {
+                        // Descodificar y asignar el destino de retorno
+                        destino = java.net.URLDecoder.decode(redirectUrlParam, "UTF-8");
+                    } catch (java.io.UnsupportedEncodingException e) {
+                        System.err.println("Error decodificando URL de redirección: " + e.getMessage());
+                    }
+                }
+
+                // Crear la sesión y REDIRIGIR AL DESTINO (usando el nuevo método)
+                crearSesionYRedirigir(request, response, usuarioAutenticado, destino);
+                return; // ¡CRUCIAL! Terminar la ejecución aquí.
+
             } else {
-                // Mensaje de advertencia
-                errorMsg = "Credenciales incorrectas. Intento " + nuevosIntentosFallidos + " de " + MAX_INTENTOS + ".";
-            }
+                // ==========================================================
+                // LOGIC FLOW CORREGIDO: LOGIN FALLIDO
+                // ==========================================================
+                usuarioDao.aumentarIntentos(u.getIdUsuario());
+                int nuevosIntentosFallidos = intentosFallidosActuales + 1;
 
-            manejarFallo(request, response, username, errorMsg);
+                if (nuevosIntentosFallidos > MAX_INTENTOS) {
+                    usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
+                    errorMsg = "¡Último intento fallido! Tu cuenta ha sido bloqueada.";
+                } else {
+                    errorMsg = "Credenciales incorrectas. Intento " + nuevosIntentosFallidos + " de " + MAX_INTENTOS + ".";
+                }
+                manejarFallo(request, response, username, errorMsg);
+                return; // ¡CRUCIAL! Terminar la ejecución aquí después de forward.
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            errorMsg = "Error interno del servidor al procesar la solicitud.";
-            manejarFallo(request, response, username, errorMsg);
+            String errorMsg = "Error interno del servidor al procesar la solicitud.";
+            manejarFallo(request, response, request.getParameter("username"), errorMsg);
+            return;
         }
     }
 
@@ -173,40 +184,40 @@ public class LoginServlet extends HttpServlet {
         request.setAttribute("lastUsername", username);
         request.getRequestDispatcher("/Login.jsp").forward(request, response);
     }
-    
-    private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u)
-        throws IOException, ServletException {
-    HttpSession session = request.getSession(true);
-    session.setAttribute("userId", u.getIdUsuario());
-    session.setAttribute("username", u.getUsername());
-    session.setAttribute("nombreCompleto", u.getNombreCompleto());
-    Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
-    session.setAttribute("userRoleId", rolId);
 
-    // 🔹 NUEVO: atributo "rol" que usarán tus JSP para validación
-    if (rolId != null) {
-        if (rolId == 1) { // Cliente
-            session.setAttribute("rol", "cliente");  // ← añadido
-            response.sendRedirect(request.getContextPath() + "/DashboardServlet");
-        } else if (rolId == 2) { // Admin
-            session.setAttribute("rol", "admin");    // ← añadido
-            response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+    // 🚨 Nota: Cambié la firma del método para recibir la URL de destino
+    private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u, String retornoClienteUrl)
+            throws IOException, ServletException {
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute("userId", u.getIdUsuario());
+        session.setAttribute("username", u.getUsername());
+        session.setAttribute("nombreCompleto", u.getNombreCompleto());
+        Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
+        session.setAttribute("userRoleId", rolId);
+
+        if (rolId != null) {
+            if (rolId == 1) { // Cliente
+                session.setAttribute("rol", "cliente");
+
+                // 💡 APLICACIÓN DE LA URL DE RETORNO PARA CLIENTES
+                response.sendRedirect(retornoClienteUrl);
+
+            } else if (rolId == 2) { // Admin
+                session.setAttribute("rol", "admin");
+                // El admin va a su dashboard fijo, sin importar la URL de interrupción.
+                response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+
+            } else {
+                session.invalidate();
+                manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+            }
         } else {
             session.invalidate();
-            manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+            manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
         }
-    } else {
-        session.invalidate();
-        manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
     }
-}
 
-
-
-
-    /**
-     * Método auxiliar para enviar la solicitud de verificación a Google.
-     */
     private boolean verifyRecaptcha(String gRecaptchaResponse) throws Exception {
         String url = "https://www.google.com/recaptcha/api/siteverify";
 
