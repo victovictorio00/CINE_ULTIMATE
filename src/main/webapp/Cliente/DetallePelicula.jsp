@@ -233,7 +233,7 @@
             </iframe>
         </div>
 
-        <!-- DETALLES MEJORADOS -->
+        <!-- DETALLES MEJORADOS (con precio) -->
         <div class="container movie-details-container">
             <div class="row d-flex align-items-start justify-content-center">
 
@@ -250,11 +250,30 @@
 
                 <!-- Texto -->
                 <div class="col-12 col-md-7 movie-details" style="padding-left:18px;">
-                    <h1 class="mb-2" style="font-size:1.9rem;"><%= pelicula.getNombre()%></h1>
-                    <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
+                    <%
+                        // Formatear precio con locale de Perú
+                        java.text.NumberFormat fmt = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "PE"));
+                        String precioFormateado = fmt.format(pelicula.getPrecio());
+                    %>
 
-                    <h3 style="margin-top:6px; margin-bottom:8px;">Sinopsis</h3>
-                    <p style="margin-bottom:18px; text-align:justify; color:#666;"><%= pelicula.getSinopsis()%></p>
+                    <!-- Título y meta -->
+                    <div class="d-flex align-items-center justify-content-between" style="gap:12px;">
+                        <div style="flex:1;">
+                            <h1 class="mb-1" style="font-size:1.9rem;"><%= pelicula.getNombre()%></h1>
+                            <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
+                        </div>
+
+                        <!-- Precio destacado -->
+                        <div style="min-width:120px; text-align:right;">
+                            <div style="background: linear-gradient(90deg,#FF6B3A,#ff8a61); padding:10px 14px; border-radius:10px; box-shadow:0 6px 18px rgba(255,107,58,0.12);">
+                                <div style="font-size:0.9rem; color:rgba(255,255,255,0.9);">Entrada</div>
+                                <div style="font-weight:800; font-size:1.15rem; color:white;"><%= precioFormateado%></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top:12px; margin-bottom:8px;">Sinopsis</h3>
+                    <p style="margin-bottom:18px; text-align:justify; color:#c7d4df;"><%= pelicula.getSinopsis()%></p>
 
                     <h3 style="margin-top:10px; margin-bottom:10px;">Horarios</h3>
 
@@ -269,6 +288,16 @@
                         <%
                         } else {
                         %>
+
+                        <!-- Tarjeta pequeña con precio (opcional, repetido para énfasis) -->
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px;">
+                            <div style="color:var(--muted); font-weight:600;">
+                                Precio por entrada
+                            </div>
+                            <div style="font-weight:800; font-size:1.05rem; color:var(--accent);">
+                                <%= precioFormateado%>
+                            </div>
+                        </div>
 
                         <!-- Lista de horarios: espacio entre botones y scroll lateral en móviles -->
                         <div id="horariosWrapper" class="d-flex flex-wrap align-items-center" style="gap:10px;">
@@ -322,13 +351,16 @@
             <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
         </footer>
 
-        <!-- Script que habilita Reservar solo tras seleccionar un horario -->
+        <!-- Script que habilita Reservar solo tras seleccionar un horario y actualiza el texto con el precio -->
         <script>
             (function () {
                 // Evitar ejecutar si no hay botones de horario
                 const horarioBtns = Array.from(document.querySelectorAll('.horario-btn'));
                 const btnReservar = document.getElementById('btnReservar');
                 const inputIdFuncion = document.getElementById('inputIdFuncion');
+
+                // Precio que viene del servidor (formateado). Lo usamos para actualizar el botón.
+                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; // string seguro
 
                 if (!btnReservar || !inputIdFuncion)
                     return;
@@ -348,6 +380,7 @@
                     btnReservar.disabled = true;
                     btnReservar.setAttribute('aria-disabled', 'true');
                     btnReservar.title = "Selecciona un horario";
+                    btnReservar.innerHTML = "🎟 Reservar";
                 }
 
                 // Inicializar (por si)
@@ -371,6 +404,10 @@
                             btnReservar.disabled = false;
                             btnReservar.removeAttribute('aria-disabled');
                             btnReservar.title = "Reservar " + (this.dataset.label || '');
+                            // Actualizar texto del botón con el precio
+                            btnReservar.innerHTML = "🎟 Reservar · " + precioServidor;
+                            // opcional: focus para accesibilidad
+                            btnReservar.focus();
                         }
                     });
 
@@ -383,16 +420,8 @@
                     });
                 });
 
-                // Optional: al recargar, si hay inputIdFuncion con valor (poco probable), marcar el botón correspondiente
-                const existing = inputIdFuncion.value;
-                if (existing) {
-                    const found = horarioBtns.find(b => b.dataset.idfuncion === existing);
-                    if (found)
-                        found.click();
-                }
             })();
         </script>
-
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
