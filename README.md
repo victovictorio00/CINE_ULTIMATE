@@ -1,13 +1,41 @@
 # Cine_
 
-Coevaluacion
+<table border="1">
+  <thead>
+    <tr>
+      <th>NOMBRES Y APELLIDOS</th>
+      <th>PORCENTAJE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jofre Alexis Montes Saravia</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td>Set Carlos López Quispe</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td>Victor Manuel Huaman Victorio</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td>Edwin Ronaldo Castillo Uman</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td>Angel Fernando Rojas Pacherres</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td>Erick Josue Huamani Ttito</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td><strong>TOTAL</strong></td>
+      <td><strong>100%</strong></td>
+    </tr>
+  </tbody>
+</table>
 
-**NOMBRES Y APELLIDOS	              PORCENTAJE
-Jofre Alexis Montes Saravia	        20%
-Set Carlos López Quispe	            20%
-Victor Manuel Huaman Victorio	      20%
-Edwin Ronaldo Castillo Uman	        20%
-Angel Fernando Rojas Pacherres	    20%
-Erick Josue Huamani Ttito	          20%
-TOTAL	                              100%
-**
