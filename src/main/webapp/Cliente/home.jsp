@@ -7,7 +7,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>CineOnline</title>
+        <title>CineMax</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="Estilos/dashClienteStyle.css">
     </head>
@@ -82,7 +82,7 @@
 
         <!-- NAVBAR -->
         <nav class="navbar navbar-expand-lg navbar-dark">
-            <a class="navbar-brand" href="#">CineMax</a>
+            <a class="navbar-brand" href="<%= request.getContextPath()%>/DashboardServlet">CineMax</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -150,11 +150,11 @@
                             loading="lazy"
                             onerror="(function(img){ img.style.display='none'; var ph=img.nextElementSibling; if(ph) ph.style.display='flex'; img.closest('.pelicula-card').classList.add('no-image'); })(this);"
                             onload="(function (img) {
-                                    var ph = img.nextElementSibling;
-                                    if (ph)
-                                        ph.style.display = 'none';
-                                    img.closest('.pelicula-card').classList.add('has-image');
-                                })(this);" />
+                                        var ph = img.nextElementSibling;
+                                        if (ph)
+                                            ph.style.display = 'none';
+                                        img.closest('.pelicula-card').classList.add('has-image');
+                                    })(this);" />
 
                         <div class="placeholder-img" role="img" aria-label="Imagen no disponible">
                             <% if (title.length() > 20) {%>
