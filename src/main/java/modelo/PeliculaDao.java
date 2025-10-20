@@ -15,7 +15,9 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
     public List<Pelicula> listar() throws SQLException {
         List<Pelicula> peliculas = new ArrayList<>();
         String query = "SELECT * FROM peliculas";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
                 Pelicula pelicula = new Pelicula();
@@ -29,6 +31,11 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
                 pelicula.setTrailerUrl(rs.getString("trailer_url"));
                 peliculas.add(pelicula);
             }
+
+        } catch (SQLException e) {
+            System.err.println("⚠️ Error en PeliculaDao.listar(): " + e.getMessage());
+            e.printStackTrace();
+            throw e; // re-lanzamos para que el servlet también lo vea
         }
         return peliculas;
     }

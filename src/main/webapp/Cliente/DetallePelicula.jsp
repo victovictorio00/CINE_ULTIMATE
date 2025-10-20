@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="modelo.Cliente.Pelicula" %>
-<%@ page import="modelo.Cliente.PeliculaDaoCliente" %>
+<%@ page import="modelo.Pelicula" %>
+<%@ page import="modelo.PeliculaDao" %>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -50,15 +50,27 @@
 
         /* === DETALLES === */
         .movie-details-container {
-            margin-top: 40px;
+            margin-top: 60px;
             margin-bottom: 80px;
         }
 
+        .movie-poster img.poster-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .movie-poster img.poster-img:hover {
+            transform: scale(1.03);
+        }
+
         .movie-details {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
         .movie-details h1 {
@@ -76,17 +88,6 @@
             color: #555;
         }
 
-        .movie-poster {
-            text-align: center;
-        }
-
-        .movie-poster img {
-            width: 80%;
-            border-radius: 10px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.3);
-        }
-
-        /* === BOTONES === */
         .btn-primary, .btn-dark {
             margin-right: 10px;
             margin-top: 10px;
@@ -110,6 +111,13 @@
         footer a:hover {
             color: white;
         }
+
+        @media (max-width: 768px) {
+            .movie-details {
+                margin-top: 30px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -119,8 +127,8 @@
     String peliculaId = request.getParameter("id");
     int id = Integer.parseInt(peliculaId);
 
-    PeliculaDaoCliente dao = new PeliculaDaoCliente();
-    Pelicula pelicula = dao.getPeliculaById(id);
+    PeliculaDao dao = new PeliculaDao();
+    Pelicula pelicula = dao.leer(id);
 
     if (pelicula == null) {
         out.println("<div class='container mt-5'><h2>Película no encontrada.</h2></div>");
@@ -144,8 +152,7 @@
 </nav>
 
 <!-- VIDEO TRAILER -->
-<div class="movie-video">
-    <%
+<%
     String trailer = pelicula.getTrailerUrl();
 
     // Si el trailer no es nulo, convertir enlace normal de YouTube a formato embed
@@ -165,30 +172,37 @@
     </iframe>
 </div>
 
-</div>
-
 <!-- DETALLES -->
 <div class="container movie-details-container">
-    <div class="row align-items-center">
-        <div class="col-md-6 movie-poster">
-            <img src="<%= pelicula.getFoto() != null && !pelicula.getFoto().isEmpty() 
-                ? pelicula.getFoto() 
-                : request.getContextPath() + "/Cliente/images/pelicula6.jpg" %>" 
-                alt="<%= pelicula.getNombre() %>">
+    <div class="row d-flex align-items-center justify-content-center">
+        
+        <!-- Imagen -->
+        <div class="col-md-5 movie-poster text-center">
+            <img 
+                src="<%= (pelicula.getFoto() != null && pelicula.getFoto().length > 0)
+                    ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula())
+                    : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>" 
+                alt="Póster de <%= pelicula.getNombre() %>" 
+                class="img-fluid poster-img">
         </div>
-        <div class="col-md-6 movie-details">
+
+        <!-- Texto -->
+        <div class="col-md-7 movie-details">
             <h1><%= pelicula.getNombre() %></h1>
-            <h5 class="text-muted"><%= pelicula.getGenero() %></h5>
+            <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
+
             <h3>Sinopsis</h3>
             <p><%= pelicula.getSinopsis() %></p>
 
             <h3>Horarios</h3>
-            <button class="btn btn-primary">09:30 PM</button>
-            <button class="btn btn-primary">12:00 PM</button>
-            <button class="btn btn-primary">02:30 PM</button>
+            <div class="mb-3">
+                <button class="btn btn-primary">09:30 PM</button>
+                <button class="btn btn-primary">12:00 PM</button>
+                <button class="btn btn-primary">02:30 PM</button>
+            </div>
 
             <a href="<%= request.getContextPath() %>/ClienteServlet?action=reservar&id=<%= pelicula.getIdPelicula() %>" 
-               class="btn btn-dark mt-3">🎟 Reservar</a>
+               class="btn btn-dark mt-2">🎟 Reservar</a>
         </div>
     </div>
 </div>
