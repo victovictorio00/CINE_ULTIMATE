@@ -1,7 +1,6 @@
 package Controlador.Cliente;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import javax.servlet.http.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,37 +8,56 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
-import modelo.Pelicula;
-import modelo.PeliculaDao;
-import modelo.Asiento; 
+import modelo.Cliente.Pelicula;
+import modelo.Cliente.PeliculaDaoCliente;
+import modelo.Cliente.Asiento;  // Asegúrate de importar la clase Asiento
 import java.util.List;
 import java.util.ArrayList;
 
 @WebServlet("/ClienteServlet")
 public class ClienteServlet extends HttpServlet {
-    private PeliculaDao peliculaDao;
+    private PeliculaDaoCliente peliculaDaoCliente;
 
     @Override
     public void init() {
-        peliculaDao = new PeliculaDao();
+        peliculaDaoCliente = new PeliculaDaoCliente();
     }
 
 @Override
 protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String action = request.getParameter("action");
-    try {
-        if ("listar".equals(action)) {
-            listarPeliculas(request, response);
-        } else if ("reservar".equals(action)) {
-            mostrarSeleccionAsiento(request, response);
-        } else if ("confirmarPago".equals(action)) {
-            mostrarVoucher(request, response);
+    throws ServletException, IOException {
+    
+        // --- INICIO DE VALIDACIÓN DE SESIÓN ---
+        // 1. Obtener la sesión existente (sin crear una nueva)
+        HttpSession session = request.getSession(false);
+        String username = (session != null) ? (String) session.getAttribute("username") : null;
+
+        // 2. Comprobar si el usuario NO está logueado
+        if (username == null || username.isEmpty()) {
+
+            // Opcional: Construir la URL de login con parámetro de redirección
+            // Esto permite que el LoginServlet sepa a dónde enviar al usuario después de loguearse.
+            String requestedId = request.getParameter("id");
+            String loginUrl = request.getContextPath() + "/Login.jsp";
+
+            if (requestedId != null && !requestedId.isEmpty()) {
+                // Se asume que /Login.jsp tiene un mecanismo para leer 'redirect' y volver aquí.
+                loginUrl += "?redirect=DetallePeliculaServlet&id=" + requestedId;
+            }
+
+            // Redirigir al usuario a la página de login
+            response.sendRedirect(loginUrl);
+            return; // ¡IMPORTANTE! Detener la ejecución del doGet aquí.
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        request.setAttribute("error", "Error en base de datos: " + e.getMessage());
-        request.getRequestDispatcher("error.jsp").forward(request, response);
+        // --- FIN DE VALIDACIÓN DE SESIÓN ---
+    String action = request.getParameter("action");
+
+    if ("listar".equals(action)) {
+        listarPeliculas(request, response);
+    } else if ("reservar".equals(action)) {
+        mostrarSeleccionAsiento(request, response);
+    } else if ("confirmarPago".equals(action)) {
+        mostrarVoucher(request, response);
     }
 }
 
@@ -75,23 +93,23 @@ private void procesarSeleccionAsiento(HttpServletRequest request, HttpServletRes
 
 
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException, SQLException {
-        List<Pelicula> peliculas = peliculaDao.listar();
+        throws ServletException, IOException {
+        List<Pelicula> peliculas = peliculaDaoCliente.listar();
         request.setAttribute("peliculas", peliculas);
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/DashboardCliente.jsp");
         dispatcher.forward(request, response);
     }
 
     private void mostrarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException, SQLException {
+        throws ServletException, IOException {
         int idPelicula = Integer.parseInt(request.getParameter("id"));
-        Pelicula pelicula = peliculaDao.leer(idPelicula);
+        Pelicula pelicula = peliculaDaoCliente.getPeliculaById(idPelicula);
         request.setAttribute("pelicula", pelicula);
 
         // Simulación lista de asientos
         List<Asiento> asientos = new ArrayList<>();
         for (int i = 1; i <= 30; i++) {
-            asientos.add(new Asiento(i, true)); 
+            asientos.add(new Asiento(i, true)); // todos disponibles
         }
         request.setAttribute("asientos", asientos);
         request.setAttribute("idPelicula", idPelicula);

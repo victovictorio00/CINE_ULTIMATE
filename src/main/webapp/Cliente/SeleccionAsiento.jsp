@@ -288,7 +288,7 @@ footer a:hover {
         <div id="selected-seats" style="margin-top: 20px; font-weight: bold;">Butacas seleccionadas:</div>
 
         <!-- Botón continuar -->
-       <a href="http://localhost:8080/CineJ3/Cliente/SeleccionCombo.jsp" class="btn-link-continue">Continuar</a>
+       <a href="<%= request.getContextPath()%>/ProductoServlet" class="btn-link-continue">Continuar</a>
 
     </div>
 
