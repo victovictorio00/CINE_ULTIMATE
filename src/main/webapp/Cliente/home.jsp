@@ -38,7 +38,7 @@
                     if (peliculas != null && !peliculas.isEmpty()) {
                         for (int i = 0; i < peliculas.size(); i++) {
                             Pelicula pelicula = peliculas.get(i);
-                            String imageUrl = request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula();
+                            String imageUrl = request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis();
                             String title = pelicula.getNombre() == null ? "Sin título" : pelicula.getNombre();
                             String sinopsis = (pelicula.getSinopsis() != null && !pelicula.getSinopsis().isEmpty())
                                     ? pelicula.getSinopsis()
@@ -137,7 +137,7 @@
                         String sinopsis = pelicula.getSinopsis() == null || pelicula.getSinopsis().isEmpty()
                                 ? "Sin sinopsis disponible." : pelicula.getSinopsis();
                         int id = pelicula.getIdPelicula();
-                        String imageUrl = request.getContextPath() + "/ImageServlet?id=" + id;
+                        String imageUrl = request.getContextPath() + "/ImageServlet?id=" + id + "&t=" + System.currentTimeMillis();
                         String detailUrl = request.getContextPath() + "/DetallePeliculaServlet?id=" + id;
                 %>
                 <div class="col-md-3 mb-4">
@@ -193,36 +193,31 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
         <script>
-                                // Fallback para placeholders de imágenes
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    document.querySelectorAll('.pelicula-card').forEach(function (card) {
-                                        var img = card.querySelector('img.card-img-top');
-                                        var ph = card.querySelector('.placeholder-img');
-                                        if (!img)
-                                            return;
-                                        if (img.complete && img.naturalHeight > 0) {
-                                            card.classList.add('has-image');
-                                            if (ph)
-                                                ph.style.display = 'none';
-                                        } else if (img.complete && img.naturalHeight === 0) {
-                                            img.style.display = 'none';
-                                            if (ph)
-                                                ph.style.display = 'flex';
-                                            card.classList.add('no-image');
-                                        }
-                                        img.addEventListener('load', function () {
-                                            card.classList.add('has-image');
-                                            if (ph)
-                                                ph.style.display = 'none';
-                                        });
-                                        img.addEventListener('error', function () {
-                                            img.style.display = 'none';
-                                            if (ph)
-                                                ph.style.display = 'flex';
-                                            card.classList.add('no-image');
-                                        });
-                                    });
-                                });
+            // Fallback para placeholders de imágenes
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.pelicula-card').forEach(function (card) {
+                    var img = card.querySelector('img.card-img-top');
+                    var ph = card.querySelector('.placeholder-img');
+                    if (!img) return;
+                    if (img.complete && img.naturalHeight > 0) {
+                        card.classList.add('has-image');
+                        if (ph) ph.style.display = 'none';
+                    } else if (img.complete && img.naturalHeight === 0) {
+                        img.style.display = 'none';
+                        if (ph) ph.style.display = 'flex';
+                        card.classList.add('no-image');
+                    }
+                    img.addEventListener('load', function () {
+                        card.classList.add('has-image');
+                        if (ph) ph.style.display = 'none';
+                    });
+                    img.addEventListener('error', function () {
+                        img.style.display = 'none';
+                        if (ph) ph.style.display = 'flex';
+                        card.classList.add('no-image');
+                    });
+                });
+            });
         </script>
     </body>
 </html>

@@ -20,8 +20,6 @@
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
         }
-
-        /* === NAVBAR === */
         .navbar {
             position: fixed;
             top: 0;
@@ -31,33 +29,23 @@
             border-bottom: 1px solid #fff;
             height: 70px;
         }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.4rem;
-        }
-
-        /* === VIDEO === */
+        .navbar-brand { font-weight: bold; font-size: 1.4rem; }
         .movie-video {
             width: 100%;
             height: 60vh;
             overflow: hidden;
-            margin-top: 70px; /* evita solaparse con el navbar */
+            margin-top: 70px;
         }
-
         .movie-video iframe {
             width: 100%;
             height: 100%;
             border: none;
             object-fit: cover;
         }
-
-        /* === DETALLES === */
         .movie-details-container {
             margin-top: 60px;
             margin-bottom: 80px;
         }
-
         .movie-poster img.poster-img {
             max-width: 100%;
             height: auto;
@@ -65,40 +53,17 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             transition: transform 0.3s ease;
         }
-
-        .movie-poster img.poster-img:hover {
-            transform: scale(1.03);
-        }
-
+        .movie-poster img.poster-img:hover { transform: scale(1.03); }
         .movie-details {
             background: #fff;
             border-radius: 12px;
             padding: 30px 40px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
-
-        .movie-details h1 {
-            font-size: 2rem;
-            font-weight: 600;
-        }
-
-        .movie-details h3 {
-            margin-top: 20px;
-            color: #333;
-        }
-
-        .movie-details p {
-            text-align: justify;
-            color: #555;
-        }
-
-        .btn-primary, .btn-dark {
-            margin-right: 10px;
-            margin-top: 10px;
-            border-radius: 8px;
-        }
-
-        /* === FOOTER === */
+        .movie-details h1 { font-size: 2rem; font-weight: 600; }
+        .movie-details h3 { margin-top: 20px; color: #333; }
+        .movie-details p { text-align: justify; color: #555; }
+        .btn-primary, .btn-dark { margin-right: 10px; margin-top: 10px; border-radius: 8px; }
         footer {
             background-color: #212529;
             color: white;
@@ -106,21 +71,10 @@
             padding: 15px;
             width: 100%;
         }
-
-        footer a {
-            color: #bbb;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: white;
-        }
-
+        footer a { color: #bbb; text-decoration: none; }
+        footer a:hover { color: white; }
         @media (max-width: 768px) {
-            .movie-details {
-                margin-top: 30px;
-                text-align: center;
-            }
+            .movie-details { margin-top: 30px; text-align: center; }
         }
     </style>
 </head>
@@ -166,11 +120,11 @@
         String videoId = "";
         if (trailer.contains("watch?v=")) {
             videoId = trailer.substring(trailer.indexOf("watch?v=") + 8);
-            if (videoId.contains("&")) { // eliminar parámetros extra
+            if (videoId.contains("&")) {
                 videoId = videoId.substring(0, videoId.indexOf("&"));
             }
         } else {
-            videoId = trailer; // por si ya es un embed
+            videoId = trailer;
         }
         trailer = "https://www.youtube.com/embed/" + videoId;
     } else {
@@ -194,7 +148,7 @@
         <div class="col-md-5 movie-poster text-center">
             <img 
                 src="<%= (pelicula.getFoto() != null && pelicula.getFoto().length > 0)
-                    ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula())
+                    ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis())
                     : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>" 
                 alt="Póster de <%= pelicula.getNombre() %>" 
                 class="img-fluid poster-img">
@@ -210,11 +164,10 @@
 
             <h3>Horarios</h3>
             <%
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a"); // 12h + AM/PM
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a");
                 if (funciones == null || funciones.isEmpty()) {
             %>
-                <div class="alert alert-info col-12"
-                     style="background-color: var(--card-bg); color: var(--secondary-text); border-color: var(--border-color);">
+                <div class="alert alert-info col-12">
                     No hay funciones disponibles
                 </div>
             <%
@@ -225,8 +178,8 @@
             %>
                 <button class="btn btn-primary"><%= horarioInicio %> - <%= horarioFin %></button>
             <%
-                    } // fin del for
-                } // fin del else
+                    }
+                }
             %>
 
             <a href="<%= request.getContextPath() %>/ClienteServlet?action=reservar&id=<%= pelicula.getIdPelicula() %>" 
@@ -241,7 +194,6 @@
     <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>

@@ -1,11 +1,7 @@
-
-
-
 package modelo;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import Conexion.Conexion;
 
@@ -34,52 +30,53 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
 
         } catch (SQLException e) {
             System.err.println("⚠️ Error en PeliculaDao.listar(): " + e.getMessage());
-            e.printStackTrace();
-            throw e; // re-lanzamos para que el servlet también lo vea
+            throw e;
         }
         return peliculas;
     }
 
-   @Override
-public void insertar(Pelicula pelicula) throws SQLException {
-    String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio,trailer_url) VALUES (?, ?, ?, ?, ?, ?,?)";
+    @Override
+    public void insertar(Pelicula pelicula) throws SQLException {
+        String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio, trailer_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
-        pst.setString(1, pelicula.getNombre());
-        pst.setString(2, pelicula.getSinopsis());
-        pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+            pst.setString(1, pelicula.getNombre());
+            pst.setString(2, pelicula.getSinopsis());
+            pst.setInt(3, pelicula.getIdGenero().getIdGenero());
 
-        // Foto (puede ser null)
-        if (pelicula.getFoto() != null) {
-            pst.setBytes(4, pelicula.getFoto());
-        } else {
-            pst.setNull(4, Types.BLOB);
+            // Foto (puede ser null)
+            if (pelicula.getFoto() != null) {
+                pst.setBytes(4, pelicula.getFoto());
+            } else {
+                pst.setNull(4, Types.BLOB);
+            }
+
+            // Fecha (puede ser null)
+            if (pelicula.getFechaEstreno() != null) {
+                pst.setDate(5, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+            } else {
+                pst.setNull(5, Types.DATE);
+            }
+
+            // Precio
+            if (pelicula.getPrecio() != null) {
+                pst.setDouble(6, pelicula.getPrecio());
+            } else {
+                pst.setNull(6, Types.DECIMAL);
+            }
+
+            // Trailer URL
+            if (pelicula.getTrailerUrl() != null) {
+                pst.setString(7, pelicula.getTrailerUrl());
+            } else {
+                pst.setNull(7, Types.VARCHAR);
+            }
+
+            pst.executeUpdate();
         }
-
-        // Fecha (puede ser null)
-        if (pelicula.getFechaEstreno() != null) {
-            pst.setDate(5, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-        } else {
-            pst.setNull(5, Types.DATE);
-        }
-
-        // Precio (default 0 si es null)
-        if (pelicula.getPrecio() != null) {
-            pst.setDouble(6, pelicula.getPrecio());
-        } else {
-            pst.setNull(6, Types.DECIMAL);
-        }
-          // ⚡ Faltaba este campo: trailer_url
-        if (pelicula.getTrailerUrl() != null) {
-            pst.setString(7, pelicula.getTrailerUrl());
-        } else {
-            pst.setNull(7, Types.VARCHAR);
-        }
-        pst.executeUpdate();
     }
-}
-
 
     @Override
     public Pelicula leer(int id) throws SQLException {
@@ -110,112 +107,106 @@ public void insertar(Pelicula pelicula) throws SQLException {
         }
         return null;
     }
-//-
 
-@Override
+   @Override
 public void editar(Pelicula pelicula) throws SQLException {
-    String sql;
-    boolean actualizarFoto = (pelicula.getFoto() != null);
+    String sqlConFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=?, foto=? WHERE id_pelicula=?";
+    String sqlSinFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=? WHERE id_pelicula=?";
 
-    if (actualizarFoto) {
-        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=?, foto=? WHERE id_pelicula=?";
-    } else {
-        sql = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=? WHERE id_pelicula=?";
-    }
-
-    try (Connection con = Conexion.getConnection();
-         PreparedStatement pst = con.prepareStatement(sql)) {
-
-        pst.setString(1, pelicula.getNombre());
-        pst.setString(2, pelicula.getSinopsis());
-        pst.setInt(3, pelicula.getIdGenero().getIdGenero());
-        pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-        pst.setDouble(5, pelicula.getPrecio());
-        pst.setString(6, pelicula.getTrailerUrl());
-
-        if (actualizarFoto) {
-            pst.setBytes(7, pelicula.getFoto());
-            pst.setInt(8, pelicula.getIdPelicula());
-        } else {
-            pst.setInt(7, pelicula.getIdPelicula());
+    try (Connection con = Conexion.getConnection()) {
+        if (pelicula.getFoto() != null) { // 👉 si viene una nueva foto
+            try (PreparedStatement pst = con.prepareStatement(sqlConFoto)) {
+                pst.setString(1, pelicula.getNombre());
+                pst.setString(2, pelicula.getSinopsis());
+                pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+                pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+                pst.setDouble(5, pelicula.getPrecio());
+                pst.setString(6, pelicula.getTrailerUrl());
+                pst.setBytes(7, pelicula.getFoto());  // se guarda la nueva foto
+                pst.setInt(8, pelicula.getIdPelicula());
+                pst.executeUpdate();
+            }
+        } else { // 👉 no hay foto nueva → mantener la anterior
+            try (PreparedStatement pst = con.prepareStatement(sqlSinFoto)) {
+                pst.setString(1, pelicula.getNombre());
+                pst.setString(2, pelicula.getSinopsis());
+                pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+                pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+                pst.setDouble(5, pelicula.getPrecio());
+                pst.setString(6, pelicula.getTrailerUrl());
+                pst.setInt(7, pelicula.getIdPelicula());
+                pst.executeUpdate();
+            }
         }
-
-        pst.executeUpdate();
     }
 }
-
 
 
     @Override
-public void eliminar(int id) throws SQLException {
-    try (Connection con = Conexion.getConnection()) {
-        // 1. Eliminar funciones asociadas a la película
-        String sqlFunciones = "DELETE FROM funciones WHERE id_pelicula = ?";
-        try (PreparedStatement pst = con.prepareStatement(sqlFunciones)) {
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
+    public void eliminar(int id) throws SQLException {
+        try (Connection con = Conexion.getConnection()) {
+            // Eliminar funciones asociadas primero
+            String sqlFunciones = "DELETE FROM funciones WHERE id_pelicula = ?";
+            try (PreparedStatement pst = con.prepareStatement(sqlFunciones)) {
+                pst.setInt(1, id);
+                pst.executeUpdate();
+            }
 
-        // 2. Eliminar la película
-        String sqlPelicula = "DELETE FROM peliculas WHERE id_pelicula = ?";
-        try (PreparedStatement pst = con.prepareStatement(sqlPelicula)) {
-            pst.setInt(1, id);
-            pst.executeUpdate();
+            // Luego eliminar película
+            String sqlPelicula = "DELETE FROM peliculas WHERE id_pelicula = ?";
+            try (PreparedStatement pst = con.prepareStatement(sqlPelicula)) {
+                pst.setInt(1, id);
+                pst.executeUpdate();
+            }
         }
     }
-}
 
-
-    // Método con debug para depurar ImageServlet
+    // Obtener foto por id (para ImageServlet)
     public byte[] obtenerFotoPorId(int idPelicula) throws SQLException {
         String sql = "SELECT foto FROM peliculas WHERE id_pelicula = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setInt(1, idPelicula);
-
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    byte[] b = rs.getBytes("foto");
-                    return b;
+                    return rs.getBytes("foto");
                 }
             }
         }
-        return null; // Retorna null si no encuentra la foto
+        return null;
     }
 
+    // Listar con filtros dinámicos (género y fecha)
     public List<Pelicula> getPeliculasFiltradas(String generoIdString, String fechaSeleccionadaString) throws SQLException {
         List<Pelicula> peliculas = new ArrayList<>();
-        // 1. Construcción dinámica de la consulta
         StringBuilder queryBuilder = new StringBuilder("SELECT * FROM peliculas WHERE 1=1");
         List<Object> parameters = new ArrayList<>();
-        // --- 1.1 FILTRO POR GÉNERO (Se mantiene la lógica) ---
-        // ... (Tu código para el filtro de género, que es correcto) ...
+
         if (generoIdString != null && !generoIdString.isEmpty()) {
             try {
                 int idGenero = Integer.parseInt(generoIdString);
                 queryBuilder.append(" AND id_genero = ?");
                 parameters.add(idGenero);
             } catch (NumberFormatException e) {
-                // Manejo de error...
+                // ignorar error de formato
             }
         }
-        // --- 1.2 FILTRO POR FECHA EXACTA (El cambio importante) ---
+
         if (fechaSeleccionadaString != null && !fechaSeleccionadaString.isEmpty()) {
-            // CAMBIO CLAVE: 
-            // 1. Usamos el operador '=' (igual) en lugar de '<=' para buscar la fecha exacta.
-            // 2. Usamos DATE(columna) para ignorar la parte de la hora y garantizar la comparación.
             queryBuilder.append(" AND DATE(fecha_estreno) = ?");
-            parameters.add(java.sql.Date.valueOf(fechaSeleccionadaString)); // 'YYYY-MM-DD' a SQL Date
+            parameters.add(java.sql.Date.valueOf(fechaSeleccionadaString));
         }
-        // 2. Ejecución de la consulta (igual que antes)
-        String finalQuery = queryBuilder.toString();
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(finalQuery)) {
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(queryBuilder.toString())) {
+
             for (int i = 0; i < parameters.size(); i++) {
                 pst.setObject(i + 1, parameters.get(i));
             }
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    // ... (Tu código para mapear ResultSet a Pelicula)
                     Pelicula pelicula = new Pelicula();
                     pelicula.setIdPelicula(rs.getInt("id_pelicula"));
                     pelicula.setNombre(rs.getString("nombre"));
@@ -224,7 +215,7 @@ public void eliminar(int id) throws SQLException {
                     pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
                     pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                     pelicula.setPrecio(rs.getDouble("precio"));
-
+                    pelicula.setTrailerUrl(rs.getString("trailer_url"));
                     peliculas.add(pelicula);
                 }
             }

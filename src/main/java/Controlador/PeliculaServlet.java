@@ -90,7 +90,9 @@ public class PeliculaServlet extends HttpServlet {
         }
     }
 
-
+    // ==============================
+    // MÉTODOS CRUD
+    // ==============================
 
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
@@ -143,7 +145,7 @@ public class PeliculaServlet extends HttpServlet {
         int idGenero = Integer.parseInt(request.getParameter("idGenero"));
         java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
         double precio = Double.parseDouble(request.getParameter("precio"));
-        
+
         // Imagen
         Part filePart = request.getPart("foto");
         byte[] foto = null;
@@ -152,6 +154,7 @@ public class PeliculaServlet extends HttpServlet {
                 foto = inputStream.readAllBytes();
             }
         }
+
         String trailerUrl = request.getParameter("trailerUrl");
 
         Pelicula pelicula = new Pelicula();
@@ -162,7 +165,7 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setPrecio(precio);
         pelicula.setFoto(foto);
         pelicula.setTrailerUrl(trailerUrl);
-     
+
         peliculaDao.insertar(pelicula);
         response.sendRedirect("PeliculaServlet?action=listar");
     }
@@ -185,7 +188,9 @@ public class PeliculaServlet extends HttpServlet {
                 foto = inputStream.readAllBytes();
             }
         }
+
         String trailerUrl = request.getParameter("trailerUrl");
+
         Pelicula pelicula = new Pelicula();
         pelicula.setIdPelicula(id);
         pelicula.setNombre(nombre);
@@ -193,8 +198,12 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setIdGenero(new Genero(idGenero, null));
         pelicula.setFechaEstreno(fechaEstreno);
         pelicula.setPrecio(precio);
-        pelicula.setFoto(foto);
         pelicula.setTrailerUrl(trailerUrl);
+
+        if (foto != null) {
+            pelicula.setFoto(foto); // 👈 solo si subiste una nueva
+        }
+
         peliculaDao.editar(pelicula);
         response.sendRedirect("PeliculaServlet?action=listar");
     }
