@@ -12,6 +12,8 @@
         <session-timeout>30</session-timeout>
     </session-config>
     <!-- Aquí agregas el archivo de inicio -->
-    
+    <welcome-file-list>
+        <welcome-file>DashboardServlet</welcome-file>
+    </welcome-file-list>
 
 </web-app>
