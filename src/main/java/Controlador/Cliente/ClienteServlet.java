@@ -29,35 +29,41 @@ public class ClienteServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // --- INICIO DE VALIDACIÓN DE SESIÓN (Modificado) ---
-// ... (Obtener sesión y username como lo tienes) ...
+        // --- INICIO DE VALIDACIÓN DE SESIÓN (Mejorada) ---
         HttpSession session = request.getSession(false);
-        String username = (session != null) ? (String) session.getAttribute("username") : null;
+        String username = null;
+        if (session != null) {
+            Object u = session.getAttribute("username");
+            if (u instanceof String) {
+                username = ((String) u).trim();
+            }
+        }
 
-// 2. Comprobar si el usuario NO está logueado
         if (username == null || username.isEmpty()) {
 
-            // 1. OBTENER LA URL DE DESTINO COMPLETA (URI + Query String)
-            String uri = request.getRequestURI(); // Ej: /MiApp/DulceriaServlet
-            String queryString = request.getQueryString(); // Ej: action=listar&cat=dulces
+            // Construir la URL de destino (URI + query)
+            String uri = request.getRequestURI(); // ej: /MiApp/DulceriaServlet
+            String query = request.getQueryString(); // ej: action=listar&cat=dulces
+            String fullRedirectUrl = uri + (query != null && !query.isEmpty() ? "?" + query : "");
 
-            // Construir la URL completa que el usuario quería visitar
-            String fullRedirectUrl = uri;
-            if (queryString != null && !queryString.isEmpty()) {
-                fullRedirectUrl += "?" + queryString;
+            // Seguridad: asegurarse que la URL es interna (evitar open-redirects)
+            String context = request.getContextPath(); // ej: /MiApp
+            if (!fullRedirectUrl.startsWith(context)) {
+                // fallback seguro: ir a la raíz de la app
+                fullRedirectUrl = context + "/";
             }
 
-            // Codificar la URL para que sea segura como parámetro (importante si tiene caracteres especiales)
-            String encodedUrl = java.net.URLEncoder.encode(fullRedirectUrl, "UTF-8");
+            // Codificar el destino para usarlo como parámetro
+            String encodedUrl = java.net.URLEncoder.encode(fullRedirectUrl, java.nio.charset.StandardCharsets.UTF_8.name());
 
-            // 2. Construir la URL de login con el destino como parámetro 'redirect'
-            String loginUrl = request.getContextPath() + "/Login.jsp?redirect=" + encodedUrl;
+            // Construir login URL y aplicar encodeRedirectURL por si las cookies están deshabilitadas
+            String loginUrl = response.encodeRedirectURL(context + "/Login.jsp?redirect=" + encodedUrl);
 
-            // 3. Redirigir al usuario a la página de login
             response.sendRedirect(loginUrl);
-            return; // Detener la ejecución del doGet
+            return;
         }
 // --- FIN DE VALIDACIÓN DE SESIÓN ---
+
         String action = request.getParameter("action");
         try {
             if ("listar".equals(action)) {

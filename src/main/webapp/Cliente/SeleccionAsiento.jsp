@@ -221,7 +221,7 @@ footer a:hover {
 
     <!-- Cabecera personalizada -->
     <header class="custom-header">
-    <a <a href="http://localhost:8080/CineJ3/Cliente/DetallePelicula.jsp?id=1" class="back-link">
+    <a href="http://localhost:8080/CineJ3/Cliente/DetallePelicula.jsp?id=1" class="back-link">
 
         ← Atrás
       </a>
@@ -286,9 +286,9 @@ footer a:hover {
 
         <!-- Butacas seleccionadas -->
         <div id="selected-seats" style="margin-top: 20px; font-weight: bold;">Butacas seleccionadas:</div>
-
+        
         <!-- Botón continuar -->
-       <a href="<%= request.getContextPath()%>/ProductoServlet" class="btn-link-continue">Continuar</a>
+       <a href="<%= request.getContextPath()%>/DulceriaServlet" class="btn-link-continue">Continuar</a>
 
     </div>
 
