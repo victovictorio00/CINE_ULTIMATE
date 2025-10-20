@@ -23,7 +23,7 @@
 %>
 
 <div class="container mt-5">
-    <h3>Editar Película</h3>
+    <h3 class="mb-4">Editar Película</h3>
 
     <!-- Formulario para editar una película -->
     <form action="PeliculaServlet?action=actualizar" method="POST" enctype="multipart/form-data">
@@ -91,7 +91,9 @@
         <!-- Foto -->
         <div class="form-group">
             <label for="foto">Foto actual:</label><br>
-            <img src="ImageServlet?id=<%= peli.getIdPelicula() %>" width="150"><br><br>
+            <!-- 👇 Cambio aquí: se agrega un parámetro dinámico para evitar caché -->
+            <img src="ImageServlet?id=<%= peli.getIdPelicula() %>&t=<%= System.currentTimeMillis() %>" 
+                 width="150" class="mb-3"><br>
             <label for="foto">Cambiar foto (opcional):</label>
             <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*">
             <small class="form-text text-muted">
@@ -99,6 +101,7 @@
             </small>
         </div>
 
+        <!-- Botones -->
         <button type="submit" class="btn btn-primary">Actualizar Película</button>
         <a href="PeliculaServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>
