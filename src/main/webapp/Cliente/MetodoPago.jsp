@@ -285,7 +285,7 @@
                 </div>
 
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn-continue">Continuar</button>
+                    <button type="submit" class="btn-continue" >Continuar</button>
                 </div>
             </form>
         </div>
@@ -321,6 +321,23 @@
                 el.addEventListener('input', validarTodo));
             metodoPago.forEach(r => r.addEventListener('change', validarTodo));
 
+            // -----------------------------------------------------------------
+            // >>> INICIO DEL CÓDIGO AÑADIDO PARA LA REDIRECCIÓN <<<
+            // -----------------------------------------------------------------
+            btnContinuar.addEventListener('click', (e) => {
+                // Previene el envío del formulario por POST (comportamiento por defecto de type="submit")
+                e.preventDefault(); 
+                
+                // Solo si el botón está habilitado por la función validarTodo()
+                if (!btnContinuar.disabled) {
+                    // Redirige al Servlet con la acción requerida
+                    window.location.href = 'ClienteServlet?action=procesarPago';
+                }
+            });
+            // -----------------------------------------------------------------
+            // >>> FIN DEL CÓDIGO AÑADIDO PARA LA REDIRECCIÓN <<<
+            // -----------------------------------------------------------------
+            
             /* Estado inicial */
             btnContinuar.disabled = true;
         </script>
