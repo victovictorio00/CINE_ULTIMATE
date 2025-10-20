@@ -171,20 +171,7 @@
                             <% } %>
                         </td>
                          <td>
-    <%
-        String trailerUrl = pelicula.getTrailerUrl();
-        if (trailerUrl != null && !trailerUrl.isEmpty()) {
-    %>
-        <a href="<%= trailerUrl %>" target="_blank" class="btn btn-outline-info btn-sm">
-            <i class="fas fa-play"></i> Ver tráiler
-        </a>
-    <%
-        } else {
-    %>
-        <span class="text-muted">No disponible</span>
-    <%
-        }
-    %>
+
 </td>
                         <td>
                             <a href="PeliculaServlet?action=editar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-primary btn-sm">Editar</a>
