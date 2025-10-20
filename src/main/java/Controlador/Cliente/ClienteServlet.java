@@ -1,6 +1,7 @@
 package Controlador.Cliente;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.http.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -8,19 +9,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
-import modelo.Cliente.Pelicula;
-import modelo.Cliente.PeliculaDaoCliente;
+import modelo.Pelicula;
+import modelo.PeliculaDao;
 import modelo.Cliente.Asiento;  // Asegúrate de importar la clase Asiento
 import java.util.List;
 import java.util.ArrayList;
 
 @WebServlet("/ClienteServlet")
 public class ClienteServlet extends HttpServlet {
-    private PeliculaDaoCliente peliculaDaoCliente;
+    private PeliculaDao peliculaDao;
 
     @Override
     public void init() {
-        peliculaDaoCliente = new PeliculaDaoCliente();
+        peliculaDao = new PeliculaDao();
     }
 
 @Override
@@ -50,14 +51,17 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
             return; // ¡IMPORTANTE! Detener la ejecución del doGet aquí.
         }
         // --- FIN DE VALIDACIÓN DE SESIÓN ---
-    String action = request.getParameter("action");
-
-    if ("listar".equals(action)) {
-        listarPeliculas(request, response);
-    } else if ("reservar".equals(action)) {
-        mostrarSeleccionAsiento(request, response);
-    } else if ("confirmarPago".equals(action)) {
-        mostrarVoucher(request, response);
+        String action = request.getParameter("action");
+    try {
+        if ("listar".equals(action)) {
+            listarPeliculas(request, response);
+        } else if ("reservar".equals(action)) {
+            mostrarSeleccionAsiento(request, response);
+        } else if ("confirmarPago".equals(action)) {
+            mostrarVoucher(request, response);
+        }
+    } catch (SQLException e) {
+        throw new ServletException("Error al listar películas", e);
     }
 }
 
@@ -93,17 +97,17 @@ private void procesarSeleccionAsiento(HttpServletRequest request, HttpServletRes
 
 
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-        List<Pelicula> peliculas = peliculaDaoCliente.listar();
+        throws ServletException, IOException, SQLException {
+        List<Pelicula> peliculas = peliculaDao.listar();
         request.setAttribute("peliculas", peliculas);
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/DashboardCliente.jsp");
         dispatcher.forward(request, response);
     }
 
     private void mostrarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+        throws ServletException, IOException, SQLException {
         int idPelicula = Integer.parseInt(request.getParameter("id"));
-        Pelicula pelicula = peliculaDaoCliente.getPeliculaById(idPelicula);
+        Pelicula pelicula = peliculaDao.leer(idPelicula);
         request.setAttribute("pelicula", pelicula);
 
         // Simulación lista de asientos
