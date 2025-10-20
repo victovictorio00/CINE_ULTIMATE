@@ -201,58 +201,58 @@ public class FuncionDao {
     }
 
     public Funcion leer(int id) throws SQLException {
-        /* 1.  Traemos el id_estado_funcion (INT) */
         String sql
-                = "SELECT id_funcion, id_pelicula, id_sala, fecha_inicio, fecha_fin, "
-                + "       id_estado_funcion, asientos_disponibles "
-                + "FROM   funciones "
-                + "WHERE  id_funcion = ?";
+                = "SELECT f.id_funcion, "
+                + "       f.id_pelicula, p.nombre AS pelicula, p.precio, "
+                + "       f.id_sala, s.nombre AS sala, "
+                + "       f.fecha_inicio, f.fecha_fin, "
+                + "       f.id_estado_funcion, e.nombre AS estado, "
+                + "       f.asientos_disponibles, "
+                + "       g.id_genero, g.nombre AS genero "
+                + "FROM funciones f "
+                + "JOIN peliculas  p ON f.id_pelicula = p.id_pelicula "
+                + "JOIN salas      s ON f.id_sala = s.id_sala "
+                + "JOIN estado_funciones e ON f.id_estado_funcion = e.id_estado_funcion "
+                + "JOIN generos    g ON p.id_genero = g.id_genero "
+                + "WHERE f.id_funcion = ?";
 
         try (Connection c = Conexion.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Funcion f = new Funcion();
                     f.setIdFuncion(rs.getInt("id_funcion"));
 
-                    /* Película */
+                    /* Película con precio y genero */
                     Pelicula p = new Pelicula();
                     p.setIdPelicula(rs.getInt("id_pelicula"));
+                    p.setNombre(rs.getString("pelicula"));
+                    p.setPrecio(rs.getDouble("precio"));
+                    p.setIdGenero(new Genero(rs.getInt("id_genero"), rs.getString("genero")));
                     f.setPelicula(p);
 
-                    /* Sala */
+                    /* Sala con nombre */
                     Sala s = new Sala();
                     s.setIdSala(rs.getInt("id_sala"));
+                    s.setNombre(rs.getString("sala"));
                     f.setSala(s);
 
                     /* Fechas */
                     f.setFechaInicio(rs.getTimestamp("fecha_inicio"));
                     f.setFechaFin(rs.getTimestamp("fecha_fin"));
 
-                    /* Estado (INT) → objeto EstadoFuncion */
-                    int idEstado = rs.getInt("id_estado_funcion");
-                    EstadoFuncion ef;
-                    switch (idEstado) {
-                        case 1:
-                            ef = new EstadoFuncion(1, "ACTIVA");
-                            break;
-                        case 2:
-                            ef = new EstadoFuncion(2, "INACTIVA");
-                            break;
-                        case 3:
-                            ef = new EstadoFuncion(3, "CANCELADA");
-                            break;
-                        default:
-                            ef = new EstadoFuncion(2, "INACTIVA");
-                    }
+                    /* Estado */
+                    EstadoFuncion ef = new EstadoFuncion();
+                    ef.setIdEstadoFuncion(rs.getInt("id_estado_funcion"));
+                    ef.setNombre(rs.getString("estado"));
                     f.setEstadoFuncion(ef);
+
                     f.setAsientosDisponibles(rs.getInt("asientos_disponibles"));
                     return f;
                 }
             }
         }
-        return null;   // o lanzar excepción si prefieres
+        return null;
     }
 }

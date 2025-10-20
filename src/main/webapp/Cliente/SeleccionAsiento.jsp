@@ -1,3 +1,5 @@
+<%@page import="modelo.Funcion"%>
+<%@page import="modelo.Sala"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.LinkedHashMap"%>
 <%@page import="java.util.Map"%>
@@ -327,77 +329,35 @@
                 }
             }
         </style>
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const seats = document.querySelectorAll(".seat.available");
-                const selectedSeats = new Set();
-                const selectedSeatsText = document.getElementById("selected-seats-list");
-                const selectedCountSpan = document.getElementById("selected-count");
-                const subtotalSpan = document.getElementById("subtotal");
-                const totalSpan = document.getElementById("total");
-
-                const pricePerSeat = 15.00;
-
-                function updateSummary() {
-                    const count = selectedSeats.size;
-                    const subtotal = count * pricePerSeat;
-
-                    selectedCountSpan.textContent = count;
-                    subtotalSpan.textContent = subtotal.toFixed(2);
-                    totalSpan.textContent = subtotal.toFixed(2);
-
-                    if (selectedSeats.size > 0) {
-                        selectedSeatsText.textContent = Array.from(selectedSeats).join(", ");
-                    } else {
-                        selectedSeatsText.textContent = "Ninguna butaca seleccionada";
-                    }
-                }
-
-                seats.forEach(seat => {
-                    seat.addEventListener("click", () => {
-                        const seatId = seat.getAttribute("data-seat");
-                        if (seat.classList.contains("selected")) {
-                            seat.classList.remove("selected");
-                            selectedSeats.delete(seatId);
-                        } else {
-                            seat.classList.add("selected");
-                            selectedSeats.add(seatId);
-                        }
-                        updateSummary();
-                    });
-                });
-
-                updateSummary();
-            });
-        </script>
     </head>
     <body>
 
-    <!-- Cabecera personalizada -->
-    <header class="custom-header">
-        <h1>Selecciona tus butacas</h1>
-    </header>
+        <!-- Cabecera personalizada -->
+        <header class="custom-header">
+            <h1>Selecciona tus butacas</h1>
+        </header>
 
-    <div class="main-container">
-        <!-- Columna izquierda: Selección de asientos -->
-        <div class="left-column">
-            <div class="screen">PANTALLA</div>
+        <div class="main-container">
+            <!-- Columna izquierda: Selección de asientos -->
+            <div class="left-column">
+                <div class="screen">PANTALLA</div>
 
-            <%-- Recuperar lista --%>
-            <%
-                List<Asiento> asientos = (List<Asiento>) request.getAttribute("asientos");
-                if (asientos == null) asientos = new ArrayList<>();
-            %>
+                <%-- Recuperar lista --%>
+                <%
+                    List<Asiento> asientos = (List<Asiento>) request.getAttribute("asientos");
+                    if (asientos == null)
+                        asientos = new ArrayList<>();
+                %>
 
-            <%-- Pintar asientos --%>
-            <%
-                Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
-                for (Asiento a : asientos) {
-                    String fila = a.getCodigo().substring(0, 1);
-                    porFila.computeIfAbsent(fila, k -> new ArrayList<>()).add(a);
-                }
-                for (Map.Entry<String, List<Asiento>> e : porFila.entrySet()) {
-            %>
+                <%-- Pintar asientos --%>
+                <%
+                    Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
+                    for (Asiento a : asientos) {
+                        String fila = a.getCodigo().substring(0, 1);
+                        porFila.computeIfAbsent(fila, k -> new ArrayList<>()).add(a);
+                    }
+                    for (Map.Entry<String, List<Asiento>> e : porFila.entrySet()) {
+                %>
                 <div class="seats-row">
                     <div class="row-label"><%= e.getKey()%></div>
                     <div class="seats-column">
@@ -405,70 +365,109 @@
                             for (Asiento a : e.getValue()) {
                                 String cls = a.isOcupado() ? "occupied" : "available";
                         %>
-                                <div class="seat <%= cls%>"
-                                     data-seat="<%= a.getCodigo()%>"
-                                     title="<%= a.getCodigo()%>"></div>
+                        <div class="seat <%= cls%>"
+                             data-seat="<%= a.getCodigo()%>"
+                             title="<%= a.getCodigo()%>"></div>
                         <%
                             }
                         %>
                     </div>
                     <div class="row-label"><%= e.getKey()%></div>
                 </div>
-            <%
-                }
-            %>
+                <%
+                    }
+                %>
 
-            <!-- Leyenda -->
-            <div class="legend">
-                <div><div class="box available"></div><span>Disponible</span></div>
-                <div><div class="box occupied"></div><span>Ocupada</span></div>
-                <div><div class="box selected"></div><span>Seleccionada</span></div>
+                <!-- Leyenda -->
+                <div class="legend">
+                    <div><div class="box available"></div><span>Disponible</span></div>
+                    <div><div class="box occupied"></div><span>Ocupada</span></div>
+                    <div><div class="box selected"></div><span>Seleccionada</span></div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Resumen de compra -->
+            <div class="right-column">
+                <div class="summary-card">
+                    <h2>Resumen de compra</h2>
+
+                    <div class="movie-info">
+                        <p><strong>Película:</strong> <%= ((Pelicula) request.getAttribute("pelicula")).getNombre()%></p>
+                        <p><strong>Sala:</strong> <%= ((Sala) request.getAttribute("sala")).getNombre()%></p>
+                        <p><strong>Fecha:</strong>
+                            <%
+                                Funcion f = (Funcion) request.getAttribute("funcion");
+                                java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new java.util.Locale("es", "ES"));
+                                out.print(df.format(f.getFechaInicio()));
+                            %>
+                        </p>
+                        <p><strong>Horario:</strong>
+                            <%
+                                java.text.SimpleDateFormat hf = new java.text.SimpleDateFormat("HH:mm");
+                                out.print(hf.format(f.getFechaInicio()));
+                            %>
+                        </p>
+                        <p><strong>Duración:</strong> <%= request.getAttribute("duracionMin")%> min</p>
+                        <p><strong>Género:</strong> <%= request.getAttribute("genero")%></p>
+                    </div>
+
+                    <div class="selected-seats-section">
+                        <h3>Butacas seleccionadas</h3>
+                        <div id="selected-seats-list">Ninguna butaca seleccionada</div>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-row">
+                            <span>Butaca (<span id="selected-count">0</span>):</span>
+                            <span>S/. <span id="unit-price"><%= request.getAttribute("precioButaca")%></span></span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Total:</span>
+                            <span class="amount">S/. <span id="total">0.00</span></span>
+                        </div>
+                    </div>
+                    <a href="<%=request.getContextPath()%>/DulceriaServlet" class="btn-continue">Continuar</a>
+                </div>
             </div>
         </div>
 
-        <!-- Columna derecha: Resumen de compra -->
-        <div class="right-column">
-            <div class="summary-card">
-                <h2>Información de la Película</h2>
-                <div class="movie-info">
-                    <p><strong>Película:</strong> Avengers: Endgame</p>
-                    <p><strong>Sala:</strong> 3D - Sala 5</p>
-                    <p><strong>Fecha:</strong> 20 de Octubre, 2025</p>
-                    <p><strong>Horario:</strong> 18:30 PM</p>
-                    <p><strong>Duración:</strong> 181 minutos</p>
-                    <p><strong>Clasificación:</strong> PG-13</p>
-                </div>
+        <!-- Pie de página -->
+        <footer>
+            <p>© 2025 Cine Online | Todos los derechos reservados</p>
+            <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
+        </footer>
 
-                <div class="selected-seats-section">
-                    <h3>Butacas Seleccionadas</h3>
-                    <div id="selected-seats-list">Ninguna butaca seleccionada</div>
-                </div>
+        <script>
+            const pricePerSeat = parseFloat('<%= request.getAttribute("precioButaca")%>') || 0;
+            const selectedSeats = new Set();
+            const selectedSeatsText = document.getElementById('selected-seats-list');
+            const selectedCountSpan = document.getElementById('selected-count');
+            const totalSpan = document.getElementById('total');
 
-                <div class="price-section">
-                    <div class="price-row">
-                        <span>Butacas (<span id="selected-count">0</span>):</span>
-                        <span>S/. <span id="subtotal">0.00</span></span>
-                    </div>
-                    <div class="price-row">
-                        <span>Cargo por servicio:</span>
-                        <span>S/. 0.00</span>
-                    </div>
-                    <div class="price-row total">
-                        <span>Total:</span>
-                        <span class="amount">S/. <span id="total">0.00</span></span>
-                    </div>
-                </div>
+            function updateSummary() {
+                const count = selectedSeats.size;
+                const total = count * pricePerSeat;
+                selectedCountSpan.textContent = count;
+                totalSpan.textContent = total.toFixed(2);
+                selectedSeatsText.textContent = count
+                        ? Array.from(selectedSeats).join(', ')
+                        : 'Ninguna butaca seleccionada';
+            }
 
-                <a href="<%= request.getContextPath()%>/DulceriaServlet" class="btn-continue">Continuar</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pie de página -->
-    <footer>
-        <p>© 2025 Cine Online | Todos los derechos reservados</p>
-        <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
-    </footer>
-
-</body>
+            document.querySelectorAll('.seat.available').forEach(seat => {
+                seat.addEventListener('click', () => {
+                    const seatId = seat.dataset.seat;
+                    if (selectedSeats.has(seatId)) {
+                        selectedSeats.delete(seatId);
+                        seat.classList.remove('selected');
+                    } else {
+                        selectedSeats.add(seatId);
+                        seat.classList.add('selected');
+                    }
+                    updateSummary();
+                });
+            });
+            updateSummary();
+        </script>
+    </body>
 </html>
