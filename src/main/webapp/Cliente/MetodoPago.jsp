@@ -297,6 +297,7 @@
         <script>
             const pricePerSeat = 0; // no lo usamos aquí, pero lo dejamos por compatibilidad
             const btnContinuar = document.querySelector('.btn-continue');
+            const formPago = document.querySelector('form'); // <--- Nuevo: Referencia al formulario
 
             /* Campos que deben estar OK */
             const nombre = document.querySelector('[name="nombreCompleto"]');
@@ -321,22 +322,30 @@
                 el.addEventListener('input', validarTodo));
             metodoPago.forEach(r => r.addEventListener('change', validarTodo));
 
-            // -----------------------------------------------------------------
-            // >>> INICIO DEL CÓDIGO AÑADIDO PARA LA REDIRECCIÓN <<<
-            // -----------------------------------------------------------------
+            // >>> CÓDIGO CORREGIDO: INTERCEPTAR ENVÍO, AGREGAR PARÁMETRO Y FORZAR POST <<<
             btnContinuar.addEventListener('click', (e) => {
-                // Previene el envío del formulario por POST (comportamiento por defecto de type="submit")
+                // 1. Previene temporalmente el envío del formulario para manipularlo
                 e.preventDefault(); 
                 
-                // Solo si el botón está habilitado por la función validarTodo()
+                // 2. Solo si la validación del script permite la continuidad
                 if (!btnContinuar.disabled) {
-                    // Redirige al Servlet con la acción requerida
-                    window.location.href = 'ClienteServlet?action=procesarPago';
+                    
+                    // 3. Verifica si el campo 'action' ya existe o lo crea
+                    let actionInput = formPago.querySelector('input[name="action"]');
+                    
+                    if (!actionInput) {
+                        actionInput = document.createElement('input');
+                        actionInput.type = 'hidden';
+                        actionInput.name = 'action';
+                        actionInput.value = 'procesarPago'; // <--- Parámetro deseado
+                        formPago.appendChild(actionInput);
+                    }
+                    
+                    // 4. Envía el formulario por POST, incluyendo ahora el campo 'action'
+                    formPago.submit(); 
                 }
             });
-            // -----------------------------------------------------------------
-            // >>> FIN DEL CÓDIGO AÑADIDO PARA LA REDIRECCIÓN <<<
-            // -----------------------------------------------------------------
+            // >>> FIN DEL CÓDIGO CORREGIDO <<<
             
             /* Estado inicial */
             btnContinuar.disabled = true;
