@@ -1,6 +1,6 @@
     <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-    <%@ page import="modelo.Cliente.Pelicula" %>
-    <%@ page import="modelo.Cliente.PeliculaDaoCliente" %>
+    <%@ page import="modelo.Pelicula" %>
+    <%@ page import="modelo.PeliculaDao" %>
     <%@ page import="javax.servlet.RequestDispatcher" %>
 
     <!DOCTYPE html>
@@ -143,8 +143,8 @@
         int id = Integer.parseInt(peliculaId);
 
         // Crear una instancia del DAO cliente y buscar la película
-        PeliculaDaoCliente peliculaDaoCliente = new PeliculaDaoCliente();
-        Pelicula pelicula = peliculaDaoCliente.getPeliculaById(id); // Pasa el ID como int
+        PeliculaDao peliculaDaoCliente = new PeliculaDao();
+        Pelicula pelicula = peliculaDaoCliente.leer(id); // Pasa el ID como int
 
         // Si la película no existe, redirigir o mostrar un mensaje de error
         if (pelicula == null) {
@@ -153,17 +153,27 @@
         }
     %>
 
-    <!-- Video en la parte superior -->
-    <div class="movie-video">
-        <iframe src="https://www.youtube.com/embed/HeTE7j9dcGg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
+    <%
+        String trailerUrl = pelicula.getTrailerUrl();
+        if (trailerUrl != null && !trailerUrl.isEmpty()) {
+    %>
+        <a href="<%= trailerUrl %>" target="_blank" class="btn btn-outline-info btn-sm">
+            <i class="fas fa-play"></i> Ver tráiler
+        </a>
+    <%
+        } else {
+    %>
+        <span class="text-muted">No disponible</span>
+    <%
+        }
+    %>
 
     <!-- Contenedor de los detalles de la película (debajo del video) -->
     <div class="container movie-details-container">
         <div class="row">
             <!-- Columna para la sinopsis -->
             <div class="col-md-6 movie-details">
-                <h1><%= pelicula.getTitle() %> (<%= pelicula.getGenero() %>)</h1>
+                <h1><%= pelicula.getNombre()%> (<%= pelicula.getIdGenero().getNombre()%>)</h1>
                 <h3>Sinopsis</h3>
                 <p><%= pelicula.getSinopsis() %></p>
                 <h3>Horarios</h3>
@@ -173,7 +183,7 @@
                 <button class="btn btn-primary">02:30 PM</button>
 
 
-                <a href="<%= request.getContextPath() %>/ClienteServlet?action=reservar&id=<%= pelicula.getId() %>" class="btn btn-dark mt-3">Reservar</a>
+                <a href="<%= request.getContextPath() %>/ClienteServlet?action=reservar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-dark mt-3">Reservar</a>
             </div>
 
 

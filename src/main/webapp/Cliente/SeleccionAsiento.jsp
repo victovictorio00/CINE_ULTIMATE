@@ -6,8 +6,8 @@
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
-<%@ page import="modelo.Cliente.Asiento" %>
-<%@ page import="modelo.Cliente.Pelicula" %>
+<%@ page import="modelo.Asiento" %>
+<%@ page import="modelo.Pelicula" %>
 
 
 <!DOCTYPE html>
