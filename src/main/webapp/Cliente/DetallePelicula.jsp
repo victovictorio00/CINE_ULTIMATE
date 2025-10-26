@@ -370,20 +370,27 @@
                         %>
                     </div>
 
-                    <div class="mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center" style="gap:12px;">
-                        <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="get" class="mb-2 mb-sm-0">
+                    <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
+                        <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="get"
+                              class="m-0 p-0 d-flex align-items-center">
                             <input type="hidden" name="action" value="reservar">
                             <input type="hidden" name="id" value="<%= pelicula.getIdPelicula()%>">
                             <input type="hidden" name="idFuncion" id="inputIdFuncion" value="">
-                            <button id="btnReservar" type="submit" class="btn btn-dark" disabled
-                                    style="padding:10px 18px; border-radius:8px; font-weight:700;">
+                            <button id="btnReservar" type="submit" class="btn btn-dark"
+                                    style="height:40px; min-width:160px; border-radius:6px; font-weight:600; line-height:1;"
+                                    disabled>
                                 🎟 Reservar
                             </button>
                         </form>
 
-                        <a href="<%= request.getContextPath()%>/CarteleraServlet" class="btn btn-outline-secondary"
-                           style="padding:10px 16px; border-radius:8px;">← Volver a cartelera</a>
+                        <a href="<%= request.getContextPath()%>/CarteleraServlet"
+                           class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                           style="height:40px; min-width:160px; border-radius:6px; font-weight:600; line-height:1; margin-top:11px;">
+                           ← Volver a cartelera
+                        </a>
                     </div>
+
+
 
                     <!-- Espacio extra para separar contenido visualmente -->
                     <div style="height:18px;"></div>

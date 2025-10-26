@@ -25,7 +25,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
-        /* Barra lateral fija */
         body {
             min-height: 100vh;
             display: flex;
@@ -58,9 +57,6 @@
             border-radius: 50%;
             margin-bottom: 0.5rem;
         }
-        .sidebar .profile h5, .sidebar .profile small {
-            margin: 0;
-        }
         .sidebar .nav-link {
             color: white;
             padding: 1rem 1.5rem;
@@ -71,14 +67,12 @@
             color: white;
         }
 
-        /* Contenido principal */
         .content {
             margin-left: 250px;
             padding: 2rem;
             width: 100%;
         }
 
-        /* Tabla de usuarios */
         .table-container {
             background: white;
             padding: 1.5rem;
@@ -91,7 +85,9 @@
             margin-bottom: 1rem;
         }
         .acciones a {
-            margin-right: 10px;
+            display: block;
+            width: 100px;
+            margin: 3px auto;
         }
     </style>
 </head>
@@ -129,7 +125,6 @@
             <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
                 <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
-
         </nav>
     </nav>
 
@@ -138,8 +133,11 @@
         <div class="table-container">
             <h3 class="text-center">Lista de Usuarios</h3>
 
-            <!-- Botón para agregar nuevo usuario -->
-            <a href="UsuarioServlet?action=nuevo" class="btn btn-primary btn-agregar">Agregar Usuario</a>
+            <!-- Botón para agregar usuario -->
+            <a href="UsuarioServlet?action=nuevo" class="btn btn-success btn-agregar">
+                <i class="fas fa-plus"></i> Agregar Usuario
+            </a>
+
 
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
@@ -172,14 +170,17 @@
                     <td><%= usuario.getTelefono() %></td>
                     <td><%= usuario.getEmail() %></td>
                     <td><%= usuario.getDireccion() %></td>
-                    <td class="acciones">
-                        <a href="UsuarioServlet?action=editar&idUsuario=<%= usuario.getIdUsuario() %>" class="btn btn-sm btn-info">Editar</a>
-                        <a href="UsuarioServlet?action=eliminar&id=<%= usuario.getIdUsuario() %>" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este usuario?');">Eliminar</a>
+                    <td class="acciones text-center">
+                        <a href="UsuarioServlet?action=editar&idUsuario=<%= usuario.getIdUsuario() %>" 
+                           class="btn btn-primary btn-sm">Editar</a>
+                        <a href="UsuarioServlet?action=eliminar&id=<%= usuario.getIdUsuario() %>" 
+                           class="btn btn-danger btn-sm" 
+                           onclick="return confirm('¿Está seguro de eliminar este usuario?');">Eliminar</a>
                     </td>
                 </tr>
                 <%
-                    }
-                } else {
+                        }
+                    } else {
                 %>
                 <tr>
                     <td colspan="10" class="text-center">No hay usuarios registrados.</td>
@@ -190,7 +191,7 @@
         </div>
     </main>
 
-    <!-- Bootstrap JS y dependencias -->
+    <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
