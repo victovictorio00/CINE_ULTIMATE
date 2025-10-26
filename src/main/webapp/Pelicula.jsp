@@ -77,7 +77,7 @@
             padding: 1.5rem;
             border-radius: 0.5rem;
             box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-            max-width: 900px;
+            max-width: 1000px;
             margin: auto;
         }
         .btn-agregar {
@@ -119,7 +119,6 @@
             <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
                 <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
-
         </nav>
     </nav>
 
@@ -129,8 +128,9 @@
             <h3 class="text-center">Lista de Películas</h3>
 
             <!-- Botón para agregar nueva película -->
-            <a href="PeliculaServlet?action=nuevo" class="btn btn-success mb-3">Agregar Película</a>
-
+            <a href="PeliculaServlet?action=nuevo" class="btn btn-success btn-agregar mb-3">
+                <i class="fas fa-plus"></i> Agregar Película
+            </a>
             <!-- Tabla de películas -->
             <table class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
@@ -142,7 +142,6 @@
                         <th>Foto</th>
                         <th>Tráiler</th>
                         <th>Acciones</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
@@ -152,31 +151,34 @@
                             for (Pelicula pelicula : listaPeliculas) {
                     %>
                     <tr>
-                        <td><%= pelicula.getIdPelicula()%></td>
-                        <td><%= pelicula.getNombre()%></td>
-                        <td><%= pelicula.getSinopsis()%></td>
-                        <td><%= pelicula.getFechaEstreno()%></td>
-                       
+                        <td><%= pelicula.getIdPelicula() %></td>
+                        <td><%= pelicula.getNombre() %></td>
+                        <td><%= pelicula.getSinopsis() %></td>
+                        <td><%= pelicula.getFechaEstreno() %></td>
                         <td>
                             <%
                                 byte[] foto = pelicula.getFoto();
                                 if (foto != null) {
                                     String base64Image = java.util.Base64.getEncoder().encodeToString(foto);
                             %>
-                            <img src="data:image/jpeg;base64,<%= base64Image%>" alt="Foto" style="width: 60px; height: auto;" />
+                            <img src="data:image/jpeg;base64,<%= base64Image %>" alt="Foto" style="width: 60px; height: auto;" />
                             <%
                                 } else {
                             %>
                             Sin foto
                             <% } %>
                         </td>
-                         <td>
-
-</td>
-                        <td>
-                            <a href="PeliculaServlet?action=editar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-primary btn-sm">Editar</a>
-                            <a href="PeliculaServlet?action=eliminar&id=<%= pelicula.getIdPelicula()%>" class="btn btn-danger btn-sm"
-                               onclick="return confirm('¿Está seguro de eliminar esta película?');">Eliminar</a>
+                        <td><!-- Aquí podrías agregar un link o ícono de tráiler --></td>
+                        <td class="text-center">
+                            <a href="PeliculaServlet?action=editar&id=<%= pelicula.getIdPelicula() %>" 
+                               class="btn btn-primary btn-sm d-block mb-2" style="width: 100px;">
+                               Editar
+                            </a>
+                            <a href="PeliculaServlet?action=eliminar&id=<%= pelicula.getIdPelicula() %>" 
+                               class="btn btn-danger btn-sm d-block" style="width: 100px;"
+                               onclick="return confirm('¿Está seguro de eliminar esta película?');">
+                               Eliminar
+                            </a>
                         </td>
                     </tr>
                     <% 
@@ -184,7 +186,7 @@
                         } else { 
                     %>
                     <tr>
-                        <td colspan="6" class="text-center">No hay películas disponibles.</td>
+                        <td colspan="7" class="text-center">No hay películas disponibles.</td>
                     </tr>
                     <% } %>
                 </tbody>
