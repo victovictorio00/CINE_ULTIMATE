@@ -34,12 +34,12 @@
         </div>
 
         <div class="form-group">
-            <label>Username</label>
+            <label>Nombre de usuario</label>
             <input type="text" name="username" class="form-control" value="<%= usuario.getUsername() %>" required>
         </div>
 
         <div class="form-group">
-            <label>Password</label>
+            <label>Contraseña</label>
             <input type="password" name="password" class="form-control" placeholder="Dejar vacío si no desea cambiar">
         </div>
 
