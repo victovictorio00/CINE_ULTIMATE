@@ -352,11 +352,21 @@
                 <%-- Pintar asientos --%>
                 <%
                     Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
+
+                    // Agrupar por letra de fila 
                     for (Asiento a : asientos) {
                         String fila = a.getCodigo().substring(0, 1);
                         porFila.computeIfAbsent(fila, k -> new ArrayList<>()).add(a);
                     }
+
+                    // Recorrer filas
                     for (Map.Entry<String, List<Asiento>> e : porFila.entrySet()) {
+                        //  Ordenar por número de asiento dentro de la fila
+                        e.getValue().sort((a1, a2) -> {
+                            int num1 = Integer.parseInt(a1.getCodigo().substring(1));
+                            int num2 = Integer.parseInt(a2.getCodigo().substring(1));
+                            return Integer.compare(num1, num2);
+                        });
                 %>
                 <div class="seats-row">
                     <div class="row-label"><%= e.getKey()%></div>
