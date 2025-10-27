@@ -63,7 +63,7 @@
             }
 
             .navbar .dropdown-menu {
-                background-color: #343a40 !important; /* Gris oscuro */
+                background-color: #343a40 !important;
                 border: 1px solid rgba(255, 255, 255, 0.15);
             }
             .navbar .dropdown-item {
@@ -143,14 +143,28 @@
                     text-align: center;
                 }
             }
+            .horario-btn:focus {
+                box-shadow: 0 0 0 4px rgba(255,87,51,0.15);
+                outline: none;
+            }
         </style>
     </head>
 
     <body>
-
         <%
+            // Validar parámetro id de forma segura
             String peliculaId = request.getParameter("id");
-            int id = Integer.parseInt(peliculaId);
+            if (peliculaId == null) {
+                out.println("<div class='container mt-5'><h2>Parámetro id faltante.</h2></div>");
+                return;
+            }
+            int id = 0;
+            try {
+                id = Integer.parseInt(peliculaId.trim());
+            } catch (NumberFormatException nfe) {
+                out.println("<div class='container mt-5'><h2>Id de película inválido.</h2></div>");
+                return;
+            }
 
             PeliculaDao dao = new PeliculaDao();
             Pelicula pelicula = dao.leer(id);
@@ -163,6 +177,22 @@
                 out.println("<div class='container mt-5'><h2>Película no encontrada.</h2></div>");
                 return;
             }
+
+            // Manejar mensaje de error pasado por redirección
+            String errorMsg = request.getParameter("error");
+            if (errorMsg == null) errorMsg = "";
+            String errorEscaped = errorMsg.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+            // Formatear precio con locale de Perú (protegemos por si precio es null)
+            java.text.NumberFormat fmt = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "PE"));
+            Double precioObj = pelicula.getPrecio(); // puede ser null
+            String precioFormateado;
+            if (precioObj == null) {
+                precioFormateado = fmt.format(0.0);
+            } else {
+                precioFormateado = fmt.format(precioObj);
+            }
+            String precioFormateadoJs = precioFormateado.replace("\"", "\\\"").replace("'", "\\'");
         %>
 
         <!-- NAVBAR -->
@@ -204,36 +234,52 @@
             </div>
         </nav>
 
+        <%-- Mostrar mensaje de error (si existe) --%>
+        <%
+            if (!errorEscaped.isEmpty()) {
+        %>
+        <div class="container" style="margin-top:18px;">
+            <div class="alert alert-warning" role="alert" style="background:#fff3cd; border-color:#ffecb5; color:#856404;">
+                <strong>Atención:</strong> <%= errorEscaped %>
+            </div>
+        </div>
+        <%
+            }
+        %>
+
         <!--  TRAILER -->
         <%
             String trailer = pelicula.getTrailerUrl();
+            String videoId = "";
             if (trailer != null && !trailer.trim().isEmpty()) {
-                String videoId = "";
                 if (trailer.contains("watch?v=")) {
                     videoId = trailer.substring(trailer.indexOf("watch?v=") + 8);
                     if (videoId.contains("&")) {
                         videoId = videoId.substring(0, videoId.indexOf("&"));
                     }
+                } else if (trailer.contains("/embed/")) {
+                    videoId = trailer.substring(trailer.lastIndexOf("/") + 1);
                 } else {
                     videoId = trailer;
                 }
                 trailer = "https://www.youtube.com/embed/" + videoId;
             } else {
-                trailer = "https://www.youtube.com/embed/HeTE7j9dcGg";
+                videoId = "HeTE7j9dcGg";
+                trailer = "https://www.youtube.com/embed/" + videoId;
             }
         %>
 
         <div class="movie-video" style="position:relative; margin-top:80px; width:100%; height:60vh;">
             <!-- Miniatura -->
-            <img id="videoThumb" 
-                 src="https://img.youtube.com/vi/<%= trailer.substring(trailer.lastIndexOf('/')+1) %>/hqdefault.jpg"
+            <img id="videoThumb"
+                 src="https://img.youtube.com/vi/<%= videoId %>/hqdefault.jpg"
                  style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
 
             <div id="playerContainer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
 
-            <div id="playOverlay" 
-                 style="position:absolute; top:0; left:0; width:100%; height:100%; 
-                        display:flex; justify-content:center; align-items:center; 
+            <div id="playOverlay"
+                 style="position:absolute; top:0; left:0; width:100%; height:100%;
+                        display:flex; justify-content:center; align-items:center;
                         cursor:pointer;">
                 <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,87,51,0.85);
                             display:flex; justify-content:center; align-items:center;">
@@ -247,12 +293,12 @@
         <script>
             const overlay = document.getElementById('playOverlay');
             const container = document.getElementById('playerContainer');
-            const videoId = "<%= trailer.substring(trailer.lastIndexOf('/')+1) %>";
+            const videoIdJS = "<%= videoId %>";
             let player;
 
             overlay.addEventListener('click', () => {
                 player = new YT.Player('playerContainer', {
-                    videoId: videoId,
+                    videoId: videoIdJS,
                     width: '100%',
                     height: '100%',
                     playerVars: {
@@ -263,7 +309,7 @@
                         disablekb: 1,
                         playsinline: 1,
                         loop: 1,
-                        playlist: videoId
+                        playlist: videoIdJS
                     },
                     events: {
                         'onStateChange': onPlayerStateChange
@@ -287,23 +333,17 @@
 
                 <!-- Imagen -->
                 <div class="col-12 col-md-5 mb-4 mb-md-0 movie-poster text-center">
-                    <img 
+                    <img
                         src="<%= (pelicula.getFoto() != null && pelicula.getFoto().length > 0)
             ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis())
-            : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>" 
-                        alt="Póster de <%= pelicula.getNombre()%>" 
+            : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>"
+                        alt="Póster de <%= pelicula.getNombre()%>"
                         class="img-fluid poster-img"
                         style="border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.35); max-height:520px; object-fit:cover;">
                 </div>
 
                 <!-- Texto -->
                 <div class="col-12 col-md-7 movie-details" style="padding-left:18px;">
-                    <%
-                        // Formatear precio con locale de Perú
-                        java.text.NumberFormat fmt = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "PE"));
-                        String precioFormateado = fmt.format(pelicula.getPrecio());
-                    %>
-
                     <!-- Titulo -->
                     <div class="d-flex align-items-center justify-content-between" style="gap:12px;">
                         <div style="flex:1;">
@@ -312,7 +352,7 @@
                         </div>
 
                         <!-- Precio -->
-                        <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61); 
+                        <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61);
                             padding:12px 18px; border-radius:16px; box-shadow:0 6px 18px rgba(255,107,58,0.15);">
                             <div style="font-size:0.85rem; color:rgba(255,255,255,0.9); font-weight:500;">Entrada</div>
                             <div style="font-weight:700; font-size:1.3rem; color:white; margin-top:2px;"><%= precioFormateado %></div>
@@ -342,7 +382,7 @@
                                 Precio por entrada
                             </div>
                             <div style="font-weight:800; font-size:1.05rem; color:var(--accent);">
-                                <%= precioFormateado%>
+                                <%= precioFormateado %>
                             </div>
                         </div>
 
@@ -354,10 +394,13 @@
                                     String horarioFin = sdf.format(funcion.getFechaFin());
                                     int idFuncion = funcion.getIdFuncion();
                             %>
-                            <button type="button" 
+                            <button type="button"
                                     class="btn btn-outline-primary horario-btn"
                                     data-idfuncion="<%= idFuncion%>"
                                     data-label="<%= horarioInicio%> - <%= horarioFin%>"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-pressed="false"
                                     style="border-radius:999px; padding:10px 16px; font-weight:600;">
                                 <%= horarioInicio%> - <%= horarioFin%>
                             </button>
@@ -370,19 +413,25 @@
                         %>
                     </div>
 
-                    <div class="mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center" style="gap:12px;">
-                        <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="get" class="mb-2 mb-sm-0">
+                    <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
+                        <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="get"
+                              class="m-0 p-0 d-flex align-items-center">
                             <input type="hidden" name="action" value="reservar">
                             <input type="hidden" name="id" value="<%= pelicula.getIdPelicula()%>">
                             <input type="hidden" name="idFuncion" id="inputIdFuncion" value="">
-                            <button id="btnReservar" type="submit" class="btn btn-dark" disabled
-                                    style="padding:10px 18px; border-radius:8px; font-weight:700;">
+                            <!-- ahora es button para evitar envíos sin JS/validación -->
+                            <button id="btnReservar" type="button" class="btn btn-dark"
+                                    style="height:40px; min-width:160px; border-radius:6px; font-weight:600; line-height:1;"
+                                    aria-disabled="true" disabled>
                                 🎟 Reservar
                             </button>
                         </form>
 
-                        <a href="<%= request.getContextPath()%>/CarteleraServlet" class="btn btn-outline-secondary"
-                           style="padding:10px 16px; border-radius:8px;">← Volver a cartelera</a>
+                        <a href="<%= request.getContextPath()%>/CarteleraServlet"
+                           class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                           style="height:40px; min-width:160px; border-radius:6px; font-weight:600; line-height:1; margin-top:11px;">
+                           ← Volver a cartelera
+                        </a>
                     </div>
 
                     <!-- Espacio extra para separar contenido visualmente -->
@@ -403,13 +452,11 @@
                 const btnReservar = document.getElementById('btnReservar');
                 const inputIdFuncion = document.getElementById('inputIdFuncion');
 
-                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; // string seguro
+                // precio seguro inyectado por el servidor
+                const precioServidor = "<%= precioFormateadoJs %>";
 
                 if (!btnReservar || !inputIdFuncion)
                     return;
-
-                btnReservar.disabled = true;
-                btnReservar.setAttribute('aria-disabled', 'true');
 
                 function clearSelection() {
                     horarioBtns.forEach(b => {
@@ -417,6 +464,7 @@
                         b.style.background = '';
                         b.style.color = '';
                         b.style.borderColor = '';
+                        b.setAttribute('aria-pressed', 'false');
                     });
                     inputIdFuncion.value = '';
                     btnReservar.disabled = true;
@@ -433,9 +481,10 @@
                         clearSelection();
                         if (!wasSelected) {
                             this.classList.add('active');
-                            this.style.background = window.getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#FF5733';
+                            this.style.background = "var(--accent)";
                             this.style.color = '#fff';
                             this.style.borderColor = 'transparent';
+                            this.setAttribute('aria-pressed', 'true');
 
                             const id = this.dataset.idfuncion;
                             inputIdFuncion.value = id;
@@ -445,6 +494,7 @@
                             btnReservar.title = "Reservar " + (this.dataset.label || '');
                             // Actualizar texto del botón con el precio
                             btnReservar.innerHTML = "🎟 Reservar · " + precioServidor;
+                            // focus para accesibilidad
                             btnReservar.focus();
                         }
                     });
@@ -457,6 +507,17 @@
                     });
                 });
 
+                // Acción segura del botón Reservar: valida idFuncion y envía el form
+                btnReservar.addEventListener('click', function (e) {
+                    if (btnReservar.disabled) return;
+                    const idFunc = inputIdFuncion.value;
+                    if (!idFunc || idFunc.trim() === '') {
+                        alert('Selecciona un horario antes de reservar.');
+                        return;
+                    }
+                    // enviar formulario
+                    document.getElementById('reservarForm').submit();
+                });
             })();
         </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -465,4 +526,3 @@
 
     </body>
 </html>
-

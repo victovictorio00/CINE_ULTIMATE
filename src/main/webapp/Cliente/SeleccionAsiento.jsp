@@ -129,6 +129,10 @@
                 background-color: white;
                 cursor: pointer;
                 transition: all 0.3s;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                outline: none;
             }
 
             .seat.available:hover {
@@ -480,38 +484,68 @@
                 function toggleSeatElement(el) {
                     const seatId = el.dataset.seat;
                     if (!seatId) return;
-                    if (el.classList.contains('seat-occupied')) return; // no interactuar con ocupadas
-                    if (selectedSeats.has(seatId)) {
+                    // Si está ocupada, no permitir interacción
+                    if (el.classList.contains('occupied')) return;
+                    const isSelected = el.classList.contains('selected');
+                    if (isSelected) {
                         selectedSeats.delete(seatId);
                         el.classList.remove('selected');
+                        el.setAttribute('aria-pressed', 'false');
                     } else {
                         selectedSeats.add(seatId);
                         el.classList.add('selected');
+                        el.setAttribute('aria-pressed', 'true');
                     }
                     updateSummary();
                 }
 
-                // Attach listeners a todas las butacas disponibles
-                document.querySelectorAll('.seat.available').forEach(seat => {
-                    seat.addEventListener('click', () => toggleSeatElement(seat));
-                    // keyboard support: space/enter toggles
-                    seat.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            toggleSeatElement(seat);
-                        }
-                    });
+                // Attach listeners y accesibilidad a todas las butacas disponibles
+                document.querySelectorAll('.seat').forEach(seat => {
+                    // Marcar disponible como focoable / accesible
+                    if (!seat.classList.contains('occupied')) {
+                        seat.classList.add('available'); // asegura que exista la clase available si es interactiva
+                        seat.setAttribute('tabindex', '0'); // permite focus con teclado
+                        seat.setAttribute('role', 'button');
+                        seat.setAttribute('aria-pressed', 'false');
+                        seat.addEventListener('click', () => toggleSeatElement(seat));
+                        seat.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleSeatElement(seat);
+                            }
+                        });
+                    } else {
+                        // asientos ocupados: aria-disabled
+                        seat.setAttribute('aria-disabled', 'true');
+                    }
                 });
 
-                // Acción del botón: si habilitado, redirige pasando selectedSeats y total (GET)
+                // Acción del botón: si habilitado, enviar POST con butacas y total a ClienteServlet?action=guardarButacas
                 btnContinue.addEventListener('click', function(){
                     if (btnContinue.disabled) return;
-                    const seatsCSV = encodeURIComponent(Array.from(selectedSeats).join(','));
+                    const seatsCSV = Array.from(selectedSeats).join(',');
                     const total = (selectedSeats.size * pricePerSeat).toFixed(2);
-                    // Redirigir al servlet que necesites. Ahora uso DulceriaServlet como en tu original.
-                    // Cambia la URL si prefieres POST o enviar a otro servlet.
-                    const url = '<%=request.getContextPath()%>/DulceriaServlet?selectedSeats=' + seatsCSV + '&total=' + total;
-                    window.location.href = url;
+
+                    // crear form POST dinámico
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '<%= request.getContextPath()%>/ClienteServlet?action=guardarButacas';
+                    // hidden input butacas
+                    const inp = document.createElement('input');
+                    inp.type = 'hidden';
+                    inp.name = 'butacas';
+                    inp.value = seatsCSV;
+                    form.appendChild(inp);
+                    // hidden input total (opcional)
+                    const inpTotal = document.createElement('input');
+                    inpTotal.type = 'hidden';
+                    inpTotal.name = 'total';
+                    inpTotal.value = total;
+                    form.appendChild(inpTotal);
+
+                    // append form and submit
+                    document.body.appendChild(form);
+                    form.submit();
                 });
 
                 // Inicializar estado

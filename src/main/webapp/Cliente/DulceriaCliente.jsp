@@ -2,16 +2,14 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="modelo.Producto" %> 
+<%@ page import="modelo.Producto" %> 
 <%@ page import="java.util.Base64" %>
 <%@ page import="java.util.LinkedHashMap" %>
 
 <%
-    // Obtener el mapa de productos categorizados del Servlet
     Map<String, List<modelo.Producto>> productosCategorizados
             = (Map<String, List<modelo.Producto>>) request.getAttribute("productosCategorizados");
 
-    // Inicializar mapa de respaldo si el Servlet no envió datos o falló.
     if (productosCategorizados == null) {
         productosCategorizados = new LinkedHashMap<>();
         productosCategorizados.put("COMBOS", new ArrayList<>());
@@ -22,7 +20,6 @@
         productosCategorizados.put("OTROS", new ArrayList<>());
     }
 
-    // Suponiendo que el carrito de la sesión se guarda como: Map<Integer (ID Producto), Integer (Cantidad)>
     Map<Integer, Integer> carritoExistente = (Map<Integer, Integer>) session.getAttribute("carritoDulceria");
     if (carritoExistente == null) {
         carritoExistente = new LinkedHashMap<>();
@@ -38,7 +35,7 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/Estilos/peliculaClienteStyle.css"> 
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/Estilos/peliculaClienteStyle.css"> 
 
         <style>
             :root {
@@ -48,8 +45,6 @@
                 --muted: #b0b0b0;
                 --border: #3a3a3a;
             }
-
-            /* ... (Tus estilos de Tabs y Product Card se mantienen) ... */
 
             /* Tabs */
             .category-nav {
@@ -138,8 +133,6 @@
                 margin-bottom: 8px; /* Espacio antes del control de cantidad */
             }
 
-            /* =================== ESTILOS NUEVOS PARA CONTADOR Y BOTÓN AGREGAR =================== */
-
             /* Controles para cantidad */
             .quantity-control {
                 display: flex;
@@ -205,9 +198,7 @@
     </head>
     <body style="background-color: var(--main-bg, #1e1e1e);">
 
-        <%-- ==========================================================
-        1. NAV BAR COMPLETO (Estructura de DashboardCliente)
-        ============================================================== --%>
+        <%-- NAVBAR --%>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineOnline</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -246,17 +237,13 @@
             </div>
         </nav>
 
-        <a href="<%= request.getContextPath()%>/ClienteServlet?action=metodoPago" 
-           class="btn-flotante btn btn-primary">
-            Continuar
-        </a>
+        <!-- Botón flotante: ahora envia el carrito al ClienteServlet -->
+        <button id="btnAgregar" class="btn-flotante btn btn-primary" type="button" title="Continuar">Continuar</button>
 
-        <%-- Formulario oculto para enviar los datos del carrito al Servlet --%>
-        <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/CarritoDulceriaServlet" style="display: none;">
-            <input type="hidden" name="accion" value="actualizarDulceria">
-            <input type="hidden" name="carritoData" id="carritoData">
+        <%-- Formulario oculto para enviar los datos del carrito al Servlet (ahora apunta a ClienteServlet) --%>
+        <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/ClienteServlet?action=guardarDulceria" style="display: none;">
+            <!-- Inputs product_<id> serán creados dinámicamente por JS -->
         </form>
-
 
         <div class="container py-4">
             <div class="container">
@@ -274,10 +261,10 @@
                             String tabId = "tab-" + categoria.replaceAll("[^a-zA-Z0-9]", "");
                             String activeClass = isFirstTab ? "active" : "";
                     %>
-                    <a class="nav-link <%= activeClass%>" 
-                       id="nav-<%= categoria%>-tab" 
-                       data-toggle="tab" 
-                       href="#<%= tabId%>" 
+                    <a class="nav-link <%= activeClass%>" 
+                       id="nav-<%= categoria%>-tab" 
+                       data-toggle="tab" 
+                       href="#<%= tabId%>" 
                        role="tab">
                         <%= categoria.toUpperCase()%>
                     </a>
@@ -302,16 +289,13 @@
                         <%
                             if (listaProductos != null) {
                                 for (modelo.Producto producto : listaProductos) {
-                                    // Obtener la cantidad que ya estaba en la sesion
                                     int cantidadInicial = carritoExistente.getOrDefault(producto.getIdProducto(), 0);
-
-                                    // Convertir el byte array de la foto a base64 para mostrarla
                                     String fotoBase64 = java.util.Base64.getEncoder().encodeToString(producto.getFoto());
                         %>
                         <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex align-items-stretch">
-                            <article class="product-card shadow-sm">
+                            <article class="product-card shadow-sm" data-id="<%= producto.getIdProducto() %>">
                                 <div class="product-image-wrap">
-                                    <img src="data:image/jpeg;base64,<%= fotoBase64%>" 
+                                    <img src="data:image/jpeg;base64,<%= fotoBase64%>" 
                                          class="product-image" alt="<%= producto.getNombre()%>" loading="lazy">
                                 </div>
 
@@ -325,11 +309,11 @@
                                         </div>
 
                                         <div class="quantity-control" data-id="<%= producto.getIdProducto()%>">
-                                            <button type="button" class="decrease" title="Quitar">
+                                            <button type="button" class="decrease" title="Quitar" aria-label="Quitar">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                             <span class="quantity-value"><%= cantidadInicial%></span>
-                                            <button type="button" class="increase" title="Agregar">
+                                            <button type="button" class="increase" title="Agregar" aria-label="Agregar">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                         </div>
@@ -337,7 +321,7 @@
                                 </div>
                             </article>
                         </div>
-                        <%}
+                        <%      }
                             } %>
                     </div>
                 </div>
@@ -357,7 +341,6 @@
             let carritoState = {};
 
             // Inicializar carritoState con los valores que vienen de la sesion (si los hay)
-            // Esto asegura que si el usuario vuelve, su seleccion anterior se mantiene.
             <%
                 for (Map.Entry<Integer, Integer> entry : carritoExistente.entrySet()) {
                     if (entry.getValue() > 0) {
@@ -368,77 +351,77 @@
                 }
             %>
 
-            /**
-             * Calcula el total de ítems seleccionados y actualiza el botón flotante.
-             */
             function actualizarBotonFlotante() {
                 const totalItems = Object.values(carritoState).reduce((sum, count) => sum + count, 0);
                 const btn = document.getElementById('btnAgregar');
+                if (!btn) return;
+                if (totalItems > 0) {
+                    btn.textContent = 'Continuar · ' + totalItems + ' item' + (totalItems > 1 ? 's' : '');
+                } else {
+                    btn.textContent = 'Continuar';
+                }
             }
 
-            /**
-             * Prepara el formulario oculto con los datos del carrito y lo envía al Servlet.
-             */
             function enviarCarritoAlServlet() {
-                // 1. Convertir el carritoState de JavaScript a una cadena JSON
-                const carritoJson = JSON.stringify(carritoState);
-
-                // 2. Poner el JSON en el campo oculto
-                document.getElementById('carritoData').value = carritoJson;
-
-                // 3. Enviar el formulario
-                document.getElementById('carritoForm').submit();
+                const form = document.getElementById('carritoForm');
+                Array.from(form.querySelectorAll('input[name^="product_"]')).forEach(i => i.remove());
+                Object.keys(carritoState).forEach(idStr => {
+                    const qty = carritoState[idStr];
+                    if (qty && qty > 0) {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'product_' + idStr;
+                        inp.value = String(qty);
+                        form.appendChild(inp);
+                    }
+                });
+                form.submit();
             }
-
 
             document.addEventListener("DOMContentLoaded", () => {
-
-                // Inicializa el botón flotante con el estado del carrito existente
                 actualizarBotonFlotante();
+                document.querySelectorAll('.quantity-control').forEach(control => {
+                    const increaseBtn = control.querySelector('.increase');
+                    const decreaseBtn = control.querySelector('.decrease');
+                    const qtySpan = control.querySelector('.quantity-value');
+                    const idProducto = parseInt(control.dataset.id);
+                    let value = parseInt(qtySpan.textContent) || 0;
+                    if (value > 0) carritoState[idProducto] = value;
 
-                // 1. Manejar los clics de incremento/decremento
-                document.querySelectorAll('.quantity-control button').forEach(button => {
-                    button.addEventListener('click', e => {
+                    increaseBtn.addEventListener('click', function (e) {
                         e.preventDefault();
-
-                        // Encontrar el contenedor de control de cantidad
-                        const controlContainer = e.target.closest('.quantity-control');
-                        const idProducto = parseInt(controlContainer.dataset.id);
-                        const span = controlContainer.querySelector('.quantity-value');
-                        let value = parseInt(span.textContent);
-
-                        // Determinar el cambio
-                        // Se usa e.target.parentNode para soportar el clic en el icono (fas fa-minus/plus)
-                        const clickedElement = e.target.classList.contains('decrease') || e.target.parentNode.classList.contains('decrease') ? 'decrease' :
-                                e.target.classList.contains('increase') || e.target.parentNode.classList.contains('increase') ? 'increase' : null;
-
-                        if (clickedElement === 'decrease') {
-                            if (value > 0)
-                                value--;
-                        } else if (clickedElement === 'increase') {
-                            value++;
-                        }
-
-                        // 2. Actualizar el DOM y el estado JS
-                        span.textContent = value;
-
-                        if (value > 0) {
-                            carritoState[idProducto] = value;
-                        } else {
-                            delete carritoState[idProducto]; // Eliminar el producto si la cantidad llega a 0
-                        }
-
-                        // 3. Actualizar el boton flotante
+                        value++;
+                        qtySpan.textContent = value;
+                        carritoState[idProducto] = value;
                         actualizarBotonFlotante();
+                    });
+
+                    decreaseBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (value > 0) value--;
+                        qtySpan.textContent = value;
+                        if (value > 0) carritoState[idProducto] = value;
+                        else delete carritoState[idProducto];
+                        actualizarBotonFlotante();
+                    });
+
+                    [increaseBtn, decreaseBtn].forEach(btn => {
+                        btn.addEventListener('keydown', function(e){
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                this.click();
+                            }
+                        });
                     });
                 });
 
-                // 4. Manejar el clic del boton "Agregar al Carrito"
-                document.getElementById('btnAgregar').addEventListener('click', function (e) {
-                    e.preventDefault();
-                    // Enviar la data al Servlet
-                    enviarCarritoAlServlet();
-                });
+                const btnAgregar = document.getElementById('btnAgregar');
+                if (btnAgregar) {
+                    btnAgregar.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        enviarCarritoAlServlet();
+                    });
+                }
             });
         </script>
     </body>

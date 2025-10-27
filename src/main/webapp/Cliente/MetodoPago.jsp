@@ -1,354 +1,371 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="modelo.ReservaTemporal" %>
+<%@ page import="modelo.Producto" %>
+<%@ page import="modelo.ProductoDao" %>
+<%@ page import="java.util.*" %>
+<%
+    ReservaTemporal rt = (ReservaTemporal) session.getAttribute("reservaTemporal");
+    @SuppressWarnings("unchecked")
+    List<String> butacas = (List<String>) session.getAttribute("butacasSeleccionadas");
+    @SuppressWarnings("unchecked")
+    Map<Integer, Integer> productos = (Map<Integer, Integer>) session.getAttribute("productosSeleccionados");
+    @SuppressWarnings("unchecked")
+    Map<String,String> cliente = (Map<String,String>) session.getAttribute("clienteDatos");
+    String metodoGuardado = (String) session.getAttribute("metodoPago");
+    String nombreVal = cliente != null && cliente.get("nombre") != null ? cliente.get("nombre") : "";
+    String emailVal  = cliente != null && cliente.get("email")  != null ? cliente.get("email") : "";
+    String metodoVal = metodoGuardado != null ? metodoGuardado : "";
+
+    ProductoDao pDao = new ProductoDao();
+    double totalProductos = 0.0;
+    List<Map<String,Object>> listaProductos = new ArrayList<>();
+
+    if (productos != null && !productos.isEmpty()) {
+        for (Map.Entry<Integer,Integer> e : productos.entrySet()) {
+            Integer pid = e.getKey();
+            Integer qty = e.getValue();
+            Producto prod = null;
+            try { prod = pDao.leer(pid); } catch (Exception ex) { prod = null; }
+
+            // --- LECTURA SEGURA DEL PRECIO (soporta double primitivo o Double Object)
+            double precio = 0.0;
+            if (prod != null) {
+                try {
+                    // asignamos a Object para permitir tanto double primitivo (autobox) como Double
+                    Object tmp = prod.getPrecio(); // si devuelve double se autoboxea a Double
+                    if (tmp instanceof Number) {
+                        precio = ((Number) tmp).doubleValue();
+                    } else {
+                        // en caso raro que no sea Number, intentar parse
+                        try {
+                            precio = Double.parseDouble(String.valueOf(tmp));
+                        } catch (Throwable ignore) { precio = 0.0; }
+                    }
+                } catch (Throwable t) {
+                    // fallback seguro
+                    precio = 0.0;
+                }
+            }
+
+            Map<String,Object> m = new HashMap<>();
+            m.put("id", pid);
+            m.put("nombre", prod != null ? prod.getNombre() : ("Producto #" + pid));
+            m.put("cantidad", qty);
+            m.put("precio", precio);
+            m.put("subtotal", precio * qty);
+            totalProductos += precio * qty;
+            listaProductos.add(m);
+        }
+    }
+
+    double totalEntradas = 0.0;
+    if (rt != null && butacas != null) {
+        totalEntradas = rt.getPrecioEntrada() * butacas.size();
+    } else if (session.getAttribute("totalEntradas") != null) {
+        try { totalEntradas = Double.parseDouble(session.getAttribute("totalEntradas").toString()); } catch (Exception ex) {}
+    }
+    double totalGeneral = totalEntradas + totalProductos;
+    java.text.NumberFormat fmt = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es","PE"));
+    String totalEntradasFmt = fmt.format(totalEntradas);
+    String totalProductosFmt = fmt.format(totalProductos);
+    String totalGeneralFmt = fmt.format(totalGeneral);
+%>
+
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Método de Pago</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
-        <style>
-            :root {
-                --dark: #343a40;
-                --orange: #FF5733;
-                --light: #f5f5f5;
-                --white: #ffffff;
-                --gray: #6c757d;
-            }
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Método de pago - CineOnline</title>
 
-            body {
-                background-color: var(--light);
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-                margin: 0;
-            }
+    <link href="<%= request.getContextPath()%>/Estilos/peliculaClienteStyle.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
-            /* Cabecera personalizada */
-            .custom-header {
-                background-color: var(--dark);
-                color: var(--white);
-                display: flex;
-                align-items: center;
-                padding: 15px 30px;
-                font-weight: bold;
-                font-size: 18px;
-                position: sticky;
-                top: 0;
-                z-index: 20;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-            .back-link {
-                color: var(--white);
-                text-decoration: none;
-                margin-right: 20px;
-                font-size: 16px;
-                transition: color 0.3s;
-            }
-            .back-link:hover {
-                color: var(--orange);
-            }
-            .custom-header h1 {
-                margin: 0;
-                flex-grow: 1;
-                text-align: center;
-                font-size: 24px;
-            }
-
-            /* Contenedor principal */
-            .payment-container {
-                flex: 1;
-                max-width: 700px;
-                margin: 30px auto;
-                background: var(--white);
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-
-            /* Pasos */
-            .step-progress {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 30px;
-                gap: 20px;
-            }
-            .step-progress .step {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background: var(--gray);
-                color: var(--white);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                font-size: 18px;
-            }
-            .step-progress .step.active {
-                background: var(--orange);
-            }
-
-            /* Títulos */
-            h2 {
-                color: var(--dark);
-                font-weight: 700;
-                margin-bottom: 20px;
-                text-align: center;
-            }
-
-            /* Inputs mejorados */
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-            .form-control {
-                border: none;
-                border-bottom: 2px solid #ccc;
-                border-radius: 0;
-                padding: 10px 5px 5px 0;
-                font-size: 16px;
-                background: transparent;
-                transition: border-color 0.3s;
-            }
-            .form-control:focus {
-                border-color: var(--orange);
-                box-shadow: none;
-            }
-            /* Línea animada */
-            .form-group {
-                position: relative;
-            }
-            .form-group::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 0;
-                height: 2px;
-                background: var(--orange);
-                transition: width 0.3s;
-            }
-            .form-control:focus ~ .form-group::after,
-            .form-control:not(:placeholder-shown) ~ .form-group::after {
-                width: 100%;
-            }
-
-            /* Tarjetas de pago */
-            .payment-options {
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                padding: 12px 15px;
-                margin-bottom: 1rem;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                transition: border-color 0.3s;
-            }
-            .payment-options:hover,
-            .payment-options:has(input:checked) {
-                border-color: var(--orange);
-            }
-            .payment-options input[type="radio"] {
-                margin: 0;
-            }
-            .payment-options label {
-                margin: 0;
-                font-weight: 600;
-                color: var(--dark);
-                flex-grow: 1;
-            }
-            .payment-options img {
-                max-height: 25px;
-            }
-
-            /* Checkboxes */
-            .checkbox-group {
-                font-size: 14px;
-                margin-bottom: 10px;
-            }
-            .checkbox-group a {
-                color: var(--orange);
-            }
-
-            /* Notas */
-            .notes {
-                font-size: 12px;
-                color: var(--gray);
-                margin-top: 15px;
-            }
-
-            /* Botón estilo CineJ3 */
-            .btn-continue {
-                background-color: var(--orange);
-                color: var(--white);
-                border: none;
-                padding: 14px 40px;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                cursor: pointer;
-                box-shadow: 0 4px 10px rgba(255, 87, 51, 0.6);
-                display: block;
-                margin: 30px auto 0 auto;
-                transition: background-color 0.3s, opacity 0.3s;
-            }
-            .btn-continue:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-            .btn-continue:hover:not(:disabled) {
-                background-color: #d44729;
-            }
-
-            /* Footer */
-            footer {
-                text-align: center;
-                font-size: 12px;
-                color: var(--gray);
-                padding: 20px 0;
-                margin-top: auto;
-            }
-            footer a {
-                color: var(--gray);
-                margin: 0 5px;
-                text-decoration: none;
-            }
-            footer a:hover {
-                color: var(--orange);
-            }
-        </style>
-    </head>
-    <body>
-        <header class="custom-header">
-            <h1>Pago</h1>
-        </header>
-
-        <div class="payment-container">
-
-            <div class="step-progress">
-                <div class="step">1</div>
-                <div class="step">2</div>
-                <div class="step">3</div>
-                <div class="step active">4</div>
+    <style>
+        body { background: #f5f7fa; font-family: 'Poppins', sans-serif; }
+        .container-main { max-width:1100px; margin: 36px auto; padding: 0 12px; }
+        .grid { display:grid; grid-template-columns: 1fr 420px; gap: 22px; align-items:start; }
+        .card { background:#fff; border-radius:12px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.06); }
+        h2 { margin:0 0 12px 0; font-weight:700; color:#222; }
+        .small-muted { color:#6b7280; font-size:0.95rem; }
+        .summary-row { display:flex; justify-content:space-between; margin:8px 0; color:#374151; }
+        .section-title { font-size:1rem; font-weight:700; color:#111827; margin-bottom:8px; }
+        .btn-primary { background: linear-gradient(90deg,#FF6B3A,#FF8A61); border:none; border-radius:8px; padding:12px 18px; font-weight:700; }
+        .price-box { background:linear-gradient(90deg,#FF6B3A,#FF8A61); color:#fff; padding:12px 16px; border-radius:10px; display:inline-block; font-weight:800; }
+        label { font-weight:600; margin-top:10px; display:block; }
+        input, select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #d1d5db; margin-top:6px; }
+        .hidden { display:none; }
+        .product-line { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e5e7eb; }
+        .muted { color:#6b7280; }
+        .field-error { color:#b91c1c; font-size:0.85rem; margin-top:6px; display:none; }
+        @media (max-width:980px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <div class="grid">
+        <div class="card">
+            <h2>Resumen de compra</h2>
+            <p class="small-muted">Revisa tu selección antes de continuar con el pago.</p>
+            <div style="margin-top:16px;">
+                <div class="section-title">Función</div>
+                <div class="small-muted">
+                    <p><strong>Película:</strong> <%= (rt!=null ? rt.getIdPelicula() : "N/D") %></p>
+                    <p><strong>Fecha/Hora:</strong> <%= (rt!=null && rt.getFecha()!=null ? new java.text.SimpleDateFormat("dd 'de' MMMM 'de' yyyy - HH:mm", new java.util.Locale("es","ES")).format(rt.getFecha()) : "N/D") %></p>
+                    <p><strong>Sala:</strong> <%= (rt!=null ? rt.getIdSala() : "N/D") %></p>
+                </div>
             </div>
 
-            <h2>Elige una forma de Pago</h2>
+            <div style="margin-top:14px;">
+                <div class="section-title">Butacas</div>
+                <div class="small-muted">
+                    <%
+                        if (butacas == null || butacas.isEmpty()) {
+                    %>
+                        <p>Ninguna butaca seleccionada</p>
+                    <%
+                        } else {
+                    %>
+                        <p><strong>Cantidad:</strong> <%= butacas.size() %></p>
+                        <p><strong>Butacas:</strong> <%= String.join(", ", butacas) %></p>
+                    <%
+                        }
+                    %>
+                </div>
+            </div>
 
-            <form action="ClienteServlet" method="post">
-                <div class="form-group">
-                    <input type="text" name="nombreCompleto" placeholder="Nombre completo" required/>
+            <div style="margin-top:14px;">
+                <div class="section-title">Dulcería</div>
+                <div>
+                    <%
+                        if (listaProductos.isEmpty()) {
+                    %>
+                        <p class="muted">No hay productos seleccionados</p>
+                    <%
+                        } else {
+                            for (Map<String,Object> mp : listaProductos) {
+                    %>
+                        <div class="product-line">
+                            <div>
+                                <div style="font-weight:600;"><%= mp.get("nombre") %></div>
+                                <div class="muted" style="font-size:0.9rem;">x <%= mp.get("cantidad") %></div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:700;"><%= fmt.format((Double)mp.get("subtotal")) %></div>
+                            </div>
+                        </div>
+                    <%
+                            }
+                        }
+                    %>
                 </div>
-                <div class="form-group">
-                    <input type="email" name="correoElectronico" placeholder="Correo electrónico" required/>
+            </div>
+
+            <div style="margin-top:18px;">
+                <div class="section-title">Totales</div>
+                <div class="summary-row">
+                    <div class="muted">Entradas</div>
+                    <div><strong><%= totalEntradasFmt %></strong></div>
+                </div>
+                <div class="summary-row">
+                    <div class="muted">Productos</div>
+                    <div><strong><%= totalProductosFmt %></strong></div>
+                </div>
+                <div style="border-top:1px solid #e6e9ee; margin-top:10px; padding-top:10px;">
+                    <div class="summary-row">
+                        <div class="section-title">Total</div>
+                        <div class="price-box"><%= totalGeneralFmt %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Método de pago</h2>
+            <p class="small-muted">Selecciona cómo deseas pagar y completa tus datos.</p>
+
+            <form id="metodoForm" method="post" action="<%= request.getContextPath() %>/ClienteServlet?action=metodoPago" novalidate>
+                <label for="metodo">Método de pago</label>
+                <select id="metodo" name="metodo" required>
+                    <option value="" <%= metodoVal.isEmpty() ? "selected" : "" %>>-- Seleccionar --</option>
+                    <option value="TARJETA" <%= "TARJETA".equals(metodoVal) ? "selected" : "" %>>Tarjeta (VISA/MC)</option>
+                    <option value="EFECTIVO" <%= "EFECTIVO".equals(metodoVal) ? "selected" : "" %>>Efectivo</option>
+                    <option value="YAPE" <%= "YAPE".equals(metodoVal) ? "selected" : "" %>>Yape / Transferencia</option>
+                </select>
+
+                <label for="nombre">Nombre completo</label>
+                <input id="nombre" name="nombre" type="text" required placeholder="Ej. Juan Pérez" value="<%= nombreVal %>" />
+                <div id="errNombre" class="field-error">Ingrese su nombre</div>
+
+                <label for="email">Correo electrónico</label>
+                <input id="email" name="email" type="email" required placeholder="ejemplo@correo.com" value="<%= emailVal %>" />
+                <div id="errEmail" class="field-error">Ingrese un correo válido</div>
+
+                <div id="tarjetaFields" class="<%= "TARJETA".equals(metodoVal) ? "" : "hidden" %>">
+                    <label for="cardNumber">Número de tarjeta</label>
+                    <input id="cardNumber" name="cardNumber" type="text" inputmode="numeric" placeholder="XXXX XXXX XXXX XXXX" maxlength="23" />
+                    <div id="errCard" class="field-error">Número de tarjeta inválido</div>
+
+                    <div class="row" style="margin-top:8px;">
+                        <div class="col-7">
+                            <label for="expiry">Vencimiento (MM/AA)</label>
+                            <input id="expiry" name="expiry" type="text" placeholder="MM/AA" maxlength="5" />
+                            <div id="errExpiry" class="field-error">Formato inválido (MM/AA)</div>
+                        </div>
+                        <div class="col-5">
+                            <label for="cvv">CVV</label>
+                            <input id="cvv" name="cvv" type="text" inputmode="numeric" maxlength="4" placeholder="123" />
+                            <div id="errCvv" class="field-error">CVV inválido</div>
+                        </div>
+                    </div>
+                    <p class="small-muted" style="margin-top:10px;">Los datos de tarjeta en esta demo no son procesados realmente.</p>
                 </div>
 
-                <div class="payment-options">
-                    <input type="radio" id="tarjeta" name="metodoPago" value="tarjeta" required/>
-                    <label for="tarjeta">Tarjeta de Crédito o Débito</label>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago1.png" alt="Visa"/>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago3.png"/>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago2.png" alt="Mastercard"/>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago4.png" alt="Diners Club"/>
-                </div>
-
-                <div class="payment-options">
-                    <input type="radio" id="appAgora" name="metodoPago" value="appAgora" />
-                    <label for="appAgora">App agora</label>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago5.png" alt="App Agora"/>
-                </div>
-
-                <div class="payment-options">
-                    <input type="radio" id="billeteras" name="metodoPago" value="billeteras" />
-                    <label for="billeteras">Billeteras Electrónicas</label>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago6.jpg" alt="Yape"/>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago7.png" alt="Plin"/>
-                    <img src="http://localhost:8080/CineJ3/Cliente/images/pago8.png" alt="Payme"/>
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="terminos" name="terminos" required />
-                    <label for="terminos">Acepto los <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="finalidades" name="finalidades" required />
-                    <label for="finalidades">He leído y acepto las finalidades de <a href="#">Tratamiento necesario de datos</a>.</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="opcionales" name="opcionales" />
-                    <label for="opcionales">Acepto el tratamiento opcional de datos.</label>
-                </div>
-
-                <div class="notes">
-                    * No se hacen cambios ni devoluciones<br/>
-                    * Toda la información de pago es segura<br/>
-                    * Algunas de las tarjetas de débito con CVV podrían ser rechazadas por la plataforma de pago que utilizamos debido a las políticas de seguridad del banco
-                </div>
-
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn-continue" >Continuar</button>
+                <div style="margin-top:14px;">
+                    <button id="btnContinue" type="submit" class="btn-primary" style="width:100%;" disabled aria-disabled="true">Continuar</button>
                 </div>
             </form>
+
+            <div style="margin-top:12px; font-size:0.9rem; color:#6b7280;">
+                Al continuar, revisarás la confirmación final antes de que la compra sea procesada.
+            </div>
         </div>
-        <footer>
-            © 2025 Cine Online | Todos los derechos reservados
-            <br />
-            <a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a>
-        </footer>
-        <script>
-            const pricePerSeat = 0; // no lo usamos aquí, pero lo dejamos por compatibilidad
-            const btnContinuar = document.querySelector('.btn-continue');
-            const formPago = document.querySelector('form'); // <--- Nuevo: Referencia al formulario
+    </div>
+</div>
 
-            /* Campos que deben estar OK */
-            const nombre = document.querySelector('[name="nombreCompleto"]');
-            const email = document.querySelector('[name="correoElectronico"]');
-            const metodoPago = document.querySelectorAll('[name="metodoPago"]');
-            const terminos = document.getElementById('terminos');
-            const finalidades = document.getElementById('finalidades');
+<script>
+    (function(){
+        const metodoSel = document.getElementById('metodo');
+        const tarjetaFields = document.getElementById('tarjetaFields');
+        const btnContinue = document.getElementById('btnContinue');
+        const nombreIn = document.getElementById('nombre');
+        const emailIn = document.getElementById('email');
+        const cardInput = document.getElementById('cardNumber');
+        const expiryInput = document.getElementById('expiry');
+        const cvvInput = document.getElementById('cvv');
 
-            function validarTodo() {
-                const nombreOk = nombre.value.trim().length > 0;
-                const emailOk = email.value.trim().length > 0;
-                const metodoOk = Array.from(metodoPago).some(r => r.checked);
-                const terminosOk = terminos.checked;
-                const finalidadesOk = finalidades.checked;
+        // errores
+        const errNombre = document.getElementById('errNombre');
+        const errEmail = document.getElementById('errEmail');
+        const errCard = document.getElementById('errCard');
+        const errExpiry = document.getElementById('errExpiry');
+        const errCvv = document.getElementById('errCvv');
 
-                const todoOk = nombreOk && emailOk && metodoOk && terminosOk && finalidadesOk;
-                btnContinuar.disabled = !todoOk;
+        function showErr(el, show) {
+            if (!el) return;
+            el.style.display = show ? 'block' : 'none';
+        }
+
+        function onlyDigits(str) {
+            return str.replace(/\D/g,'');
+        }
+
+        function isEmailValid(v) {
+            return /\S+@\S+\.\S+/.test(v);
+        }
+
+        function validateCardFields() {
+            let ok = true;
+
+            const cardValRaw = cardInput ? cardInput.value.trim() : '';
+            const cardDigits = onlyDigits(cardValRaw);
+            if (!cardInput) ok = false;
+            else {
+                const len = cardDigits.length;
+                if (!(len >= 13 && len <= 19)) { ok = false; showErr(errCard, true); }
+                else showErr(errCard, false);
             }
 
-            /* Escuchar cambios */
-            [nombre, email, terminos, finalidades].forEach(el =>
-                el.addEventListener('input', validarTodo));
-            metodoPago.forEach(r => r.addEventListener('change', validarTodo));
+            const exp = expiryInput ? expiryInput.value.trim() : '';
+            if (!expiryInput) ok = false;
+            else {
+                const re = /^(0[1-9]|1[0-2])\/\d{2}$/;
+                if (!re.test(exp)) { ok = false; showErr(errExpiry, true); }
+                else showErr(errExpiry, false);
+            }
 
-            // >>> CÓDIGO CORREGIDO: INTERCEPTAR ENVÍO, AGREGAR PARÁMETRO Y FORZAR POST <<<
-            btnContinuar.addEventListener('click', (e) => {
-                // 1. Previene temporalmente el envío del formulario para manipularlo
-                e.preventDefault(); 
-                
-                // 2. Solo si la validación del script permite la continuidad
-                if (!btnContinuar.disabled) {
-                    
-                    // 3. Verifica si el campo 'action' ya existe o lo crea
-                    let actionInput = formPago.querySelector('input[name="action"]');
-                    
-                    if (!actionInput) {
-                        actionInput = document.createElement('input');
-                        actionInput.type = 'hidden';
-                        actionInput.name = 'action';
-                        actionInput.value = 'procesarPago'; // <--- Parámetro deseado
-                        formPago.appendChild(actionInput);
-                    }
-                    
-                    // 4. Envía el formulario por POST, incluyendo ahora el campo 'action'
-                    formPago.submit(); 
+            const cvv = cvvInput ? cvvInput.value.trim() : '';
+            if (!cvvInput) ok = false;
+            else {
+                if (!/^\d{3,4}$/.test(cvv)) { ok = false; showErr(errCvv, true); }
+                else showErr(errCvv, false);
+            }
+
+            return ok;
+        }
+
+        function toggleTarjeta() {
+            const v = metodoSel.value;
+            if (v === 'TARJETA') {
+                tarjetaFields.classList.remove('hidden');
+                if (cardInput) cardInput.setAttribute('data-required','1');
+                if (expiryInput) expiryInput.setAttribute('data-required','1');
+                if (cvvInput) cvvInput.setAttribute('data-required','1');
+            } else {
+                tarjetaFields.classList.add('hidden');
+                if (cardInput) { cardInput.removeAttribute('data-required'); showErr(errCard,false); }
+                if (expiryInput) { expiryInput.removeAttribute('data-required'); showErr(errExpiry,false); }
+                if (cvvInput) { cvvInput.removeAttribute('data-required'); showErr(errCvv,false); }
+            }
+            validateForm();
+        }
+
+        function validateForm(){
+            const metodo = metodoSel.value;
+            const nombre = nombreIn.value.trim();
+            const email = emailIn.value.trim();
+
+            let ok = true;
+
+            if (!nombre) { ok = false; showErr(errNombre, true); } else { showErr(errNombre, false); }
+            if (!isEmailValid(email)) { ok = false; showErr(errEmail, true); } else { showErr(errEmail, false); }
+
+            if (metodo === 'TARJETA') {
+                if (!validateCardFields()) ok = false;
+            }
+
+            btnContinue.disabled = !ok;
+            btnContinue.setAttribute('aria-disabled', String(!ok));
+        }
+
+        metodoSel.addEventListener('change', function(){
+            toggleTarjeta();
+        });
+        nombreIn.addEventListener('input', validateForm);
+        emailIn.addEventListener('input', validateForm);
+        if (cardInput) cardInput.addEventListener('input', function(e){
+            let v = cardInput.value;
+            v = v.replace(/[^\d\s]/g,'');
+            cardInput.value = v;
+            validateForm();
+        });
+        if (expiryInput) expiryInput.addEventListener('input', function(e){
+            let v = expiryInput.value.replace(/[^\d]/g,'');
+            if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2,4);
+            expiryInput.value = v;
+            validateForm();
+        });
+        if (cvvInput) cvvInput.addEventListener('input', function(){ validateForm(); });
+
+        const form = document.getElementById('metodoForm');
+        if (form) {
+            form.addEventListener('submit', function(e){
+                if (btnContinue.disabled) {
+                    e.preventDefault();
+                    return;
                 }
+                btnContinue.disabled = true;
+                btnContinue.textContent = 'Procesando...';
             });
-            // >>> FIN DEL CÓDIGO CORREGIDO <<<
-            
-            /* Estado inicial */
-            btnContinuar.disabled = true;
-        </script>
-    </body>
+        }
+
+        // Inicial
+        toggleTarjeta();
+        validateForm();
+    })();
+</script>
+
+</body>
 </html>
