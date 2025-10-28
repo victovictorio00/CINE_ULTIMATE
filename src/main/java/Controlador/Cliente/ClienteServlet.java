@@ -86,6 +86,7 @@ public class ClienteServlet extends HttpServlet {
 
     /* ------------------ acción reservar (conversión a modelo.Asiento) ------------------ */
   /* ------------------ acción reservar (conversión a modelo.Asiento) ------------------ */
+/* ------------------ acción reservar (robusto: asegurar Sala) ------------------ */
 private void accionReservar(HttpServletRequest req, HttpServletResponse resp) throws Exception {
     String idFuncStr = req.getParameter("idFuncion");
     String idPelStr = req.getParameter("id");
@@ -106,139 +107,154 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
         return;
     }
 
+    // obtener función
     Funcion f = funcionDao.obtener(idFuncion);
     if (f == null) {
         resp.sendRedirect(req.getContextPath() + "/DetallePelicula.jsp?error=" + URLEncoder.encode("Función no encontrada", "UTF-8"));
         return;
     }
 
-    int idPelicula = (f.getPelicula() != null) ? f.getPelicula().getIdPelicula() : 0;
+    // intentar obtener idPelicula desde parámetro o desde la función
+    int idPelicula = 0;
     if (idPelStr != null && !idPelStr.trim().isEmpty()) {
         try { idPelicula = Integer.parseInt(idPelStr.trim()); } catch (NumberFormatException ignore) {}
+    }
+    if (idPelicula == 0) {
+        try {
+            // si la función tiene getPelicula y ésta no es null, usarla
+            if (f.getPelicula() != null) idPelicula = f.getPelicula().getIdPelicula();
+            else {
+                // intentar por reflexión buscar getIdPelicula
+                try {
+                    Method m = f.getClass().getMethod("getIdPelicula");
+                    Object v = m.invoke(f);
+                    if (v != null) idPelicula = Integer.parseInt(String.valueOf(v));
+                } catch (NoSuchMethodException ignore) { /* no hay getIdPelicula */ }
+            }
+        } catch (Throwable ignored) {}
     }
 
     Pelicula pelicula = peliculaDao.leer(idPelicula);
     if (pelicula == null) pelicula = (f.getPelicula() != null) ? f.getPelicula() : new Pelicula();
 
-    // Intentamos obtener sala desde la función (o desde la BD si hace falta)
+    // ---------- SALA: intentar obtenerla robustamente ----------
     Sala sala = null;
     try {
-        sala = f.getSala(); // intento directo
+        // primer intento: función ya trae la sala
+        sala = f.getSala();
     } catch (Throwable ignored) {}
 
-    // Si sigue siendo null, intentamos recuperar idSala desde Funcion por reflexión
-    Integer idSalaFromFunc = null;
+    Integer salaIdFromFunc = null;
     if (sala == null) {
-        String[] possibleGetters = new String[] {"getIdSala", "getSalaId", "getId_sala", "getIdSalaId", "getId"};
-        for (String g : possibleGetters) {
+        // intentar extraer idSala por reflexión desde Funcion
+        try {
+            Method mid = f.getClass().getMethod("getIdSala");
+            Object o = mid.invoke(f);
+            if (o != null) salaIdFromFunc = Integer.parseInt(String.valueOf(o));
+        } catch (NoSuchMethodException ns) {
+            // intentar otras variantes
             try {
-                Method mg = f.getClass().getMethod(g);
-                Object rv = mg.invoke(f);
-                if (rv != null) {
-                    // normalizar a Integer
-                    if (rv instanceof Number) {
-                        idSalaFromFunc = ((Number) rv).intValue();
-                        break;
-                    } else {
-                        try { idSalaFromFunc = Integer.parseInt(String.valueOf(rv)); break; } catch (Exception ex) { /* no */ }
-                    }
-                }
+                Method mid2 = f.getClass().getMethod("getSalaId");
+                Object o2 = mid2.invoke(f);
+                if (o2 != null) salaIdFromFunc = Integer.parseInt(String.valueOf(o2));
             } catch (Throwable ignore) {}
-        }
+        } catch (Throwable ignore) {}
     } else {
-        // si tenemos sala, intentamos obtener su id por reflexión por si acaso
         try {
-            Method mg = sala.getClass().getMethod("getIdSala");
-            Object rv = mg.invoke(sala);
-            if (rv instanceof Number) idSalaFromFunc = ((Number) rv).intValue();
-        } catch (Throwable ignore) {
-            try {
-                Method mg = sala.getClass().getMethod("getId");
-                Object rv = mg.invoke(sala);
-                if (rv instanceof Number) idSalaFromFunc = ((Number) rv).intValue();
-            } catch (Throwable ignored) {}
-        }
+            // si sala no es null pero queremos asegurar id, intentar obtener su id
+            Method gm = sala.getClass().getMethod("getIdSala");
+            Object o = gm.invoke(sala);
+            if (o != null) salaIdFromFunc = Integer.parseInt(String.valueOf(o));
+        } catch (Throwable ignored) {}
     }
 
-    // Si todavía no tenemos Sala pero sí idSala, consultamos la tabla 'salas'
-    if (sala == null && idSalaFromFunc != null) {
-        Connection con = null;
+    // Si aún no tenemos Sala pero sí un id, cargar sala desde DB
+    if (sala == null && (salaIdFromFunc == null || salaIdFromFunc == 0)) {
+        // intentar obtener idSala desde la función (otra forma)
         try {
-            con = Conexion.getConnection();
-            // intentar columnas comunes
-            String sql = "SELECT * FROM salas WHERE id_sala = ?";
-            try (PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setInt(1, idSalaFromFunc);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        // crear instancia Sala y rellenar por reflexión (para mantener compatibilidad)
-                        sala = new Sala();
-                        // set id
-                        try {
-                            Method ms = sala.getClass().getMethod("setIdSala", int.class);
-                            ms.invoke(sala, idSalaFromFunc);
-                        } catch (Throwable ex) {
-                            try { sala.getClass().getMethod("setId", int.class).invoke(sala, idSalaFromFunc); } catch (Throwable ignore) {}
-                        }
-                        // set nombre (intentar columnas típicas)
-                        String nombre = null;
-                        try {
-                            nombre = rs.getString("nombre"); // lo más probable
-                        } catch (Throwable ignore) {}
-                        if (nombre == null) {
-                            try { nombre = rs.getString("nombre_sala"); } catch (Throwable ignore) {}
-                        }
-                        if (nombre == null) {
-                            // buscar cualquier columna que parezca nombre
-                            ResultSetMetaData md = rs.getMetaData();
-                            for (int i = 1; i <= md.getColumnCount(); i++) {
-                                String col = md.getColumnName(i);
-                                String low = col.toLowerCase();
-                                if (low.contains("nombre")) {
-                                    try { nombre = rs.getString(col); break; } catch (Throwable ignore) {}
-                                }
-                            }
-                        }
-                        if (nombre != null) {
-                            try {
-                                sala.getClass().getMethod("setNombre", String.class).invoke(sala, nombre);
-                            } catch (Throwable ex) {
-                                try { sala.getClass().getMethod("setNombreSala", String.class).invoke(sala, nombre); } catch (Throwable ignore) {}
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Throwable ex) {
-            // no fatal: dejamos sala null si falla
-            ex.printStackTrace();
-        } finally {
-            if (con != null) try { con.close(); } catch (SQLException ignored) {}
-        }
-    }
-
-    // Si no tenemos idSalaFromFunc aún, intentar extraerlo desde la función por reflexión de nuevo:
-    if (idSalaFromFunc == null) {
-        try {
-            Method mg = f.getClass().getMethod("getSala");
-            Object sv = mg.invoke(f);
-            if (sv != null) {
-                try {
-                    Method mg2 = sv.getClass().getMethod("getIdSala");
-                    Object rv = mg2.invoke(sv);
-                    if (rv instanceof Number) idSalaFromFunc = ((Number) rv).intValue();
-                } catch (Throwable ignore) {
-                    try {
-                        Method mg2 = sv.getClass().getMethod("getId");
-                        Object rv = mg2.invoke(sv);
-                        if (rv instanceof Number) idSalaFromFunc = ((Number) rv).intValue();
-                    } catch (Throwable ignored) {}
+            // si Funcion tiene getSala() que devuelve un Map o similar, manejarlo
+            Method getSalaM = f.getClass().getMethod("getSala");
+            Object salaObj = getSalaM.invoke(f);
+            if (salaObj != null && salaObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String,Object> sm = (Map<String,Object>) salaObj;
+                if (sm.containsKey("id") || sm.containsKey("id_sala")) {
+                    Object vid = sm.containsKey("id") ? sm.get("id") : sm.get("id_sala");
+                    if (vid != null) salaIdFromFunc = Integer.parseInt(String.valueOf(vid));
                 }
             }
         } catch (Throwable ignored) {}
     }
 
-    // precioEntrada
+    // Si tenemos salaIdFromFunc > 0, cargar Sala desde la tabla 'salas'
+    if (sala == null && salaIdFromFunc != null && salaIdFromFunc > 0) {
+        Connection con = null;
+        try {
+            con = Conexion.getConnection();
+            String sql = "SELECT * FROM salas WHERE id_sala = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, salaIdFromFunc);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        sala = new Sala();
+                        // establecer id (manejar varias firmas)
+                        try { sala.getClass().getMethod("setIdSala", int.class).invoke(sala, rs.getInt("id_sala")); } catch (NoSuchMethodException e1) {
+                            try { sala.getClass().getMethod("setId", int.class).invoke(sala, rs.getInt("id_sala")); } catch (Throwable ignore) {}
+                        }
+                        // establecer nombre/descripción si existen
+                        try {
+                            if (hasColumn(rs, "nombre")) {
+                                try { sala.getClass().getMethod("setNombre", String.class).invoke(sala, rs.getString("nombre")); } catch (NoSuchMethodException ignore) {}
+                            } else if (hasColumn(rs, "nombre_sala")) {
+                                try { sala.getClass().getMethod("setNombre", String.class).invoke(sala, rs.getString("nombre_sala")); } catch (NoSuchMethodException ignore) {}
+                            }
+                        } catch (Throwable ignored) {}
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        } finally {
+            if (con != null) try { con.close(); } catch (SQLException ignore) {}
+        }
+    }
+
+    // si no conseguimos sala, intentar construir un objeto Sala mínimo con el id conocido
+    if (sala == null && salaIdFromFunc != null && salaIdFromFunc > 0) {
+        try {
+            sala = new Sala();
+            try { sala.getClass().getMethod("setIdSala", int.class).invoke(sala, salaIdFromFunc); }
+            catch (NoSuchMethodException e1) { try { sala.getClass().getMethod("setId", int.class).invoke(sala, salaIdFromFunc); } catch (Throwable ignore) {} }
+        } catch (Throwable ignored) {}
+    }
+
+    // determinar idSala final (para ReservaTemporal)
+    int idSalaParaRt = 0;
+    try {
+        if (sala != null) {
+            try {
+                Method gm = sala.getClass().getMethod("getIdSala");
+                Object o = gm.invoke(sala);
+                if (o != null) idSalaParaRt = Integer.parseInt(String.valueOf(o));
+            } catch (NoSuchMethodException ex) {
+                try {
+                    Method gm2 = sala.getClass().getMethod("getId");
+                    Object o2 = gm2.invoke(sala);
+                    if (o2 != null) idSalaParaRt = Integer.parseInt(String.valueOf(o2));
+                } catch (Throwable ignore) {}
+            } catch (Throwable ignore) {}
+        }
+        if (idSalaParaRt == 0 && salaIdFromFunc != null) idSalaParaRt = salaIdFromFunc;
+        // fallback: intentar obtener id sala desde la funcion por reflexión
+        if (idSalaParaRt == 0) {
+            try {
+                Method gm = f.getClass().getMethod("getIdSala");
+                Object o = gm.invoke(f);
+                if (o != null) idSalaParaRt = Integer.parseInt(String.valueOf(o));
+            } catch (Throwable ignored) {}
+        }
+    } catch (Throwable ignored) {}
+
+    // ---------- precio entrada y fecha ----------
     double precioEntrada = 0.0;
     if (pelicula != null) {
         try {
@@ -246,35 +262,17 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
             if (val instanceof Number) precioEntrada = ((Number) val).doubleValue();
         } catch (Throwable ignore) {}
     }
-
     java.util.Date fecha = f.getFechaInicio();
 
-    // Asegurarse idSala para la ReservaTemporal: preferimos sala si no es null, sino idSalaFromFunc
-    int idSalaParaReserva = 0;
-    if (sala != null) {
-        try {
-            Method mg = sala.getClass().getMethod("getIdSala");
-            Object rv = mg.invoke(sala);
-            if (rv instanceof Number) idSalaParaReserva = ((Number) rv).intValue();
-        } catch (Throwable ex) {
-            try {
-                Method mg = sala.getClass().getMethod("getId");
-                Object rv = mg.invoke(sala);
-                if (rv instanceof Number) idSalaParaReserva = ((Number) rv).intValue();
-            } catch (Throwable ignored) {}
-        }
-    }
-    if (idSalaParaReserva == 0 && idSalaFromFunc != null) idSalaParaReserva = idSalaFromFunc;
-
-    ReservaTemporal rt = new ReservaTemporal(idFuncion, idPelicula, precioEntrada, fecha, idSalaParaReserva);
+    // crear ReservaTemporal con idFuncion, idPelicula, precioEntrada, fecha y idSalaParaRt
+    ReservaTemporal rt = new ReservaTemporal(idFuncion, idPelicula, precioEntrada, fecha, idSalaParaRt);
     HttpSession session = req.getSession();
     session.setAttribute("reservaTemporal", rt);
 
-    /* Cargar asientos (puede devolver List<Asiento> o List<Map>) */
-    List<Object> asientosRaw = tryLoadAsientosViaDao(rt.getIdSala(), rt.getIdFuncion());
-    if (asientosRaw == null || asientosRaw.isEmpty()) asientosRaw = loadAsientosFromDb(rt.getIdSala(), rt.getIdFuncion());
+    // ---------- cargar asientos como antes (allow dao or db) ----------
+    List<Object> asientosRaw = tryLoadAsientosViaDao(idSalaParaRt, rt.getIdFuncion());
+    if (asientosRaw == null || asientosRaw.isEmpty()) asientosRaw = loadAsientosFromDb(idSalaParaRt, rt.getIdFuncion());
 
-    // Convertir a List<modelo.Asiento>
     List<Asiento> asientos = new ArrayList<>();
     if (asientosRaw != null) {
         for (Object o : asientosRaw) {
@@ -284,7 +282,6 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
                 @SuppressWarnings("unchecked")
                 Map<String,Object> m = (Map<String,Object>) o;
                 Asiento a = new Asiento();
-                // id
                 try {
                     if (m.containsKey("id")) {
                         Object idv = m.get("id");
@@ -292,8 +289,7 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
                             int idInt = Integer.parseInt(String.valueOf(idv));
                             try { a.getClass().getMethod("setIdAsiento", int.class).invoke(a, idInt); }
                             catch (NoSuchMethodException ex1) {
-                                try { a.getClass().getMethod("setId", int.class).invoke(a, idInt); }
-                                catch (NoSuchMethodException ignore) {}
+                                try { a.getClass().getMethod("setId", int.class).invoke(a, idInt); } catch (Throwable ignore) {}
                             }
                         }
                     } else if (m.containsKey("id_asiento")) {
@@ -302,25 +298,18 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
                             int idInt = Integer.parseInt(String.valueOf(idv));
                             try { a.getClass().getMethod("setIdAsiento", int.class).invoke(a, idInt); }
                             catch (NoSuchMethodException ex1) {
-                                try { a.getClass().getMethod("setId", int.class).invoke(a, idInt); }
-                                catch (NoSuchMethodException ignore) {}
+                                try { a.getClass().getMethod("setId", int.class).invoke(a, idInt); } catch (Throwable ignore) {}
                             }
                         }
                     }
                 } catch (Throwable ignore) {}
-
-                // codigo
                 try {
                     String codigo = null;
                     if (m.containsKey("codigo") && m.get("codigo") != null) codigo = String.valueOf(m.get("codigo"));
                     else if (m.containsKey("codigo_asiento") && m.get("codigo_asiento") != null) codigo = String.valueOf(m.get("codigo_asiento"));
-                    if (codigo != null) {
-                        try { a.getClass().getMethod("setCodigo", String.class).invoke(a, codigo); }
-                        catch (NoSuchMethodException ignore) {}
-                    }
+                    if (codigo != null) try { a.getClass().getMethod("setCodigo", String.class).invoke(a, codigo); } catch (Throwable ignore) {}
                 } catch (Throwable ignore) {}
 
-                // ocupado
                 try {
                     boolean ocupado = false;
                     if (m.containsKey("ocupado") && m.get("ocupado") != null) {
@@ -339,21 +328,18 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
                         }
                     }
                     try { a.getClass().getMethod("setOcupado", boolean.class).invoke(a, ocupado); }
-                    catch (NoSuchMethodException ex) {
-                        try { a.getClass().getMethod("setOcupado", Boolean.class).invoke(a, Boolean.valueOf(ocupado)); }
-                        catch (NoSuchMethodException ignore) {}
-                    }
+                    catch (NoSuchMethodException ex) { try { a.getClass().getMethod("setOcupado", Boolean.class).invoke(a, Boolean.valueOf(ocupado)); } catch (Throwable ignore) {} }
                 } catch (Throwable ignore) {}
 
-                // Si tiene un codigo asignado, o incluso sin el, lo añadimos
                 asientos.add(a);
-            } // end if Map
-        } // end for asientosRaw
-    } // end if raw != null
+            }
+        }
+    }
 
+    // pasar atributos a JSP
     req.setAttribute("asientos", asientos);
     req.setAttribute("pelicula", pelicula);
-    req.setAttribute("sala", sala); // <-- ahora intentamos asegurarnos de que sala no sea null
+    req.setAttribute("sala", sala);
     req.setAttribute("funcion", f);
 
     String genero = "";
@@ -372,6 +358,15 @@ private void accionReservar(HttpServletRequest req, HttpServletResponse resp) th
 
     req.getRequestDispatcher("/Cliente/SeleccionAsiento.jsp").forward(req, resp);
 }
+
+// helper: comprobar si ResultSet contiene la columna
+private boolean hasColumn(ResultSet rs, String columnName) {
+    try {
+        rs.findColumn(columnName);
+        return true;
+    } catch (SQLException ex) { return false; }
+}
+
 
 
     /* ------------------ helpers and DB utils ------------------ */
