@@ -10,7 +10,7 @@ public class Venta {
     private double total;
     private String metodoPago;
 
-    // Constructor
+    // Constructor 
     public Venta() {}
 
     public Venta(int idVenta, Usuario idUsuarioCliente, Date fecha, double total, String metodoPago) {
@@ -50,21 +50,12 @@ public class Venta {
         return fecha;
     }
 
-    public void setFecha(String fechaStr) {
+    public void setFecha(Date fechaStr) {
         if (fechaStr == null) {
             throw new IllegalArgumentException("La fecha no puede ser nula");
         }
 
-        // Patrón específico
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy - HH:mm");
-        sdf.setLenient(false); // no acepta fechas "raras" como 32/13/25
-
-        try {
-            Date fecha = sdf.parse(fechaStr);
-            this.fecha = fecha;
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Formato de fecha inválido. Debe ser dd/MM/yy - HH:mm");
-        }
+        this.fecha = fecha;
     }
 
     public double getTotal() {
@@ -81,6 +72,6 @@ public class Venta {
         this.metodoPago = metodoPago;
     }
 
-    
+
     
 }

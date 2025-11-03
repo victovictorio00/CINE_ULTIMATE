@@ -11,6 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import modelo.Producto;
 import modelo.ProductoDao;
 
@@ -57,6 +58,13 @@ public class DulceriaServlet extends HttpServlet {
 
             // 3. Establecer el atributo en el request para el JSP
             request.setAttribute("productosCategorizados", productosPorCategoria);
+            //agregar los datos de las butacas selecioandas a la sesion
+            HttpSession session = request.getSession();
+            String seatsCSV = request.getParameter("selectedSeats");
+            String totalParam = request.getParameter("total");
+            // Guardar en sesión
+            session.setAttribute("butacasSeleccionadas", seatsCSV);
+            session.setAttribute("totalAsientos", totalParam);
 
             // 4. Redireccionar al JSP de la Dulcería
             request.getRequestDispatcher("/Cliente/DulceriaCliente.jsp").forward(request, response);

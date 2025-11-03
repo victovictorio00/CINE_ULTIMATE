@@ -186,4 +186,57 @@ public class AsientoDao implements DaoCrud<Asiento> {
         
         return asientos;
     }
+    
+    public Asiento leerPorCodigo(String codigo) throws SQLException {
+        String query = "SELECT * FROM asientos WHERE codigo = ?";
+
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(query)) {
+
+            pst.setString(1, codigo);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    Asiento asiento = new Asiento();
+                    asiento.setId_asiento(rs.getInt("id_asiento"));
+                    asiento.setCodigo(rs.getString("codigo"));
+
+                    // Crear y asignar la sala
+                    Sala sala = new Sala();
+                    sala.setIdSala(rs.getInt("id_sala"));
+                    asiento.setId_sala(sala);
+
+                    // Crear y asignar el estado
+                    EstadoAsiento estado = new EstadoAsiento();
+                    estado.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
+                    asiento.setId_estado_asiento(estado);
+
+                    return asiento;
+                }
+            }
+        }
+
+        return null; // Si no encuentra ningún asiento con ese código
+    }
+    
+    public void actualizarEstadoOcupado(int idAsiento) throws SQLException {
+        String sql = "UPDATE asientos SET id_estado_asiento = 2 WHERE id_asiento = ?";
+        
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
+            pst.setInt(1, idAsiento);
+            pst.executeUpdate();
+        }
+    }
+    public void actualizarEstadoLibre(int idAsiento) throws SQLException {
+        String sql = "UPDATE asientos SET id_estado_asiento = 1 WHERE id_asiento = ?";
+        
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            
+            pst.setInt(1, idAsiento);
+            pst.executeUpdate();
+        }
+    }    
 }

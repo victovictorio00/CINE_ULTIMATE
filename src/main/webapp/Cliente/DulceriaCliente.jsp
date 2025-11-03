@@ -246,10 +246,9 @@
             </div>
         </nav>
 
-        <a href="<%= request.getContextPath()%>/ClienteServlet?action=metodoPago" 
-           class="btn-flotante btn btn-primary">
+        <button class="btn-flotante btn btn-primary" onclick="continuarConCompra()">
             Continuar
-        </a>
+         </button>
 
         <%-- Formulario oculto para enviar los datos del carrito al Servlet --%>
         <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/CarritoDulceriaServlet" style="display: none;">
@@ -390,6 +389,10 @@
                 document.getElementById('carritoForm').submit();
             }
 
+            function continuarConCompra() {
+                // Enviar el carrito al servlet para guardarlo en sesión
+                enviarCarritoAlServlet();
+            }
 
             document.addEventListener("DOMContentLoaded", () => {
 

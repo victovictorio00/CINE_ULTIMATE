@@ -373,7 +373,11 @@
                     <div class="seats-column">
                         <%
                             for (Asiento a : e.getValue()) {
-                                String cls = a.isOcupado() ? "occupied" : "available";
+                                String cls = a.estaDisponible()? "available" : "occupied";
+                                System.err.println(a.getCodigo() + "  esta  " + 
+                                a.getId_estado_asiento().getIdEstadoAsiento() + 
+                                "pero su estaDisponible da " + a.estaDisponible() + 
+                                "ademas" + a.getId_estado_asiento().getNombre());
                         %>
                         <div class="seat <%= cls%>"
                              data-seat="<%= a.getCodigo()%>"
