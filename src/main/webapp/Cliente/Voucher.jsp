@@ -26,7 +26,7 @@
         if (d.getTipoItem() == 1) detallesAsientos.add(d);
         else if (d.getTipoItem() == 2) detallesDulceria.add(d);
     }
-
+    /*
     for (DetalleVenta d : detalles) {
         if (d.getTipoItem() == 1) {
             detallesAsientos.add(d);
@@ -35,6 +35,8 @@
             detallesDulceria.add(d);
         }
     }
+    */
+
     // === Datos útiles para mostrar ===
     String cliente = venta.getIdUsuarioCliente() != null ? venta.getIdUsuarioCliente().getNombreCompleto(): "-";
     String cine = "Cine Pobre";
