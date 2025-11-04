@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
-import modelo.Asiento;  // Tu clase Asiento real
-import modelo.AsientoDao;  // Tu DAO de asientos
-import modelo.Funcion;  // Necesitarás esta clase
-import modelo.FuncionDao;  // Y su DAO
+import modelo.Asiento; 
+import modelo.AsientoDao;
+import modelo.Funcion;  
+import modelo.FuncionDao;  
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,46 +53,33 @@ public class ClienteServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // --- INICIO DE VALIDACIÓN DE SESIÓN (Mejorada) ---
-        HttpSession session = request.getSession(false);
-        String username = null;
-        if (session != null) {
-            Object u = session.getAttribute("username");
-            if (u instanceof String) {
-                username = ((String) u).trim();
-            }
-        }
-
-        if (username == null || username.isEmpty()) {
-            String uri = request.getRequestURI();
-            String query = request.getQueryString();
-            String fullRedirectUrl = uri + (query != null && !query.isEmpty() ? "?" + query : "");
-
-            String context = request.getContextPath();
-            if (!fullRedirectUrl.startsWith(context)) {
-                fullRedirectUrl = context + "/";
-            }
-
-            String encodedUrl = java.net.URLEncoder.encode(fullRedirectUrl, java.nio.charset.StandardCharsets.UTF_8.name());
-            String loginUrl = response.encodeRedirectURL(context + "/Login.jsp?redirect=" + encodedUrl);
-
-            response.sendRedirect(loginUrl);
+                HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
-        // --- FIN DE VALIDACIÓN DE SESIÓN ---
+
+        Object u = session.getAttribute("username");
+        if (!(u instanceof String) || ((String) u).trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/Login.jsp");
+            return;
+        }
 
         String action = request.getParameter("action");
+        if (action == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el parámetro 'action'");
+            return;
+        }
+
         try {
-            if ("listar".equals(action)) {
-                listarPeliculas(request, response);
-            } else if ("reservar".equals(action)) {
-                mostrarSeleccionAsiento(request, response);
-            } else if ("confirmarPago".equals(action)) {
-                mostrarVoucher(request, response);
-            } else if ("metodoPago".equals(action)) {
-                mostrarMetodoPago(request, response);
-            } else if ("confirmarReserva".equals(action)) {
-                confirmarReserva(request, response);
+            switch (action) {
+                case "listar": listarPeliculas(request, response); break;
+                case "reservar": mostrarSeleccionAsiento(request, response); break;
+                case "confirmarPago": mostrarVoucher(request, response); break;
+                case "metodoPago": mostrarMetodoPago(request, response); break;
+                case "confirmarReserva": confirmarReserva(request, response); break;
+                default:
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             }
         } catch (SQLException e) {
             throw new ServletException("Error al procesar la solicitud", e);
@@ -103,17 +90,23 @@ public class ClienteServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-
         try {
-            if ("seleccionarCombo".equals(action)) {
-                seleccionarCombo(request, response);
-            } else if ("confirmarAsiento".equals(action)) {
-                procesarSeleccionAsiento(request, response);
-            } else if ("procesarPago".equals(action)) {
-                procesarPago(request, response);
-            } else if ("guardarVenta".equals(action)) {
-                guardarVenta(request, response);
-            } 
+            switch (action) {
+                case "seleccionarCombo":
+                    seleccionarCombo(request, response);
+                    break;
+                case "confirmarAsiento":
+                    procesarSeleccionAsiento(request, response);
+                    break;
+                case "procesarPago":
+                    procesarPago(request, response);
+                    break;
+                case "guardarVenta":
+                    guardarVenta(request, response);
+                    break;
+                default:
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
+            }
         } catch (SQLException e) {
             throw new ServletException("Error al procesar la acción", e);
         }
@@ -141,11 +134,6 @@ public class ClienteServlet extends HttpServlet {
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/DashboardCliente.jsp");
         dispatcher.forward(request, response);
     }
-
-    /**
-     * MÉTODO ACTUALIZADO: Muestra la selección de asientos con datos reales de
-     * la BD
-     */
     private void mostrarSeleccionAsiento(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException, SQLException {
@@ -156,31 +144,25 @@ public class ClienteServlet extends HttpServlet {
             return;
         }
         int idFuncion = Integer.parseInt(idFuncionParam);
-
-        /* 1. Leer función (ya trae nombres) */
         Funcion funcion = funcionDao.leer(idFuncion);
         if (funcion == null) {
             request.setAttribute("error", "Función no encontrada");
             request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
             return;
         }
-
-        /* 2. Calcular duración */
         long duracionMin = (funcion.getFechaFin().getTime()
                 - funcion.getFechaInicio().getTime()) / 60000;
-
-        /* 3. Asientos */
+        /*  Asientos */
         List<Asiento> asientos = asientoDao.obtenerAsientosPorSalaYFuncion(
                 funcion.getSala().getIdSala(), idFuncion);
-
         /* Guardamos la funcion seleccionada en la sesion*/
         HttpSession session = request.getSession();
         session.setAttribute("funcionSeleccionada", funcion);
-        /* 4. Enviar al JSP */
+        /* Enviar al JSP */
         request.setAttribute("asientos", asientos);
         request.setAttribute("funcion", funcion);
-        request.setAttribute("sala", funcion.getSala());   // con nombre
-        request.setAttribute("pelicula", funcion.getPelicula()); // con precio y género
+        request.setAttribute("sala", funcion.getSala());  
+        request.setAttribute("pelicula", funcion.getPelicula()); 
         request.setAttribute("precioButaca", funcion.getPelicula().getPrecio());
         request.setAttribute("genero", funcion.getPelicula().getIdGenero().getNombre());
         request.setAttribute("duracionMin", duracionMin);
@@ -193,46 +175,25 @@ public class ClienteServlet extends HttpServlet {
             throws ServletException, IOException, SQLException {
         String selectedSeats = request.getParameter("selectedSeats");
         String idFuncion = request.getParameter("idFuncion");
-
         // Guardar en sesión
         HttpSession session = request.getSession();
         session.setAttribute("selectedSeats", selectedSeats);
         session.setAttribute("idFuncion", idFuncion);
-
         // Validar que los asientos estén disponibles antes de continuar
-        // (Opcional pero recomendado)
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/SeleccionarCombo.jsp");
         dispatcher.forward(request, response);
     }
-
-    /*
-    protected void procesarPago(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String cardNumber = request.getParameter("cardNumber");
-        String expiryDate = request.getParameter("expiryDate");
-        String cvv = request.getParameter("cvv");
-
-        // Aquí iría la lógica para validar y procesar el pago
-        System.out.println("Procesando pago con tarjeta: " + cardNumber);
-
-        response.sendRedirect(request.getContextPath() + "/Cliente/Confirmacion.jsp");
-    }*/
-
     private void procesarPago(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         // Obtener datos del formulario método de pago
         String nombreCompleto = request.getParameter("nombreCompleto");
         String correoElectronico = request.getParameter("correoElectronico");
         String metodoPago = request.getParameter("metodoPago");
-
-
         // Guardar temporalmente en sesión
         HttpSession session = request.getSession();
         session.setAttribute("nombreCompleto", nombreCompleto);
         session.setAttribute("correoElectronico", correoElectronico);
         session.setAttribute("metodoPago", metodoPago);
-        
         // Ir a la página de confirmación
         response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=confirmarReserva");
     }
@@ -241,22 +202,18 @@ public class ClienteServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
         if (session == null) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
-
         // Recuperar los datos almacenados en pasos anteriores
         Object funcion = session.getAttribute("funcionSeleccionada");
         Object asientosSeleccionados = session.getAttribute("butacasSeleccionadas");
         Object precioAsientos = session.getAttribute("totalAsientos");
         Object carrito = session.getAttribute("carritoDulceria");
-        
         Object nombreCompleto = session.getAttribute("nombreCompleto");
         Object correoElectronico = session.getAttribute("correoElectronico");
         Object metodoPago = session.getAttribute("metodoPago");
-        
         // (Opcional) puedes agregar validación por si algo falta
         if (funcion == null || asientosSeleccionados == null || precioAsientos == null || carrito == null) {
             request.setAttribute("error", "Faltan datos para confirmar la reserva.");
@@ -264,17 +221,14 @@ public class ClienteServlet extends HttpServlet {
             System.err.println("LLEGOOOO");
             return;
         }
-
         // Enviar los datos a la JSP de confirmación
         request.getRequestDispatcher("Cliente/Confirmacion.jsp").forward(request, response);
     }
-    
     private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Voucher.jsp");
         dispatcher.forward(request, response);
     }
-
     private void generarVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String asientoSeleccionado = request.getParameter("asiento");
@@ -321,10 +275,7 @@ public class ClienteServlet extends HttpServlet {
             
             double totalAsientos = Double.parseDouble(sesion.getAttribute("totalAsientos").toString());
             double precioDulces = Double.parseDouble(sesion.getAttribute("precioDulces").toString());
-
             Map<Integer, Integer> carritoDulceria = (Map<Integer, Integer>) sesion.getAttribute("carritoDulceria");
-
-
             // === Calcular total general ===
             double totalVenta = totalAsientos + precioDulces;
 
@@ -372,7 +323,6 @@ public class ClienteServlet extends HttpServlet {
                     }
                 }
             }
-
             // === Guardar detalles de dulcería ===
             if (carritoDulceria != null && !carritoDulceria.isEmpty()) {
                 ProductoDao productoDao = new ProductoDao();
@@ -393,7 +343,6 @@ public class ClienteServlet extends HttpServlet {
                     detalleDao.insertar(detalle);
                 }
             }
-
             // === Limpieza y redirección ===
             sesion.removeAttribute("funcionSeleccionada");
             sesion.removeAttribute("butacasSeleccionadas");
@@ -401,9 +350,7 @@ public class ClienteServlet extends HttpServlet {
             sesion.removeAttribute("carritoDulceria");
             sesion.removeAttribute("precioDulces");
             sesion.removeAttribute("metodoPago");
-
             response.sendRedirect(request.getContextPath() + "/Cliente/Voucher.jsp");
-
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al guardar la venta: " + e.getMessage());
