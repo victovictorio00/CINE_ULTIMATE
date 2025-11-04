@@ -1,94 +1,35 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
-/**
- *
- * @author Desktop
- */
 public class Funcion {
     private int idFuncion;
-    private Pelicula idPelicula;
-    private Sala idSala;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
-    private int idEstadoFuncion;
+    private Pelicula pelicula;
+    private Sala sala;
+    private Timestamp fechaInicio;
+    private Timestamp fechaFin;
+    private EstadoFuncion estadoFuncion;
     private int asientosDisponibles;
-    
-    //constructor Vacio
-    public Funcion(){}
 
-    public Funcion(int idFuncion, Pelicula idPelicula, Sala idSala, LocalDate fechaInicio, LocalDate fechaFin, int idEstadoFuncion, int asientosDisponibles) {
-        this.idFuncion = idFuncion;
-        this.idPelicula = idPelicula;
-        this.idSala = idSala;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.idEstadoFuncion = idEstadoFuncion;
-        this.asientosDisponibles = asientosDisponibles;
-    }
+    // Getters y setters
+    public int getIdFuncion() { return idFuncion; }
+    public void setIdFuncion(int idFuncion) { this.idFuncion = idFuncion; }
 
-    public int getIdFuncion() {
-        return idFuncion;
-    }
+    public Pelicula getPelicula() { return pelicula; }
+    public void setPelicula(Pelicula pelicula) { this.pelicula = pelicula; }
 
-    public void setIdFuncion(int idFuncion) {
-        this.idFuncion = idFuncion;
-    }
+    public Sala getSala() { return sala; }
+    public void setSala(Sala sala) { this.sala = sala; }
 
-    public Pelicula getIdPelicula() {
-        return idPelicula;
-    }
+    public Timestamp getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(Timestamp fechaInicio) { this.fechaInicio = fechaInicio; }
 
-    public void setIdPelicula(Pelicula idPelicula) {
-        this.idPelicula = idPelicula;
-    }
+    public Timestamp getFechaFin() { return fechaFin; }
+    public void setFechaFin(Timestamp fechaFin) { this.fechaFin = fechaFin; }
 
-    public Sala getIdSala() {
-        return idSala;
-    }
+    public EstadoFuncion getEstadoFuncion() { return estadoFuncion; }
+    public void setEstadoFuncion(EstadoFuncion estadoFuncion) { this.estadoFuncion = estadoFuncion; }
 
-    public void setIdSala(Sala idSala) {
-        this.idSala = idSala;
-    }
-
-    public LocalDate getFechaInicio() {
-        return fechaInicio;
-    }
-
-    public void setFechaInicio(LocalDate fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public LocalDate getFechaFin() {
-        return fechaFin;
-    }
-
-    public void setFechaFin(LocalDate fechaFin) {
-        this.fechaFin = fechaFin;
-    }
-
-    public int getIdEstadoFuncion() {
-        return idEstadoFuncion;
-    }
-
-    public void setIdEstadoFuncion(int idEstadoFuncion) {
-        this.idEstadoFuncion = idEstadoFuncion;
-    }
-
-    public int getAsientosDisponibles() {
-        return asientosDisponibles;
-    }
-
-    public void setAsientosDisponibles(int asientosDisponibles) {
-        this.asientosDisponibles = asientosDisponibles;
-    }
-
-    
-    
-    
+    public int getAsientosDisponibles() { return asientosDisponibles; }
+    public void setAsientosDisponibles(int asientosDisponibles) { this.asientosDisponibles = asientosDisponibles; }
 }

@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="modelo.Empleado"%>
-<%@page import="java.sql.SQLException"%>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -15,26 +14,40 @@
     <h3>Editar Empleado</h3>
 
     <%
-        // Obtener el objeto empleado desde la solicitud
         Empleado empleado = (Empleado) request.getAttribute("empleado");
     %>
 
     <form action="EmpleadoServlet?action=actualizar" method="post">
-        <input type="hidden" name="id" value="<%= empleado.getId() %>">
+        <!-- Corregido: usar getIdEmpleado() -->
+        <input type="hidden" name="id" value="<%= empleado.getIdEmpleado() %>">
+
         <div class="form-group">
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" class="form-control" value="<%= empleado.getNombre() %>" required>
+        </div>
 
+        <div class="form-group">
             <label for="direccion">Dirección:</label>
             <input type="text" id="direccion" name="direccion" class="form-control" value="<%= empleado.getDireccion() %>" required>
+        </div>
 
+        <div class="form-group">
             <label for="telefono">Teléfono:</label>
             <input type="text" id="telefono" name="telefono" class="form-control" value="<%= empleado.getTelefono() %>" required>
-
-            <br>
-            <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="EmpleadoServlet?action=listar" class="btn btn-secondary">Cancelar</a>
         </div>
+
+        <div class="form-group">
+            <label for="cargo">Cargo:</label>
+            <input type="text" id="cargo" name="cargo" class="form-control" value="<%= empleado.getCargo() %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="salario">Salario:</label>
+            <input type="number" step="0.01" id="salario" name="salario" class="form-control" value="<%= empleado.getSalario() %>" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <a href="EmpleadoServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
 

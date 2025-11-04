@@ -22,28 +22,39 @@ public class EmpleadoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //hola
-        // Control de acceso manual: Solo admin puede acceder
+
+        // 🔐 Control de acceso: solo administradores
         HttpSession session = request.getSession(false);
-        if (session == null || !"admin".equals(session.getAttribute("userRole"))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
+        if (session == null || session.getAttribute("rol") == null ||
+            !"admin".equals(session.getAttribute("rol"))) {
+            // 🚪 Si no hay sesión o no es admin → redirige al Login.jsp
+            response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
+        if (action == null) action = "listar";
 
         try {
-            if ("listar".equals(action)) {
-                listarEmpleados(request, response);
-            } else if ("nuevo".equals(action)) {
-                mostrarFormularioNuevo(request, response);
-            } else if ("editar".equals(action)) {
-                mostrarFormularioEditar(request, response);
-            } else if ("eliminar".equals(action)) {
-                eliminarEmpleado(request, response);
+            switch (action) {
+                case "listar":
+                    listarEmpleados(request, response);
+                    break;
+                case "nuevo":
+                    mostrarFormularioNuevo(request, response);
+                    break;
+                case "editar":
+                    mostrarFormularioEditar(request, response);
+                    break;
+                case "eliminar":
+                    eliminarEmpleado(request, response);
+                    break;
+                default:
+                    listarEmpleados(request, response);
+                    break;
             }
         } catch (SQLException e) {
-            throw new ServletException(e);
+            throw new ServletException("Error al procesar la acción: " + action, e);
         }
     }
 
@@ -51,9 +62,9 @@ public class EmpleadoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Control de acceso manual: Solo admin puede acceder
+        // 🔐 Control de acceso: Solo administradores pueden acceder
         HttpSession session = request.getSession(false);
-        if (session == null || !"admin".equals(session.getAttribute("userRole"))) {
+        if (session == null || !"admin".equals(session.getAttribute("rol"))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
             return;
         }
@@ -61,26 +72,32 @@ public class EmpleadoServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
-            if ("insertar".equals(action)) {
-                insertarEmpleado(request, response);
-            } else if ("actualizar".equals(action)) {
-                actualizarEmpleado(request, response);
+            switch (action) {
+                case "insertar":
+                    insertarEmpleado(request, response);
+                    break;
+                case "actualizar":
+                    actualizarEmpleado(request, response);
+                    break;
+                default:
+                    listarEmpleados(request, response);
+                    break;
             }
         } catch (SQLException e) {
-            throw new ServletException(e);
+            throw new ServletException("Error al procesar el formulario de empleado.", e);
         }
     }
 
+    // ==============================
+    // MÉTODOS CRUD
+    // ==============================
+
     private void listarEmpleados(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Empleado> lista = empleadoDao.listar();  // Esto debería devolver la lista de empleados desde la base de datos
-        if (lista != null && !lista.isEmpty()) {
-            request.setAttribute("listaEmpleados", lista);
-            // Asegúrate de que los empleados se están pasando correctamente al JSP
-        } else {
-            request.setAttribute("mensaje", "No hay empleados disponibles.");  // Agregar mensaje cuando no hay empleados
-        }
-        RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");  // Verifica que 'index.jsp' sea el nombre correcto
+
+        List<Empleado> lista = empleadoDao.listar();
+        request.setAttribute("listaEmpleados", lista);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Empleado.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -88,39 +105,46 @@ public class EmpleadoServlet extends HttpServlet {
             throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher("CrearEmpleado.jsp");
         dispatcher.forward(request, response);
-
     }
 
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+
         String idParam = request.getParameter("id");
-        if (idParam != null && !idParam.isEmpty()) {
-            try {
-                int id = Integer.parseInt(idParam);
-                Empleado emp = empleadoDao.leer(id);
-                if (emp != null) {
-                    request.setAttribute("empleado", emp);
-                    RequestDispatcher dispatcher = request.getRequestDispatcher("EditarEmpleado.jsp");
-                    dispatcher.forward(request, response);
-                } else {
-                    response.getWriter().println("Empleado no encontrado");
-                }
-            } catch (NumberFormatException e) {
-                response.getWriter().println("ID inválido, no se puede convertir a número.");
-            }
-        } else {
+        if (idParam == null || idParam.isEmpty()) {
             response.getWriter().println("ID no proporcionado.");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            Empleado emp = empleadoDao.leer(id);
+
+            if (emp != null) {
+                request.setAttribute("empleado", emp);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("EditarEmpleado.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                response.getWriter().println("Empleado no encontrado.");
+            }
+        } catch (NumberFormatException e) {
+            response.getWriter().println("ID inválido, no se puede convertir a número.");
         }
     }
 
     private void insertarEmpleado(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
+
         String nombre = request.getParameter("nombre");
         String direccion = request.getParameter("direccion");
         String telefono = request.getParameter("telefono");
         String cargo = request.getParameter("cargo");
         String salarioStr = request.getParameter("salario");
-        Double salario = Double.parseDouble(salarioStr);
+
+        double salario = 0.0;
+        if (salarioStr != null && !salarioStr.isEmpty()) {
+            salario = Double.parseDouble(salarioStr);
+        }
 
         Empleado emp = new Empleado();
         emp.setNombre(nombre);
@@ -135,17 +159,34 @@ public class EmpleadoServlet extends HttpServlet {
 
     private void actualizarEmpleado(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        String nombre = request.getParameter("nombre");
-        String direccion = request.getParameter("direccion");
-        String telefono = request.getParameter("telefono");
-        String cargo = request.getParameter("cargo");
-        String salarioStr = request.getParameter("salario");
-        Double salario = Double.parseDouble(salarioStr);
 
-        Empleado emp = new Empleado(id, nombre, direccion, telefono, cargo, salario);
-        empleadoDao.editar(emp);
-        response.sendRedirect("EmpleadoServlet?action=listar");
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String nombre = request.getParameter("nombre");
+            String direccion = request.getParameter("direccion");
+            String telefono = request.getParameter("telefono");
+            String cargo = request.getParameter("cargo");
+            String salarioStr = request.getParameter("salario");
+
+            double salario = 0.0;
+            if (salarioStr != null && !salarioStr.isEmpty()) {
+                salario = Double.parseDouble(salarioStr);
+            }
+
+            Empleado emp = new Empleado();
+            emp.setIdEmpleado(id);
+            emp.setNombre(nombre);
+            emp.setDireccion(direccion);
+            emp.setTelefono(telefono);
+            emp.setCargo(cargo);
+            emp.setSalario(salario);
+
+            empleadoDao.editar(emp);
+            response.sendRedirect("EmpleadoServlet?action=listar");
+
+        } catch (NumberFormatException e) {
+            response.getWriter().println("Error: ID o salario inválido.");
+        }
     }
 
     private void eliminarEmpleado(HttpServletRequest request, HttpServletResponse response)

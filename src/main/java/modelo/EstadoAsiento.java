@@ -16,9 +16,10 @@ public class EstadoAsiento {
     // Constructor
     public EstadoAsiento() {}
 
-    public EstadoAsiento(int idEstadoAsiento, String nombre) {
+    public EstadoAsiento(int idEstadoAsiento, String nombre, String Descripcion) {
         this.idEstadoAsiento = idEstadoAsiento;
         this.nombre = nombre;
+        this.Descripcion = Descripcion;
     }
 
     public int getIdEstadoAsiento() {

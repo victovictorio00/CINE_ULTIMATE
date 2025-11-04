@@ -5,9 +5,39 @@ public class Asiento {
     private Sala id_sala;
     private String codigo;
     private EstadoAsiento id_estado_asiento;
+    
+    private String estadoActual;
+    private boolean ocupado;
 
     public Asiento() {}
+    
+    public String getEstadoActual() {
+        return estadoActual;
+    }
 
+    public void setEstadoActual(String estadoActual) {
+        this.estadoActual = estadoActual;
+    }
+
+    // Métodos útiles para el JSP
+    public String getFila() {
+        if (codigo != null && codigo.length() > 0) {
+            return codigo.substring(0, 1); // Extrae "A" de "A1"
+        }
+        return "";
+    }
+    
+    public int getNumero() {
+        if (codigo != null && codigo.length() > 1) {
+            try {
+                return Integer.parseInt(codigo.substring(1)); // Extrae "1" de "A1"
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+    
     public int getId_asiento() {
         return id_asiento;
     }
@@ -52,13 +82,16 @@ public class Asiento {
     // Verificar si esta disponible
     public boolean estaDisponible() {
         return id_estado_asiento != null &&
-               "Disponible".equalsIgnoreCase(id_estado_asiento.getNombre());
+               id_estado_asiento.getIdEstadoAsiento() == 1;
     }
 
     //Ocupar asiento
     public void ocupar() {
         if (estaDisponible()) {
-            id_estado_asiento.setNombre("Ocupado");
+            this.id_estado_asiento.setNombre("Ocupado");
+            this.id_estado_asiento.setIdEstadoAsiento(2);
+            this.estadoActual = "Ocupado";
+            this.ocupado = true;
         } else {
             throw new IllegalStateException("El asiento no está disponible para ocupar.");
         }
@@ -67,7 +100,10 @@ public class Asiento {
     // Liberar una asiento si esta ocupado
     public void liberar() {
         if (!estaDisponible()) {
-            id_estado_asiento.setNombre("Disponible");
+            this.id_estado_asiento.setNombre("Disponible");
+            this.id_estado_asiento.setIdEstadoAsiento(1);
+            this.estadoActual = "Disponible";
+            this.ocupado = false;
         } else{
             throw new IllegalStateException("El asiento ya estaba disponible");
         }
@@ -78,5 +114,20 @@ public class Asiento {
         return otro != null &&
                this.codigo != null &&
                this.codigo.equals(otro.getCodigo());
+    }
+    public Asiento(int id_asiento, boolean disponible) {
+        this.id_asiento = id_asiento;
+        this.id_estado_asiento = new EstadoAsiento();
+        if (disponible) {
+            this.id_estado_asiento.setNombre("Disponible");
+        } else {
+            this.id_estado_asiento.setNombre("Ocupado");
+        }
+    }
+    public boolean isOcupado() {   // ← faltaba
+        return ocupado;
+    }
+    public void setOcupado(boolean ocupado) {
+        this.ocupado = ocupado;
     }
 }

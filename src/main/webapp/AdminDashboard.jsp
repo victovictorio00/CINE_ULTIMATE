@@ -5,6 +5,19 @@
 --%>
 
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
+
+<%
+    // 🔐 VERIFICACIÓN DE SESIÓN ADMINISTRADOR
+    HttpSession sesion = request.getSession(false);
+
+    if (sesion == null || sesion.getAttribute("rol") == null ||
+        !"admin".equals(sesion.getAttribute("rol"))) {
+        // Si no hay sesión o el rol no es admin → redirige al login
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -28,7 +41,7 @@
         .sidebar {
             min-width: 250px;
             max-width: 250px;
-            background-color: #0d6efd; /* azul bootstrap */
+            background-color: #0d6efd;
             color: white;
             min-height: 100vh;
             position: fixed;
@@ -59,7 +72,7 @@
             font-weight: 500;
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: #084298; /* azul más oscuro */
+            background-color: #084298;
             color: white;
         }
 
@@ -130,9 +143,13 @@
             <a href="PeliculaServlet?action=listar" class="nav-link">
                 <i class="fas fa-film mr-2"></i>Películas
             </a>
-            <a href="http://localhost:8080/CineJ3/ClienteServlet?action=listar" class="nav-link">
-                <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+            <a href="FuncionServlet?action=listar" class="nav-link">
+                <i class="fas fa-clock mr-2"></i>Funciones
             </a>
+            <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
+                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+            </a>
+
         </nav>
     </nav>
 
@@ -169,8 +186,6 @@
         <div id="chart-placeholder">
             Ventas Mensuales (Gráfico de ejemplo)
         </div>
-
-        <!-- Aquí puedes agregar más contenido, tablas, gráficos, etc -->
     </main>
 
     <!-- JS y dependencias de Bootstrap -->

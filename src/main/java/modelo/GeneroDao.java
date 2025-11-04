@@ -10,23 +10,28 @@ import Conexion.Conexion;
 public class GeneroDao {
 
     // Método para obtener todos los géneros
-    public List<Genero> getTodosLosGeneros() {
+  public List<Genero> getTodosLosGeneros() throws SQLException {
         List<Genero> lista = new ArrayList<>();
-        String query = "SELECT id_genero, nombre FROM Generos";
-        
+        String sql = "SELECT id_genero, nombre FROM generos"; // tabla en minúsculas, como en tu BD
+
         try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
+             PreparedStatement pst = con.prepareStatement(sql);
              ResultSet rs = pst.executeQuery()) {
-            
+
             while (rs.next()) {
-                Genero g = new Genero();
-                g.setIdGenero(rs.getInt("id_genero"));
-                g.setNombre(rs.getString("nombre"));
-                lista.add(g);
+                Genero genero = new Genero();
+                genero.setIdGenero(rs.getInt("id_genero"));
+                genero.setNombre(rs.getString("nombre"));
+                lista.add(genero);
             }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al cargar los géneros: " + e.getMessage());
         }
         return lista;
     }
+    
+    
+    
+    
+    
+    
+    
 }

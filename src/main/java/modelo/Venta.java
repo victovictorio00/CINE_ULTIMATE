@@ -1,5 +1,6 @@
 package modelo;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Venta {
@@ -9,7 +10,7 @@ public class Venta {
     private double total;
     private String metodoPago;
 
-    // Constructor
+    // Constructor 
     public Venta() {}
 
     public Venta(int idVenta, Usuario idUsuarioCliente, Date fecha, double total, String metodoPago) {
@@ -20,6 +21,15 @@ public class Venta {
         this.metodoPago = metodoPago;
     }
 
+    
+     public void setTotal(double total) {
+           if (total < 0) {
+               throw new IllegalArgumentException("El total no puede ser negativo");
+           }
+           this.total = total; // ya sin caracteres raros
+       }
+     
+     
     public int getIdVenta() {
         return idVenta;
     }
@@ -40,7 +50,11 @@ public class Venta {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(Date fechaStr) {
+        if (fechaStr == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula");
+        }
+
         this.fecha = fecha;
     }
 
@@ -48,12 +62,7 @@ public class Venta {
         return total;
     }
 
-    public void setTotal(double total) {
-           if (total < 0) {
-               throw new IllegalArgumentException("El total no puede ser negativo");
-           }
-           this.total = total; // ya sin caracteres raros
-       }
+   
 
     public String getMetodoPago() {
         return metodoPago;
@@ -63,6 +72,6 @@ public class Venta {
         this.metodoPago = metodoPago;
     }
 
-    
+
     
 }

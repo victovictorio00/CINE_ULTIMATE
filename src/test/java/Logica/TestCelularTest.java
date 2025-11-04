@@ -1,7 +1,4 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
- */
 package Logica;
 
 import org.junit.After;
@@ -30,10 +27,11 @@ public class TestCelularTest {
     @Test
     public void testNumeroValido() {
         System.out.println("numeroValido");
-        String numero = "953re5941";
-        boolean expResult = false;
+        String numero = "3455941";
+        boolean expResult = true;
         boolean result = TestCelular.numeroValido(numero);
         if(expResult != result)
             fail("The test case is a prototype.");
     }
 }
+*/

@@ -11,6 +11,8 @@ public class DetalleVenta {
     private int tipoItem;
     private double precioUnitario;
 
+    //Agregamos uno del precio total del detalle de venta
+    
     //constructor vacío
     public DetalleVenta() {
     }
