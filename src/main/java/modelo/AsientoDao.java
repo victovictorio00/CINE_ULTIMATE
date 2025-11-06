@@ -1,5 +1,4 @@
 package modelo;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +34,12 @@ public class AsientoDao implements DaoCrud<Asiento> {
 
     @Override
     public void insertar(Asiento asiento) throws SQLException {
-        String query = "INSERT INTO asientos (id_sala, codigo, id_estado_asiento) VALUES (?, ?, ?)";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setInt(1, asiento.getId_sala().getIdSala());
-            pst.setString(2, asiento.getCodigo());
-            pst.setInt(3, asiento.getId_estado_asiento().getIdEstadoAsiento());
-            pst.executeUpdate();
+        String sql = "{CALL sp_insertar_asiento(?, ?, ?)}";
+        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+            cs.setInt(1, asiento.getId_sala().getIdSala());
+            cs.setString(2, asiento.getCodigo());
+            cs.setInt(3, asiento.getId_estado_asiento().getIdEstadoAsiento());
+            cs.execute();
         }
     }
 
@@ -94,104 +92,81 @@ public class AsientoDao implements DaoCrud<Asiento> {
             pst.executeUpdate();
         }
     }
-    
+
     public List<Asiento> obtenerAsientosPorSalaYFuncion(int idSala, int idFuncion) throws SQLException {
         List<Asiento> asientos = new ArrayList<>();
-        
-        String query = "SELECT " +
-                       "    a.id_asiento, " +
-                       "    a.codigo, " +
-                       "    a.id_sala, " +
-                       "    a.id_estado_asiento, " +
-                       "    ea.nombre as nombre_estado, " +
-                       "    CASE " +
-                       "        WHEN dv.id_asiento IS NOT NULL THEN 'ocupado' " +
-                       "        WHEN ea.nombre = 'bloqueado' THEN 'bloqueado' " +
-                       "        ELSE 'disponible' " +
-                       "    END as estado_actual " +
-                       "FROM asientos a " +
-                       "INNER JOIN estado_asientos ea ON a.id_estado_asiento = ea.id_estado_asiento " +
-                       "LEFT JOIN detalle_ventas dv ON a.id_asiento = dv.id_asiento " +
-                       "    AND dv.id_funcion = ? " +
-                       "WHERE a.id_sala = ? " +
-                       "ORDER BY a.codigo";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            
-            pst.setInt(1, idFuncion);
-            pst.setInt(2, idSala);
-            
-            try (ResultSet rs = pst.executeQuery()) {
+        String sql = "{CALL sp_obtener_asientos_por_sala_y_funcion(?, ?)}";
+
+        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+
+            cs.setInt(1, idSala);
+            cs.setInt(2, idFuncion);
+long t0 = System.currentTimeMillis();
+            try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {
                     Asiento asiento = new Asiento();
                     asiento.setId_asiento(rs.getInt("id_asiento"));
                     asiento.setCodigo(rs.getString("codigo"));
-                    
-                    // Crear y asignar objeto Sala
+
                     Sala sala = new Sala();
                     sala.setIdSala(rs.getInt("id_sala"));
                     asiento.setId_sala(sala);
-                    
-                    // Crear y asignar objeto EstadoAsiento
+
                     EstadoAsiento estado = new EstadoAsiento();
                     estado.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
                     estado.setNombre(rs.getString("nombre_estado"));
                     asiento.setId_estado_asiento(estado);
-                    
-                    // Asignar el estado actual calculado
+
                     asiento.setEstadoActual(rs.getString("estado_actual"));
-                    
                     asientos.add(asiento);
                 }
             }
+            long t1 = System.currentTimeMillis();
+System.out.println("⏱ sp_obtener_asientos_por_sala_y_funcion tardó: " + (t1 - t0) + " ms");
         }
-        
         return asientos;
     }
 
     public List<Asiento> obtenerAsientosPorSala(int idSala) throws SQLException {
         List<Asiento> asientos = new ArrayList<>();
-        
-        String query = "SELECT a.*, ea.nombre as nombre_estado " +
-                       "FROM asientos a " +
-                       "INNER JOIN estado_asientos ea ON a.id_estado_asiento = ea.id_estado_asiento " +
-                       "WHERE a.id_sala = ? " +
-                       "ORDER BY a.codigo";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            
+
+        String query = "SELECT a.*, ea.nombre as nombre_estado "
+                + "FROM asientos a "
+                + "INNER JOIN estado_asientos ea ON a.id_estado_asiento = ea.id_estado_asiento "
+                + "WHERE a.id_sala = ? "
+                + "ORDER BY a.codigo";
+
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+
             pst.setInt(1, idSala);
-            
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Asiento asiento = new Asiento();
                     asiento.setId_asiento(rs.getInt("id_asiento"));
                     asiento.setCodigo(rs.getString("codigo"));
-                    
+
                     Sala sala = new Sala();
                     sala.setIdSala(rs.getInt("id_sala"));
                     asiento.setId_sala(sala);
-                    
+
                     EstadoAsiento estado = new EstadoAsiento();
                     estado.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
                     estado.setNombre(rs.getString("nombre_estado"));
                     asiento.setId_estado_asiento(estado);
-                    
+
                     asientos.add(asiento);
                 }
             }
         }
-        
+
         return asientos;
     }
-    
+
     public Asiento leerPorCodigo(String codigo) throws SQLException {
         String query = "SELECT * FROM asientos WHERE codigo = ?";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setString(1, codigo);
 
@@ -218,25 +193,20 @@ public class AsientoDao implements DaoCrud<Asiento> {
 
         return null; // Si no encuentra ningún asiento con ese código
     }
-    
+
     public void actualizarEstadoOcupado(int idAsiento) throws SQLException {
-        String sql = "UPDATE asientos SET id_estado_asiento = 2 WHERE id_asiento = ?";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
-            
-            pst.setInt(1, idAsiento);
-            pst.executeUpdate();
+        String sql = "{CALL sp_ocupar_asiento(?)}";
+        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+            cs.setInt(1, idAsiento);
+            cs.execute();
         }
     }
+
     public void actualizarEstadoLibre(int idAsiento) throws SQLException {
-        String sql = "UPDATE asientos SET id_estado_asiento = 1 WHERE id_asiento = ?";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
-            
-            pst.setInt(1, idAsiento);
-            pst.executeUpdate();
+        String sql = "{CALL sp_liberar_asiento(?)}";
+        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+            cs.setInt(1, idAsiento);
+            cs.execute();
         }
-    }    
+    }
 }

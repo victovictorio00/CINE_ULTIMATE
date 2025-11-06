@@ -2,36 +2,11 @@ package Controlador.Cliente;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import javax.servlet.http.*;
+import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.RequestDispatcher;
-import modelo.Pelicula;
-import modelo.PeliculaDao;
-import modelo.Asiento; 
-import modelo.AsientoDao;
-import modelo.Funcion;  
-import modelo.FuncionDao;  
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-import modelo.DetalleVenta;
-import modelo.DetalleVentaDao;
-import modelo.Producto;
-import modelo.ProductoDao;
-import modelo.Sala;
-import modelo.SalaDao;
-import modelo.Usuario;
-import modelo.UsuarioDao;
-import modelo.Venta;
-import modelo.VentaDao;
+import javax.servlet.http.*;
+import modelo.*;
 
 @WebServlet("/ClienteServlet")
 public class ClienteServlet extends HttpServlet {
@@ -39,321 +14,541 @@ public class ClienteServlet extends HttpServlet {
     private PeliculaDao peliculaDao;
     private AsientoDao asientoDao;
     private FuncionDao funcionDao;
-    private SalaDao salaDao;
+    private ProductoDao productoDao;
+    private UsuarioDao usuarioDao;
+    private VentaDao ventaDao;
+    private DetalleVentaDao detalleVentaDao;
+
+    // ============== CONSTANTES PARA ATRIBUTOS DE SESIÓN ==============
+    private static final String ATTR_FUNCION = "funcionSeleccionada";
+    private static final String ATTR_ASIENTOS = "asientosSeleccionados";
+    private static final String ATTR_TOTAL_ASIENTOS = "totalAsientos";
+    private static final String ATTR_CARRITO = "carritoDulceria";
+    private static final String ATTR_TOTAL_DULCES = "totalDulces";
+    private static final String ATTR_METODO_PAGO = "metodoPago";
+    private static final String ATTR_NOMBRE = "nombreCompleto";
+    private static final String ATTR_CORREO = "correoElectronico";
 
     @Override
     public void init() {
         peliculaDao = new PeliculaDao();
         asientoDao = new AsientoDao();
         funcionDao = new FuncionDao();
-        salaDao = new SalaDao();
+        productoDao = new ProductoDao();
+        usuarioDao = new UsuarioDao();
+        ventaDao = new VentaDao();
+        detalleVentaDao = new DetalleVentaDao();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-                HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/Login.jsp");
-            return;
-        }
-
-        Object u = session.getAttribute("username");
-        if (!(u instanceof String) || ((String) u).trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        if (!validarSesion(request, response)) {
             return;
         }
 
         String action = request.getParameter("action");
         if (action == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el parámetro 'action'");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta parámetro 'action'");
             return;
         }
 
         try {
             switch (action) {
-                case "listar": listarPeliculas(request, response); break;
-                case "reservar": mostrarSeleccionAsiento(request, response); break;
-                case "confirmarPago": mostrarVoucher(request, response); break;
-                case "metodoPago": mostrarMetodoPago(request, response); break;
-                case "confirmarReserva": confirmarReserva(request, response); break;
+                case "listar":
+                    listarPeliculas(request, response);
+                    break;
+                case "mostrarAsientos":
+                    mostrarSeleccionAsiento(request, response);
+                    break;
+                case "confirmarReserva":
+                    mostrarConfirmacion(request, response);
+                    break;
+                case "verVoucher":
+                    mostrarVoucher(request, response);
+                    break;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             }
         } catch (SQLException e) {
-            throw new ServletException("Error al procesar la solicitud", e);
+            e.printStackTrace();
+            throw new ServletException("Error en operación GET", e);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!validarSesion(request, response)) {
+            return;
+        }
+
         String action = request.getParameter("action");
+        if (action == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta parámetro 'action'");
+            return;
+        }
+
         try {
             switch (action) {
+                case "reservar_p":
+                    iniciarReserva(request, response);
+                    break;
+                case "seleccionarAsientos":
+                    procesarSeleccionAsientos(request, response);
+                    break;
                 case "seleccionarCombo":
-                    seleccionarCombo(request, response);
+                    procesarSeleccionCombo(request, response);
                     break;
-                case "confirmarAsiento":
-                    procesarSeleccionAsiento(request, response);
+                case "ingresarDatosPago":
+                    procesarDatosPago(request, response);
                     break;
-                case "procesarPago":
-                    procesarPago(request, response);
-                    break;
-                case "guardarVenta":
-                    guardarVenta(request, response);
+                case "finalizarCompra":
+                    finalizarCompra(request, response);
                     break;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             }
         } catch (SQLException e) {
-            throw new ServletException("Error al procesar la acción", e);
+            e.printStackTrace();
+            throw new ServletException("Error en operación POST", e);
         }
     }
 
-    private void procesarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String idFuncion = request.getParameter("idFuncion");
-        String asientoSeleccionado = request.getParameter("asientoSeleccionado");
-
-        HttpSession session = request.getSession();
-        session.setAttribute("idFuncion", idFuncion);
-        session.setAttribute("asientoSeleccionado", asientoSeleccionado);
-
-        request.setAttribute("idFuncion", idFuncion);
-        request.setAttribute("asientoSeleccionado", asientoSeleccionado);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/MetodoPago.jsp");
-        dispatcher.forward(request, response);
+    // ============== VALIDACIÓN ==============
+    private boolean validarSesion(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("username") == null) {
+            response.sendRedirect(request.getContextPath() + "/Login.jsp");
+            return false;
+        }
+        return true;
     }
 
+    // ============== PASO 1: LISTAR PELÍCULAS ==============
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
         List<Pelicula> peliculas = peliculaDao.listar();
         request.setAttribute("peliculas", peliculas);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/DashboardCliente.jsp");
-        dispatcher.forward(request, response);
+        request.getRequestDispatcher("Cliente/DashboardCliente.jsp").forward(request, response);
     }
-    private void mostrarSeleccionAsiento(HttpServletRequest request,
-            HttpServletResponse response)
+
+    // ============== PASO 1.5: INICIAR RESERVA DESDE DETALLE DE PELÍCULA ==============
+    private void iniciarReserva(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
 
-        String idFuncionParam = request.getParameter("idFuncion");
-        if (idFuncionParam == null || idFuncionParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/Cliente/SeleccionFuncion.jsp");
-            return;
-        }
-        int idFuncion = Integer.parseInt(idFuncionParam);
-        Funcion funcion = funcionDao.leer(idFuncion);
-        if (funcion == null) {
-            request.setAttribute("error", "Función no encontrada");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
-            return;
-        }
-        long duracionMin = (funcion.getFechaFin().getTime()
-                - funcion.getFechaInicio().getTime()) / 60000;
-        /*  Asientos */
-        List<Asiento> asientos = asientoDao.obtenerAsientosPorSalaYFuncion(
-                funcion.getSala().getIdSala(), idFuncion);
-        /* Guardamos la funcion seleccionada en la sesion*/
-        HttpSession session = request.getSession();
-        session.setAttribute("funcionSeleccionada", funcion);
-        /* Enviar al JSP */
-        request.setAttribute("asientos", asientos);
-        request.setAttribute("funcion", funcion);
-        request.setAttribute("sala", funcion.getSala());  
-        request.setAttribute("pelicula", funcion.getPelicula()); 
-        request.setAttribute("precioButaca", funcion.getPelicula().getPrecio());
-        request.setAttribute("genero", funcion.getPelicula().getIdGenero().getNombre());
-        request.setAttribute("duracionMin", duracionMin);
-        request.setAttribute("idFuncion", idFuncion);
+        String idPeliculaStr = request.getParameter("id");
+        String idFuncionStr = request.getParameter("idFuncion");
 
-        request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp").forward(request, response);
-    }
-
-    private void seleccionarCombo(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, SQLException {
-        String selectedSeats = request.getParameter("selectedSeats");
-        String idFuncion = request.getParameter("idFuncion");
-        // Guardar en sesión
-        HttpSession session = request.getSession();
-        session.setAttribute("selectedSeats", selectedSeats);
-        session.setAttribute("idFuncion", idFuncion);
-        // Validar que los asientos estén disponibles antes de continuar
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/SeleccionarCombo.jsp");
-        dispatcher.forward(request, response);
-    }
-    private void procesarPago(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Obtener datos del formulario método de pago
-        String nombreCompleto = request.getParameter("nombreCompleto");
-        String correoElectronico = request.getParameter("correoElectronico");
-        String metodoPago = request.getParameter("metodoPago");
-        // Guardar temporalmente en sesión
-        HttpSession session = request.getSession();
-        session.setAttribute("nombreCompleto", nombreCompleto);
-        session.setAttribute("correoElectronico", correoElectronico);
-        session.setAttribute("metodoPago", metodoPago);
-        // Ir a la página de confirmación
-        response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=confirmarReserva");
-    }
-    
-        private void confirmarReserva(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/Login.jsp");
-            return;
-        }
-        // Recuperar los datos almacenados en pasos anteriores
-        Object funcion = session.getAttribute("funcionSeleccionada");
-        Object asientosSeleccionados = session.getAttribute("butacasSeleccionadas");
-        Object precioAsientos = session.getAttribute("totalAsientos");
-        Object carrito = session.getAttribute("carritoDulceria");
-        Object nombreCompleto = session.getAttribute("nombreCompleto");
-        Object correoElectronico = session.getAttribute("correoElectronico");
-        Object metodoPago = session.getAttribute("metodoPago");
-        // (Opcional) puedes agregar validación por si algo falta
-        if (funcion == null || asientosSeleccionados == null || precioAsientos == null || carrito == null) {
-            request.setAttribute("error", "Faltan datos para confirmar la reserva.");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
-            System.err.println("LLEGOOOO");
-            return;
-        }
-        // Enviar los datos a la JSP de confirmación
-        request.getRequestDispatcher("Cliente/Confirmacion.jsp").forward(request, response);
-    }
-    private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Voucher.jsp");
-        dispatcher.forward(request, response);
-    }
-    private void generarVoucher(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String asientoSeleccionado = request.getParameter("asiento");
-        String comboSeleccionado = request.getParameter("combo");
-        String metodoPago = request.getParameter("metodoPago");
-
-        double precioAsiento = 10.00;
-        double precioCombo = 15.00;
-        double total = precioAsiento + precioCombo;
-
-        request.setAttribute("asiento", asientoSeleccionado);
-        request.setAttribute("combo", comboSeleccionado);
-        request.setAttribute("metodoPago", metodoPago);
-        request.setAttribute("total", total);
-        
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/Voucher.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    private void mostrarMetodoPago(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Cliente/MetodoPago.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    private void guardarVenta(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-
-        HttpSession sesion = request.getSession(false);
-        if (sesion == null) {
-            response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        // Validaciones
+        if (idPeliculaStr == null || idFuncionStr == null || idFuncionStr.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Debe seleccionar una película y un horario");
             return;
         }
 
         try {
-            // === Datos del cliente ===
-            int userId = (int) sesion.getAttribute("userId");
-            String metodoPago = (String) sesion.getAttribute("metodoPago");
-            // === Datos de la función y selección ===
-            Funcion funcion = (Funcion) sesion.getAttribute("funcionSeleccionada");
-            String selectedSeatsParam =  (String)sesion.getAttribute("butacasSeleccionadas");// VER TIPO Y TRATAR
-            List<String> asientosSeleccionados = Arrays.asList(selectedSeatsParam.split(","));
-            
-            
-            double totalAsientos = Double.parseDouble(sesion.getAttribute("totalAsientos").toString());
-            double precioDulces = Double.parseDouble(sesion.getAttribute("precioDulces").toString());
-            Map<Integer, Integer> carritoDulceria = (Map<Integer, Integer>) sesion.getAttribute("carritoDulceria");
-            // === Calcular total general ===
-            double totalVenta = totalAsientos + precioDulces;
+            int idFuncion = Integer.parseInt(idFuncionStr);
 
-            // === Crear la venta ===
-            UsuarioDao usuarioDao = new UsuarioDao();
+            // Obtener la función completa
+            Funcion funcion = funcionDao.leer(idFuncion);
+
+            if (funcion == null) {
+                request.setAttribute("error", "La función seleccionada no existe");
+                request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                return;
+            }
+
+            // Guardar función en sesión
+            HttpSession session = request.getSession();
+            session.setAttribute(ATTR_FUNCION, funcion);
+
+            // Limpiar selecciones previas si existieran
+            limpiarSesionCompra(session);
+
+            // Redirigir a selección de asientos
+            response.sendRedirect(request.getContextPath()
+                    + "/ClienteServlet?action=mostrarAsientos&idFuncion=" + idFuncion);
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de función inválido");
+        }
+    }
+
+    // ============== PASO 2: MOSTRAR ASIENTOS ==============
+    private void mostrarSeleccionAsiento(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+
+        HttpSession session = request.getSession();
+
+        // Intentar obtener la función de la sesión primero
+        Funcion funcion = (Funcion) session.getAttribute(ATTR_FUNCION);
+
+        // Si no está en sesión, buscar por parámetro
+        if (funcion == null) {
+            String idFuncionParam = request.getParameter("idFuncion");
+            if (idFuncionParam == null || idFuncionParam.isEmpty()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                        "No hay función seleccionada");
+                return;
+            }
+
+            try {
+                int idFuncion = Integer.parseInt(idFuncionParam);
+                funcion = funcionDao.leer(idFuncion);
+
+                if (funcion == null) {
+                    request.setAttribute("error", "Función no encontrada");
+                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    return;
+                }
+
+                // Guardar en sesión para el flujo
+                session.setAttribute(ATTR_FUNCION, funcion);
+
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de función inválido");
+                return;
+            }
+        }
+
+        // Validar que la función tenga sala
+        if (funcion.getSala() == null) {
+            request.setAttribute("error", "La función no tiene sala asignada");
+            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            return;
+        }
+
+        // Obtener asientos disponibles
+        List<Asiento> asientos = asientoDao.obtenerAsientosPorSalaYFuncion(
+                funcion.getSala().getIdSala(), funcion.getIdFuncion());
+
+        // Calcular duración
+        long duracionMin = (funcion.getFechaFin().getTime() - funcion.getFechaInicio().getTime()) / 60000;
+
+        // Preparar atributos para JSP
+        request.setAttribute("asientos", asientos);
+        request.setAttribute("funcion", funcion);
+        request.setAttribute("sala", funcion.getSala());
+        request.setAttribute("pelicula", funcion.getPelicula());
+        request.setAttribute("precioButaca", funcion.getPelicula().getPrecio());
+        request.setAttribute("genero", funcion.getPelicula().getIdGenero().getNombre());
+        request.setAttribute("duracionMin", duracionMin);
+
+        request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp").forward(request, response);
+    }
+
+    // ============== PASO 3: PROCESAR SELECCIÓN DE ASIENTOS ==============
+    private void procesarSeleccionAsientos(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+
+        String selectedSeats = request.getParameter("selectedSeats");
+        if (selectedSeats == null || selectedSeats.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Debe seleccionar al menos un asiento");
+            return;
+        }
+
+        HttpSession session = request.getSession();
+        Funcion funcion = (Funcion) session.getAttribute(ATTR_FUNCION);
+
+        if (funcion == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay función seleccionada");
+            return;
+        }
+
+        // Validar disponibilidad de asientos
+        List<String> asientos = Arrays.asList(selectedSeats.split(","));
+        for (String codigoAsiento : asientos) {
+            Asiento asiento = asientoDao.leerPorCodigo(codigoAsiento.trim());
+
+            // ✅ CORRECCIÓN: Usar estaDisponible() en lugar de getOcupado()
+            if (asiento == null || !asiento.estaDisponible()) {
+                request.setAttribute("error", "El asiento " + codigoAsiento + " no está disponible");
+                request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                return;
+            }
+        }
+
+        // Calcular total de asientos
+        double totalAsientos = asientos.size() * funcion.getPelicula().getPrecio();
+
+        // Guardar en sesión
+        session.setAttribute(ATTR_ASIENTOS, selectedSeats);
+        session.setAttribute(ATTR_TOTAL_ASIENTOS, totalAsientos);
+
+        // Log para debug
+        System.out.println("=== ASIENTOS SELECCIONADOS ===");
+        System.out.println("Códigos: " + selectedSeats);
+        System.out.println("Total: S/. " + totalAsientos);
+
+        // ✅ Redirect (no forward) a DulceriaServlet
+        response.sendRedirect(request.getContextPath() + "/DulceriaServlet");
+    }
+
+    // ============== PASO 4: PROCESAR SELECCIÓN DE COMBO ==============
+    private void procesarSeleccionCombo(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+
+        HttpSession session = request.getSession();
+
+        // Obtener productos seleccionados (formato: producto_idProducto=cantidad)
+        Map<Integer, Integer> carrito = new HashMap<>();
+        double totalDulces = 0.0;
+
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            if (paramName.startsWith("producto_")) {
+                try {
+                    int idProducto = Integer.parseInt(paramName.replace("producto_", ""));
+                    String cantidadStr = request.getParameter(paramName);
+
+                    if (cantidadStr != null && !cantidadStr.trim().isEmpty()) {
+                        int cantidad = Integer.parseInt(cantidadStr);
+                        if (cantidad > 0) {
+                            Producto producto = productoDao.leer(idProducto);
+                            if (producto != null) {
+                                carrito.put(idProducto, cantidad);
+                                totalDulces += producto.getPrecio() * cantidad;
+                            }
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parseando producto: " + paramName);
+                }
+            }
+        }
+
+        // Guardar en sesión (incluso si está vacío)
+        session.setAttribute(ATTR_CARRITO, carrito);
+        session.setAttribute(ATTR_TOTAL_DULCES, totalDulces);
+
+        // Log para debug
+        System.out.println("=== DULCERÍA SELECCIONADA ===");
+        System.out.println("Productos: " + carrito.size());
+        System.out.println("Total dulces: S/. " + totalDulces);
+
+        // Redirigir a método de pago
+        request.getRequestDispatcher("Cliente/MetodoPago.jsp").forward(request, response);
+    }
+
+    // ============== PASO 5: PROCESAR DATOS DE PAGO ==============
+    private void procesarDatosPago(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String nombreCompleto = request.getParameter("nombreCompleto");
+        String correoElectronico = request.getParameter("correoElectronico");
+        String metodoPago = request.getParameter("metodoPago");
+
+        // Validaciones básicas
+        if (nombreCompleto == null || nombreCompleto.trim().isEmpty()
+                || correoElectronico == null || correoElectronico.trim().isEmpty()
+                || metodoPago == null || metodoPago.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Faltan datos obligatorios");
+            return;
+        }
+
+        // Guardar en sesión
+        HttpSession session = request.getSession();
+        session.setAttribute(ATTR_NOMBRE, nombreCompleto.trim());
+        session.setAttribute(ATTR_CORREO, correoElectronico.trim());
+        session.setAttribute(ATTR_METODO_PAGO, metodoPago.trim());
+
+        // Log para debug
+        System.out.println("=== DATOS DE PAGO ===");
+        System.out.println("Nombre: " + nombreCompleto);
+        System.out.println("Método: " + metodoPago);
+
+        // Redirigir a confirmación
+        response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=confirmarReserva");
+    }
+
+    // ============== PASO 6: MOSTRAR CONFIRMACIÓN ==============
+    private void mostrarConfirmacion(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+
+        // Validar que existan todos los datos necesarios
+        if (session.getAttribute(ATTR_FUNCION) == null
+                || session.getAttribute(ATTR_ASIENTOS) == null
+                || session.getAttribute(ATTR_TOTAL_ASIENTOS) == null) {
+
+            request.setAttribute("error", "Faltan datos para confirmar la reserva. Por favor, inicie el proceso nuevamente.");
+            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            return;
+        }
+
+        // Forward a JSP de confirmación (todos los datos están en sesión)
+        request.getRequestDispatcher("Cliente/Confirmacion.jsp").forward(request, response);
+    }
+
+    // ============== PASO 7: FINALIZAR COMPRA ==============
+    private void finalizarCompra(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+
+        HttpSession session = request.getSession();
+
+        try {
+            // Recuperar datos de sesión
+            Integer userIdObj = (Integer) session.getAttribute("userId");
+            if (userIdObj == null) {
+                throw new IllegalStateException("Usuario no identificado en sesión");
+            }
+            int userId = userIdObj;
+
+            Funcion funcion = (Funcion) session.getAttribute(ATTR_FUNCION);
+            String asientosStr = (String) session.getAttribute(ATTR_ASIENTOS);
+            Double totalAsientos = (Double) session.getAttribute(ATTR_TOTAL_ASIENTOS);
+            Double totalDulces = (Double) session.getAttribute(ATTR_TOTAL_DULCES);
+            Map<Integer, Integer> carrito = (Map<Integer, Integer>) session.getAttribute(ATTR_CARRITO);
+            String metodoPago = (String) session.getAttribute(ATTR_METODO_PAGO);
+
+            // Validar datos obligatorios
+            if (funcion == null || asientosStr == null || totalAsientos == null) {
+                throw new IllegalStateException("Datos incompletos para finalizar compra");
+            }
+
+            // Valores por defecto
+            if (totalDulces == null) {
+                totalDulces = 0.0;
+            }
+            if (carrito == null) {
+                carrito = new HashMap<>();
+            }
+            if (metodoPago == null || metodoPago.isEmpty()) {
+                metodoPago = "efectivo"; // Valor por defecto
+            }
+
+            List<String> asientos = Arrays.asList(asientosStr.split(","));
+
+            System.out.println("=== FINALIZANDO COMPRA ===");
+            System.out.println("Usuario ID: " + userId);
+            System.out.println("Función ID: " + funcion.getIdFuncion());
+            System.out.println("Asientos: " + asientosStr);
+            System.out.println("Total: S/. " + (totalAsientos + totalDulces));
+
+            // ===== VALIDACIÓN FINAL: Verificar disponibilidad de asientos =====
+            for (String codigoAsiento : asientos) {
+                Asiento asiento = asientoDao.leerPorCodigo(codigoAsiento.trim());
+
+                // ✅ CORRECCIÓN: Usar estaDisponible()
+                if (asiento == null || !asiento.estaDisponible()) {
+                    request.setAttribute("error", "El asiento " + codigoAsiento + " ya no está disponible");
+                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    return;
+                }
+            }
+
+            // Crear venta
             Usuario usuario = usuarioDao.leer(userId);
+            if (usuario == null) {
+                throw new IllegalStateException("Usuario no encontrado: " + userId);
+            }
 
             Venta venta = new Venta();
             venta.setIdUsuarioCliente(usuario);
-            
-            // 🔹 Generar la fecha actual con el formato correcto
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy - HH:mm");
-            String fechaActual = sdf.format(new Date());
-            System.out.println("DEBUG Fecha generada: " + fechaActual); // para ver si coincide
-            // 🔹 Pasarla como String (como tu método lo espera)
             venta.setFecha(new Date());
-            venta.setTotal(totalVenta);
+            venta.setTotal(totalAsientos + totalDulces);
             venta.setMetodoPago(metodoPago);
 
-            // === Guardar venta ===
-            VentaDao ventaDao = new VentaDao();
-            
-            // ANTES DE HACER RSTO VEIRIGFIAR EN LA ELECCION DE ASINETO QUE ESTE LIBRE  EE
-            
-            
-            int idVentaGenerada = ventaDao.insertarYDevolverId(venta);
-            sesion.setAttribute("idVenta", idVentaGenerada);
+            // Insertar venta y obtener ID
+            int idVenta = ventaDao.insertarYDevolverId(venta);
+            venta.setIdVenta(idVenta);
 
-            // === Guardar detalles de los asientos ===
-            PeliculaDao peliDao = new PeliculaDao();
-            
-            if (asientosSeleccionados != null) {
-                DetalleVentaDao detalleDao = new DetalleVentaDao();
-                for (String a : asientosSeleccionados) {
-                    DetalleVenta detalle = new DetalleVenta();
-                    detalle.setVenta(venta);
-                    detalle.setFuncion(funcion);
-                    detalle.setAsiento(asientoDao.leerPorCodigo(a));
-                    detalle.setCantidad(1);
-                    detalle.setTipoItem(1); // 1 = asiento
-                    detalle.setPrecioUnitario(funcion.getPelicula().getPrecio());
-                    detalleDao.insertar(detalle);
-                    if (detalle.getAsiento() != null) {
-                        asientoDao.actualizarEstadoOcupado(detalle.getAsiento().getId_asiento());
-                    }
-                }
+            System.out.println("Venta creada con ID: " + idVenta);
+
+            // Guardar detalles de asientos
+            for (String codigoAsiento : asientos) {
+                Asiento asiento = asientoDao.leerPorCodigo(codigoAsiento.trim());
+
+                DetalleVenta detalle = new DetalleVenta();
+                detalle.setVenta(venta);
+                detalle.setFuncion(funcion);
+                detalle.setAsiento(asiento);
+                detalle.setProducto(null);
+                detalle.setCantidad(1);
+                detalle.setTipoItem(2); // Asiento
+                detalle.setPrecioUnitario(funcion.getPelicula().getPrecio());
+
+                detalleVentaDao.insertar(detalle);
+
+                // Marcar asiento como ocupado
+                asientoDao.actualizarEstadoOcupado(asiento.getId_asiento());
+                System.out.println("Asiento " + codigoAsiento + " marcado como ocupado");
             }
-            // === Guardar detalles de dulcería ===
-            if (carritoDulceria != null && !carritoDulceria.isEmpty()) {
-                ProductoDao productoDao = new ProductoDao();
-                DetalleVentaDao detalleDao = new DetalleVentaDao();
 
-                for (Map.Entry<Integer, Integer> entry : carritoDulceria.entrySet()) {
-                    int idProducto = entry.getKey();
-                    int cantidad = entry.getValue();
+            // Guardar detalles de dulcería
+            for (Map.Entry<Integer, Integer> entry : carrito.entrySet()) {
+                Producto producto = productoDao.leer(entry.getKey());
+                int idProducto = entry.getKey();
+                int cantidad = entry.getValue();
 
-                    Producto producto = productoDao.leer(idProducto);
-
+                if (producto != null) {
                     DetalleVenta detalle = new DetalleVenta();
                     detalle.setVenta(venta);
                     detalle.setProducto(producto);
+                    detalle.setFuncion(null);  // ✅ IMPORTANTE: Asegurarse que sea null
+                    detalle.setAsiento(null);  // ✅ IMPORTANTE: Asegurarse que sea null
                     detalle.setCantidad(cantidad);
-                    detalle.setTipoItem(2); // 2 = dulcería
+                    detalle.setTipoItem(1); // 1 = Producto (dulcería)
                     detalle.setPrecioUnitario(producto.getPrecio());
-                    detalleDao.insertar(detalle);
+
+                    detalleVentaDao.insertar(detalle);
+                    System.out.println("Producto " + producto.getNombre() + " x" + entry.getValue() + " guardado");
                 }
             }
-            // === Limpieza y redirección ===
-            sesion.removeAttribute("funcionSeleccionada");
-            sesion.removeAttribute("butacasSeleccionadas");
-            sesion.removeAttribute("totalAsientos");
-            sesion.removeAttribute("carritoDulceria");
-            sesion.removeAttribute("precioDulces");
-            sesion.removeAttribute("metodoPago");
-            response.sendRedirect(request.getContextPath() + "/Cliente/Voucher.jsp");
+
+            // Guardar ID de venta para el voucher
+            session.setAttribute("idVenta", idVenta);
+
+            // Limpiar datos de sesión de compra
+            limpiarSesionCompra(session);
+
+            System.out.println("=== COMPRA FINALIZADA EXITOSAMENTE ===");
+
+            // Redirigir al voucher
+            response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=verVoucher");
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al guardar la venta: " + e.getMessage());
+            System.err.println("Error al finalizar compra: " + e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Error al procesar la compra: " + e.getMessage());
         }
+    }
+
+    // ============== PASO 8: MOSTRAR VOUCHER ==============
+    private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        Integer idVenta = (Integer) session.getAttribute("idVenta");
+
+        if (idVenta == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
+            return;
+        }
+
+        System.out.println("Mostrando voucher para venta ID: " + idVenta);
+
+        // El JSP puede cargar los detalles con el idVenta
+        request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
+    }
+
+    // ============== UTILIDADES ==============
+    private void limpiarSesionCompra(HttpSession session) {
+        session.removeAttribute(ATTR_FUNCION);
+        session.removeAttribute(ATTR_ASIENTOS);
+        session.removeAttribute(ATTR_TOTAL_ASIENTOS);
+        session.removeAttribute(ATTR_CARRITO);
+        session.removeAttribute(ATTR_TOTAL_DULCES);
+        session.removeAttribute(ATTR_METODO_PAGO);
+        session.removeAttribute(ATTR_NOMBRE);
+        session.removeAttribute(ATTR_CORREO);
+        // NO limpiar idVenta aquí - se necesita para el voucher
     }
 }

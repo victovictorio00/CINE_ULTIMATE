@@ -12,9 +12,7 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
         List<DetalleVenta> detalles = new ArrayList<>();
         String query = "SELECT * FROM detalle_ventas";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
                 DetalleVenta detalle = new DetalleVenta();
@@ -49,44 +47,43 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
 
     @Override
     public void insertar(DetalleVenta detalle) throws SQLException {
-        String query = "INSERT INTO detalle_ventas ("
-                     + "id_venta, id_producto, id_funcion, id_asiento, "
-                     + "cantidad, tipo_item, precio_unitario) "
-                     + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "{CALL sp_insertar_detalle_venta(?, ?, ?, ?, ?, ?, ?)}";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
 
-            // FK: Venta (obligatoria)
-            pst.setInt(1, detalle.getVenta().getIdVenta());
+            // Parámetro 1: ID Venta (Siempre existe)
+            cs.setInt(1, detalle.getVenta().getIdVenta());
 
-            // FK: Producto (puede ser null si es asiento)
+            // Parámetro 2: ID Producto (Dulcería)
             if (detalle.getProducto() != null) {
-                pst.setInt(2, detalle.getProducto().getIdProducto());
+                cs.setInt(2, detalle.getProducto().getIdProducto());
             } else {
-                pst.setNull(2, Types.INTEGER);
+                // CORRECCIÓN CLAVE: Usar setNull para insertar NULL
+                cs.setNull(2, java.sql.Types.INTEGER);
             }
 
-            // FK: Función (solo si es asiento)
+            // Parámetro 3: ID Función
             if (detalle.getFuncion() != null) {
-                pst.setInt(3, detalle.getFuncion().getIdFuncion());
+                cs.setInt(3, detalle.getFuncion().getIdFuncion());
             } else {
-                pst.setNull(3, Types.INTEGER);
+                // Usar setNull para insertar NULL
+                cs.setNull(3, java.sql.Types.INTEGER);
             }
 
-            // FK: Asiento (solo si es asiento)
+            // Parámetro 4: ID Asiento
             if (detalle.getAsiento() != null) {
-                pst.setInt(4, detalle.getAsiento().getId_asiento());
+                cs.setInt(4, detalle.getAsiento().getId_asiento());
             } else {
-                pst.setNull(4, Types.INTEGER);
+                // Usar setNull para insertar NULL
+                cs.setNull(4, java.sql.Types.INTEGER);
             }
 
-            // Campos propios
-            pst.setInt(5, detalle.getCantidad());
-            pst.setInt(6, detalle.getTipoItem());
-            pst.setDouble(7, detalle.getPrecioUnitario());
+            // Parámetros restantes (valores no nulos)
+            cs.setInt(5, detalle.getCantidad());
+            cs.setInt(6, detalle.getTipoItem());
+            cs.setDouble(7, detalle.getPrecioUnitario());
 
-            pst.executeUpdate(); // ✅ Inserta realmente
+            cs.execute(); // Ejecuta el procedimiento
         }
     }
 
@@ -95,8 +92,7 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
         String query = "SELECT * FROM detalle_ventas WHERE id_detalle_venta = ?";
         DetalleVenta detalle = null;
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setInt(1, id);
 
@@ -132,12 +128,11 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
     @Override
     public void editar(DetalleVenta detalle) throws SQLException {
         String query = "UPDATE detalle_ventas SET "
-                     + "id_venta = ?, id_producto = ?, id_funcion = ?, id_asiento = ?, "
-                     + "cantidad = ?, tipo_item = ?, precio_unitario = ? "
-                     + "WHERE id_detalle_venta = ?";
+                + "id_venta = ?, id_producto = ?, id_funcion = ?, id_asiento = ?, "
+                + "cantidad = ?, tipo_item = ?, precio_unitario = ? "
+                + "WHERE id_detalle_venta = ?";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setInt(1, detalle.getVenta().getIdVenta());
             pst.setInt(2, (detalle.getProducto() != null)
@@ -145,7 +140,7 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
             pst.setInt(3, (detalle.getFuncion() != null)
                     ? detalle.getFuncion().getIdFuncion() : Types.NULL);
             pst.setInt(4, (detalle.getAsiento() != null)
-                    ? detalle.getAsiento().getId_asiento(): Types.NULL);
+                    ? detalle.getAsiento().getId_asiento() : Types.NULL);
             pst.setInt(5, detalle.getCantidad());
             pst.setInt(6, detalle.getTipoItem());
             pst.setDouble(7, detalle.getPrecioUnitario());
@@ -159,20 +154,49 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
     public void eliminar(int id) throws SQLException {
         String query = "DELETE FROM detalle_ventas WHERE id_detalle_venta = ?";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setInt(1, id);
             pst.executeUpdate();
         }
     }
-    
+
     public List<DetalleVenta> listarPorVenta(int idVenta) throws SQLException {
         List<DetalleVenta> lista = new ArrayList<>();
-        String sql = "SELECT * FROM detalle_ventas WHERE id_venta = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+
+        String sql
+                = "SELECT "
+                + "  dv.id_detalle_venta, "
+                + "  dv.cantidad, "
+                + "  dv.tipo_item, "
+                + "  dv.precio_unitario, "
+                + "  dv.id_venta, "
+                + "  dv.id_producto, "
+                + "  dv.id_funcion, "
+                + "  dv.id_asiento, "
+                + "  v.id_venta      AS v_id_venta, "
+                + "  v.fecha         AS v_fecha_venta, "
+                + "  v.total         AS v_total, "
+                + "  p.id_producto   AS p_id_producto, "
+                + "  p.nombre        AS p_nombre, "
+                + "  p.precio        AS p_precio, "
+                + "  f.id_funcion    AS f_id_funcion, "
+                + "  f.fecha_fin     AS f_fecha, "
+                + "  f.hora_inicio   AS f_hora_inicio, "
+                + "  a.id_asiento    AS a_id_asiento, "
+                + "  a.codigo        AS a_codigo "
+                + "FROM detalle_ventas dv "
+                + "JOIN ventas        v  ON v.id_venta   = dv.id_venta "
+                + "LEFT JOIN productos p  ON p.id_producto = dv.id_producto "
+                + "LEFT JOIN funciones f  ON f.id_funcion  = dv.id_funcion "
+                + "LEFT JOIN asientos  a  ON a.id_asiento  = dv.id_asiento "
+                + "WHERE dv.id_venta = ? "
+                + "ORDER BY dv.id_detalle_venta";
+
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+
             pst.setInt(1, idVenta);
+
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     DetalleVenta d = new DetalleVenta();
@@ -180,27 +204,47 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
                     d.setCantidad(rs.getInt("cantidad"));
                     d.setTipoItem(rs.getInt("tipo_item"));
                     d.setPrecioUnitario(rs.getDouble("precio_unitario"));
-                    // ...rellena los objetos relacionados según tus getters/setters...
-                    
-                    VentaDao vd = new VentaDao();
-                    d.setVenta(vd.leer(rs.getInt("id_venta")));
 
-                    ProductoDao pd = new ProductoDao();
-                    d.setProducto(pd.leer(rs.getInt("id_producto")));
+                    // Venta
+                    Venta v = new Venta();
+                    v.setIdVenta(rs.getInt("v_id_venta"));
+                    v.setFecha(rs.getTimestamp("v_fecha_venta"));
+                    v.setTotal(rs.getDouble("v_total"));
+                    d.setVenta(v);
 
-                    FuncionDao fd = new FuncionDao();
-                    d.setFuncion(fd.leer(rs.getInt("id_funcion")));
+                    // Producto (puede ser null)
+                    int idProd = rs.getInt("p_id_producto");
+                    if (!rs.wasNull()) {
+                        Producto p = new Producto();
+                        p.setIdProducto(idProd);
+                        p.setNombre(rs.getString("p_nombre"));
+                        p.setPrecio(rs.getDouble("p_precio"));
+                        d.setProducto(p);
+                    }
 
-                    AsientoDao ad = new AsientoDao();
-                    d.setAsiento(ad.leer(rs.getInt("id_asiento")));                   
-                    
-                    
+                    // Función (puede ser null)
+                    int idFunc = rs.getInt("f_id_funcion");
+                    if (!rs.wasNull()) {
+                        Funcion f = new Funcion();
+                        f.setIdFuncion(idFunc);
+                        f.setFechaFin(rs.getTimestamp("f_fecha"));
+                        f.setFechaInicio(rs.getTimestamp("f_hora_inicio"));
+                        d.setFuncion(f);
+                    }
+
+                    // Asiento (puede ser null)
+                    int idAsiento = rs.getInt("a_id_asiento");
+                    if (!rs.wasNull()) {
+                        Asiento a = new Asiento();
+                        a.setId_asiento(idAsiento);
+                        a.setCodigo(rs.getString("a_codigo"));
+                        d.setAsiento(a);
+                    }
+
                     lista.add(d);
                 }
-                int a =1;
             }
         }
         return lista;
     }
-    
 }

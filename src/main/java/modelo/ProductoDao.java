@@ -1,5 +1,4 @@
 package modelo;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,7 @@ public class ProductoDao implements DaoCrud<Producto> {
             pst.setString(2, p.getDescripcion());
             pst.setBytes(3, p.getFoto());
             pst.setInt(4, p.getStock());
-            pst.setDouble(5, p.getPrecio());          // << precio
+            pst.setDouble(5, p.getPrecio());
             pst.executeUpdate();
         }
     }
@@ -59,7 +58,7 @@ public class ProductoDao implements DaoCrud<Producto> {
                     p.setDescripcion(rs.getString("descripcion"));
                     p.setFoto(rs.getBytes("foto"));
                     p.setStock(rs.getInt("stock"));
-                    p.setPrecio(rs.getDouble("precio")); // << precio
+                    p.setPrecio(rs.getDouble("precio"));
                     return p;
                 }
             }
@@ -77,7 +76,7 @@ public class ProductoDao implements DaoCrud<Producto> {
             pst.setString(2, p.getDescripcion());
             pst.setBytes(3, p.getFoto());
             pst.setInt(4, p.getStock());
-            pst.setDouble(5, p.getPrecio());          // << precio
+            pst.setDouble(5, p.getPrecio());
             pst.setInt(6, p.getIdProducto());
             pst.executeUpdate();
         }
@@ -93,8 +92,8 @@ public class ProductoDao implements DaoCrud<Producto> {
             pst.executeUpdate();
         }
     }
-
-    // Si quieres mantener un método "actualizar" separado, que llame a editar(...)
+    
+    //metodo actualizar - separado del editar (momentáneo)
     public void actualizar(Producto p) throws SQLException {
         editar(p);
     }

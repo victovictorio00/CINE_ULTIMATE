@@ -1,6 +1,6 @@
 package modelo;
-
 public class Empleado {
+    //variables de entrada
     private int idEmpleado;
     private String nombre;
     private String direccion;
@@ -19,8 +19,29 @@ public class Empleado {
         this.telefono = telefono;
         this.cargo = cargo;
         this.salario = salario;
+        
+        //última capa de validación en capa modelo
+        validar();
     }
 
+    // Método de validación
+    public void validar() {
+        if (nombre == null || nombre.trim().isEmpty())
+            throw new IllegalArgumentException("El nombre del empleado no puede estar vacío.");
+
+        if (direccion == null || direccion.trim().isEmpty())
+            throw new IllegalArgumentException("La dirección no puede estar vacía.");
+
+        if (telefono == null || !telefono.matches("\\d{7,9}"))
+            throw new IllegalArgumentException("El teléfono debe contener entre 7 y 9 dígitos numéricos.");
+
+        if (cargo == null || cargo.trim().isEmpty())
+            throw new IllegalArgumentException("El cargo no puede estar vacío.");
+
+        if (salario <= 0)
+            throw new IllegalArgumentException("El salario debe ser mayor que cero.");
+    }
+    
     //Getter and Setter
     public int getIdEmpleado() {
         return idEmpleado;

@@ -6,6 +6,7 @@ import Conexion.Conexion;
 
 public class ComprobanteDao implements DaoCrud<Comprobante> {
 
+    //los CRUD no fueron integrados a procedure, son básicos
     @Override
     public List<Comprobante> listar() throws SQLException {
         List<Comprobante> lista = new ArrayList<>();

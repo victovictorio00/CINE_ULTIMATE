@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpSession;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
 
@@ -30,6 +31,24 @@ public class DashBoardServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
+        
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+        System.out.println("Limpiando datos de reserva de la sesión...");
+        
+        // **IMPORTANTE:** Usa los nombres EXACTOS de tus atributos
+        session.removeAttribute("funcionSeleccionada"); 
+        session.removeAttribute("asientosSeleccionados");
+        session.removeAttribute("totalAsientos");
+        session.removeAttribute("carritoDulceria");
+        session.removeAttribute("totalDulces");
+        session.removeAttribute("metodoPago");
+        session.removeAttribute("nombreCompleto");
+        session.removeAttribute("correoElectronico");
+        
+        System.out.println("✅ Sesión de reserva limpiada al acceder a Home.");
+    }
+        
         try {
             // Obtener la lista de películas desde la base de datos
             List<Pelicula> lista = peliculaDao.listar();

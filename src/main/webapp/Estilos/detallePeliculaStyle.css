@@ -1,0 +1,128 @@
+:root {
+    --accent: #FF5733;
+}
+body {
+    background-color: #f7f7f7;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: rgba(0,0,0,0.8);
+    border-bottom: 1px solid white;
+    height: 80px;
+    padding-top: 10px;
+}
+.navbar-brand, .nav-link {
+    color: white !important;
+    transition: color .3s ease;
+}
+.nav-link:hover {
+    color: var(--accent) !important;
+}
+.nav-item.active .nav-link {
+    color: var(--accent) !important;
+}
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-color: var(--accent);
+    bottom: 0;
+    left: 0;
+}
+.navbar-nav {
+    width:100%;
+    display:flex;
+    justify-content:center;
+}
+.nav-item {
+    margin:0 15px;
+    position:relative;
+}
+
+.navbar .dropdown-menu {
+    background-color: #343a40 !important; /* Gris oscuro */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.navbar .dropdown-item {
+    color: #f8f9fa !important;
+    background-color: transparent !important;
+}
+.navbar .dropdown-item:hover {
+    background-color: var(--accent) !important;
+    color: white !important;
+}
+.movie-video {
+    width: 80%;
+    height: 60vh;
+    overflow: hidden;
+    margin-top: 70px;
+}
+.movie-video iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+}
+.movie-details-container {
+    margin-top: 60px;
+    margin-bottom: 80px;
+}
+.movie-poster img.poster-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+}
+.movie-poster img.poster-img:hover {
+    transform: scale(1.03);
+}
+.movie-details {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px 40px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.movie-details h1 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+.movie-details h3 {
+    margin-top: 20px;
+    color: #333;
+}
+.movie-details p {
+    text-align: justify;
+    color: #555;
+}
+.btn-primary, .btn-dark {
+    margin-right: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+footer {
+    background-color: #212529;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    width: 100%;
+}
+footer a {
+    color: #bbb;
+    text-decoration: none;
+}
+footer a:hover {
+    color: white;
+}
+@media (max-width: 768px) {
+    .movie-details {
+        margin-top: 30px;
+        text-align: center;
+    }
+}
