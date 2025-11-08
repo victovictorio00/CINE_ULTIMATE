@@ -1,4 +1,5 @@
 package modelo;
+
 import java.util.Date;
 
 public class Venta {
@@ -10,8 +11,7 @@ public class Venta {
     private String metodoPago;
 
     // Constructor vacío
-    public Venta() {
-    }
+    public Venta() {}
 
     // Constructor con parámetros
     public Venta(int idVenta, Usuario idUsuarioCliente, Date fecha, double total, String metodoPago) {
@@ -20,33 +20,14 @@ public class Venta {
         this.fecha = fecha;
         this.total = total;
         this.metodoPago = metodoPago;
-        
-        //última capa de validación en capa modelo
-        validar();
     }
 
-    // Validación estructural (antes de guardar)
-    private void validar() {
-        if (idUsuarioCliente == null) {
-            throw new IllegalArgumentException("El cliente no puede ser nulo");
-        }
-        if (fecha == null) {
-            throw new IllegalArgumentException("La fecha no puede ser nula");
-        }
-        if (total < 0) {
-            throw new IllegalArgumentException("El total no puede ser negativo");
-        }
-        if (metodoPago == null || metodoPago.trim().isEmpty()) {
-            throw new IllegalArgumentException("El método de pago no puede estar vacío");
-        }
-    }
-    
     // getters y setters
     public void setTotal(double total) {
         if (total < 0) {
             throw new IllegalArgumentException("El total no puede ser negativo");
         }
-        this.total = total; // ya sin caracteres raros
+        this.total = total;
     }
 
     public int getIdVenta() {
@@ -73,8 +54,7 @@ public class Venta {
         if (fechaStr == null) {
             throw new IllegalArgumentException("La fecha no puede ser nula");
         }
-
-        this.fecha = fecha;
+        this.fecha = fechaStr;
     }
 
     public double getTotal() {

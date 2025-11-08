@@ -30,52 +30,6 @@ public class Usuario {
         this.email = email;
         this.direccion = direccion;
         this.numeroIntentos = numeroIntentos;
-        
-        //última capa de validación en capa modelo
-        validar();
-    }
-    
-    // Validación estructural (antes de guardar)
-    public void validar() {
-        StringBuilder errores = new StringBuilder();
-
-        if (idUsuario < 0)
-            errores.append("El ID de usuario no puede ser negativo.\n");
-        if (idRol == null)
-            errores.append("El rol del usuario no puede ser nulo.\n");
-        if (idEstadoUsuario == null)
-            errores.append("El estado del usuario no puede ser nulo.\n");
-
-        if (nombreCompleto == null || nombreCompleto.trim().isEmpty())
-            errores.append("El nombre completo no puede estar vacío.\n");
-        else if (!nombreCompleto.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-            errores.append("El nombre completo solo puede contener letras y espacios.\n");
-
-        if (dni == null || !dni.matches("\\d{8}"))
-            errores.append("El DNI debe tener exactamente 8 dígitos numéricos.\n");
-
-        if (username == null || username.trim().isEmpty())
-            errores.append("El nombre de usuario no puede estar vacío.\n");
-        else if (username.length() < 4)
-            errores.append("El nombre de usuario debe tener al menos 4 caracteres.\n");
-
-        if (password == null || password.length() < 6)
-            errores.append("La contraseña debe tener al menos 6 caracteres.\n");
-
-        if (telefono != null && !telefono.trim().isEmpty() && !telefono.matches("\\d{9}"))
-            errores.append("El teléfono debe tener exactamente 9 dígitos.\n");
-
-        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$"))
-            errores.append("El correo electrónico no tiene un formato válido.\n");
-
-        if (direccion == null || direccion.trim().isEmpty())
-            errores.append("La dirección no puede estar vacía.\n");
-
-        if (numeroIntentos < 0)
-            errores.append("El número de intentos no puede ser negativo.\n");
-
-        if (errores.length() > 0)
-            throw new IllegalArgumentException("Errores en Usuario:\n" + errores.toString());
     }
     
     // getters y setters

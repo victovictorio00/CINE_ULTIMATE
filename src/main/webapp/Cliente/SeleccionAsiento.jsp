@@ -138,6 +138,10 @@
     </style>
 </head>
 <body>
+    <%
+    List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
+    System.out.println("DEBUG JSP ENTRADA: asientosFuncion size = " + (chk == null ? "null" : chk.size()));
+%>
     <header class="custom-header">
         <h1>Selecciona tus butacas</h1>
     </header>
@@ -151,7 +155,7 @@
                 Pelicula pelicula = (Pelicula) request.getAttribute("pelicula");
                 Sala sala = (Sala) request.getAttribute("sala");
                 Funcion funcion = (Funcion) request.getAttribute("funcion");
-                List<Asiento> asientos = (List<Asiento>) request.getAttribute("asientos");
+                List<Asiento> asientos = (List<Asiento>) request.getAttribute("asientosFuncion");
                 Object precioObj = request.getAttribute("precioButaca");
 
                 if (pelicula == null || sala == null || funcion == null || precioObj == null) {
@@ -174,6 +178,7 @@
             <%-- Crear matriz de asientos --%>
             <%
                 Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
+                System.out.println("DEBUG JSP: porFila.size = " + porFila.size());
                 int maxColumnas = 0;
 
                 for (Asiento a : asientos) {

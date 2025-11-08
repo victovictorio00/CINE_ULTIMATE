@@ -1,4 +1,5 @@
 package modelo;
+
 import Conexion.Conexion;
 import java.sql.*;
 import java.util.ArrayList;
@@ -109,42 +110,33 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     @Override
     public void insertar(Usuario usuario) throws SQLException {
-        // 1. Hashear en Java (como ya hacías)
         String rawOrHash = usuario.getPassword();
         String hash = looksLikeBCrypt(rawOrHash) ? rawOrHash
                 : BCrypt.hashpw(rawOrHash, BCrypt.gensalt());
 
-        // 2. Llamar al procedure
-        String sql = "{CALL sp_insertar_usuario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "INSERT INTO usuarios (id_rol, id_estado_usuario, nombre_completo, dni, username, password, "
+                + "telefono, email, direccion, numero_intentos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // IN
-            cs.setInt(1, usuario.getIdRol().getIdRol());
-            cs.setInt(2, usuario.getIdEstadoUsuario().getIdEstadoUsuario());
-            cs.setString(3, usuario.getNombreCompleto());
-            cs.setString(4, usuario.getDni());
-            cs.setString(5, usuario.getUsername());
-            cs.setString(6, hash);          // <-- hash BCrypt desde Java
-            cs.setString(7, usuario.getTelefono());
-            cs.setString(8, usuario.getEmail());
-            cs.setString(9, usuario.getDireccion());
-            cs.setInt(10, usuario.getNumeroIntentos());
+            pst.setInt(1, usuario.getIdRol().getIdRol());
+            pst.setInt(2, usuario.getIdEstadoUsuario().getIdEstadoUsuario());
+            pst.setString(3, usuario.getNombreCompleto());
+            pst.setString(4, usuario.getDni());
+            pst.setString(5, usuario.getUsername());
+            pst.setString(6, hash);
+            pst.setString(7, usuario.getTelefono());
+            pst.setString(8, usuario.getEmail());
+            pst.setString(9, usuario.getDireccion());
+            pst.setInt(10, usuario.getNumeroIntentos());
 
-            // OUT
-            cs.registerOutParameter(11, Types.INTEGER); // p_id_usuario
-            cs.registerOutParameter(12, Types.VARCHAR); // p_error
+            pst.executeUpdate();
 
-            cs.execute();
-
-            // Leer valores de salida
-            Integer idGen = (Integer) cs.getObject(11);
-            String error = cs.getString(12);
-
-            if (error != null) {
-                throw new SQLException("Error al insertar usuario: " + error);
+            try (ResultSet keys = pst.getGeneratedKeys()) {
+                if (keys.next()) {
+                    usuario.setIdUsuario(keys.getInt(1));
+                }
             }
-            usuario.setIdUsuario(idGen);
         }
     }
 
@@ -280,13 +272,22 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     }
 
     public void registrarIntentoFallido(int idUsuario) throws SQLException {
-        String sql = "{CALL sp_registrar_intento_fallido(?, ?, ?)}";
-        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+        String sqlUpdate = "UPDATE usuarios SET numero_intentos = numero_intentos + 1 WHERE id_usuario = ?";
+        String sqlCheck = "SELECT numero_intentos FROM usuarios WHERE id_usuario = ?";
 
-            cs.setInt(1, idUsuario);
-            cs.setInt(2, LIMITE_INTENTOS);   // 3
-            cs.setInt(3, 2);                 // 2 = estado bloqueado
-            cs.execute();
+        try (Connection con = Conexion.getConnection(); PreparedStatement psUpd = con.prepareStatement(sqlUpdate); PreparedStatement psChk = con.prepareStatement(sqlCheck)) {
+
+            // incrementar
+            psUpd.setInt(1, idUsuario);
+            psUpd.executeUpdate();
+
+            // consultar
+            psChk.setInt(1, idUsuario);
+            try (ResultSet rs = psChk.executeQuery()) {
+                if (rs.next() && rs.getInt(1) >= LIMITE_INTENTOS) {
+                    bloquearUsuario(idUsuario, 2); // 2 = bloqueado
+                }
+            }
         }
     }
 

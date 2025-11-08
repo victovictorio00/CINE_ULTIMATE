@@ -1,4 +1,5 @@
 package modelo;
+
 import Conexion.Conexion;
 import java.sql.*;
 import java.util.ArrayList;
@@ -6,35 +7,25 @@ import java.util.List;
 
 public class FuncionDao {
 
-    // Insertar nueva función
     public void insertar(Funcion f) throws SQLException {
-        String sql = "{CALL sp_insertar_funcion(?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "INSERT INTO funciones (id_pelicula, id_sala, fecha_inicio, fecha_fin, id_estado_funcion, asientos_disponibles) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall(sql)) {
+            ps.setInt(1, f.getPelicula().getIdPelicula());
+            ps.setInt(2, f.getSala().getIdSala());
+            ps.setTimestamp(3, f.getFechaInicio());
+            ps.setTimestamp(4, f.getFechaFin());
+            ps.setInt(5, f.getEstadoFuncion().getIdEstadoFuncion());
+            ps.setInt(6, f.getAsientosDisponibles());
 
-            // IN
-            cs.setInt(1, f.getPelicula().getIdPelicula());
-            cs.setInt(2, f.getSala().getIdSala());
-            cs.setTimestamp(3, f.getFechaInicio());
-            cs.setTimestamp(4, f.getFechaFin());
-            cs.setInt(5, f.getEstadoFuncion().getIdEstadoFuncion());
+            ps.executeUpdate();
 
-            // OUT
-            cs.registerOutParameter(6, Types.INTEGER); // p_id_funcion
-            cs.registerOutParameter(7, Types.VARCHAR); // p_error
-
-            cs.execute();
-
-            // Leemos valores de salida
-            Integer idGenerado = (Integer) cs.getObject(6);
-            String error = cs.getString(7);
-
-            if (error != null) {
-                throw new SQLException("Error al insertar función: " + error);
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    f.setIdFuncion(keys.getInt(1));
+                }
             }
-
-            // Opcional: actualizar el bean con el ID generado
-            f.setIdFuncion(idGenerado);
         }
     }
 
@@ -153,7 +144,15 @@ public class FuncionDao {
 
     // Obtener una función por ID
     public Funcion obtener(int idFuncion) throws SQLException {
-        String sql = "SELECT * FROM funciones WHERE id_funcion=?";
+        String sql = "SELECT f.id_funcion, f.id_pelicula, p.nombre AS pelicula, "
+                + "f.id_sala, s.nombre AS sala, f.fecha_inicio, f.fecha_fin, "
+                + "f.id_estado_funcion, e.nombre AS estado, f.asientos_disponibles "
+                + "FROM funciones f "
+                + "JOIN peliculas p ON f.id_pelicula = p.id_pelicula "
+                + "JOIN salas s ON f.id_sala = s.id_sala "
+                + "JOIN estado_funciones e ON f.id_estado_funcion = e.id_estado_funcion "
+                + "WHERE f.id_funcion = ?";
+
         try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idFuncion);
             ResultSet rs = ps.executeQuery();
@@ -163,14 +162,17 @@ public class FuncionDao {
 
                 Pelicula p = new Pelicula();
                 p.setIdPelicula(rs.getInt("id_pelicula"));
+                p.setNombre(rs.getString("pelicula"));  // ✅ Ahora sí cargas el nombre
                 f.setPelicula(p);
 
                 Sala s = new Sala();
                 s.setIdSala(rs.getInt("id_sala"));
+                s.setNombre(rs.getString("sala"));
                 f.setSala(s);
 
                 EstadoFuncion e = new EstadoFuncion();
                 e.setIdEstadoFuncion(rs.getInt("id_estado_funcion"));
+                e.setNombre(rs.getString("estado"));
                 f.setEstadoFuncion(e);
 
                 f.setFechaInicio(rs.getTimestamp("fecha_inicio"));

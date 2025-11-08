@@ -4,6 +4,7 @@ import Conexion.Conexion;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Types;
 
 public class VentaDao implements DaoCrud<Venta> {
 
@@ -72,11 +73,19 @@ public class VentaDao implements DaoCrud<Venta> {
 
     @Override
     public Venta leer(int id) throws SQLException {
-        String query = "SELECT * FROM ventas WHERE id_venta = ?";
+        String query = "SELECT v.id_venta,\n"
+                + "       v.fecha,\n"
+                + "       v.total,\n"
+                + "       v.metodo_pago,\n"
+                + "       v.id_usuario_cliente,\n"
+                + "       u.nombre_completo\n"
+                + "FROM ventas v\n"
+                + "JOIN usuarios u ON u.id_usuario = v.id_usuario_cliente\n"
+                + "WHERE v.id_venta = ?";
+
         Venta venta = null;
 
         try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
-
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -88,6 +97,7 @@ public class VentaDao implements DaoCrud<Venta> {
 
                     Usuario usuario = new Usuario();
                     usuario.setIdUsuario(rs.getInt("id_usuario_cliente"));
+                    usuario.setNombreCompleto(rs.getString("nombre_completo")); // ✅ ¡esta línea!
                     venta.setIdUsuarioCliente(usuario);
                 }
             }
@@ -123,45 +133,65 @@ public class VentaDao implements DaoCrud<Venta> {
     }
 
     public boolean guardarVenta(Venta venta, List<DetalleVenta> detalles) {
-        try (Connection con = Conexion.getConnection(); CallableStatement cs = con.prepareCall("{CALL sp_guardar_venta_con_detalles(?, ?, ?, ?, ?, ?)}")) {
+        String sqlVenta = "INSERT INTO ventas (id_usuario_cliente, fecha, total, metodo_pago) VALUES (?, NOW(), ?, ?)";
+        String sqlDetalle = "INSERT INTO detalle_ventas (id_venta, cantidad, tipo_item, precio_unitario, id_producto, id_funcion, id_asiento_funcion) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-            // Construir JSON de detalles
-            StringBuilder json = new StringBuilder("[");
-            for (int i = 0; i < detalles.size(); i++) {
-                DetalleVenta d = detalles.get(i);
-                json.append(String.format(
-                        "{\"cantidad\":%d,\"tipo_item\":%d,\"precio_unitario\":%.2f,\"id_producto\":%s,\"id_funcion\":%s,\"id_asiento\":%s}",
-                        d.getCantidad(),
-                        d.getTipoItem(),
-                        d.getPrecioUnitario(),
-                        d.getProducto() != null ? d.getProducto().getIdProducto() : "null",
-                        d.getFuncion() != null ? d.getFuncion().getIdFuncion() : "null",
-                        d.getAsiento() != null ? d.getAsiento().getId_asiento() : "null"
-                ));
-                if (i < detalles.size() - 1) {
-                    json.append(",");
+        try (Connection con = Conexion.getConnection()) {
+            con.setAutoCommit(false);
+
+            // 1. insertar venta
+            int idVenta;
+            try (PreparedStatement psVenta = con.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
+                psVenta.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
+                psVenta.setDouble(2, venta.getTotal());
+                psVenta.setString(3, venta.getMetodoPago());
+                psVenta.executeUpdate();
+
+                try (ResultSet keys = psVenta.getGeneratedKeys()) {
+                    if (!keys.next()) {
+                        throw new SQLException("No se generó ID de venta");
+                    }
+                    idVenta = keys.getInt(1);
+                    venta.setIdVenta(idVenta);
                 }
             }
-            json.append("]");
 
-            // IN
-            cs.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
-            cs.setDouble(2, venta.getTotal());
-            cs.setString(3, venta.getMetodoPago());
-            cs.setString(4, json.toString());
+            // 2. insertar detalles
+            try (PreparedStatement psDet = con.prepareStatement(sqlDetalle)) {
+                for (DetalleVenta d : detalles) {
+                    psDet.setInt(1, idVenta);
+                    psDet.setInt(2, d.getCantidad());
+                    psDet.setInt(3, d.getTipoItem());
+                    psDet.setDouble(4, d.getPrecioUnitario());
 
-            // OUT
-            cs.registerOutParameter(5, Types.INTEGER); // p_id_venta
-            cs.registerOutParameter(6, Types.VARCHAR); // p_error
+                    // producto
+                    if (d.getProducto() != null && d.getProducto().getIdProducto() > 0) {
+                        psDet.setInt(5, d.getProducto().getIdProducto());
+                    } else {
+                        psDet.setNull(5, Types.INTEGER);
+                    }
 
-            cs.execute();
+                    // función
+                    if (d.getFuncion() != null && d.getFuncion().getIdFuncion() > 0) {
+                        psDet.setInt(6, d.getFuncion().getIdFuncion());
+                    } else {
+                        psDet.setNull(6, Types.INTEGER);
+                    }
 
-            String error = cs.getString(6);
-            if (error != null) {
-                throw new SQLException(error);
+                    // asiento_funcion
+                    AsientoFuncion af = d.getIdAsientoFuncion();
+                    if (af != null && af.getIdAsientoFuncion() > 0) {
+                        psDet.setInt(7, af.getIdAsientoFuncion());
+                    } else {
+                        psDet.setNull(7, Types.INTEGER);
+                    }
+
+                    psDet.addBatch();
+                }
+                psDet.executeBatch();
             }
 
-            venta.setIdVenta(cs.getInt(5));
+            con.commit();
             return true;
 
         } catch (SQLException e) {
