@@ -1,7 +1,3 @@
-<%--
-    Document : Peliculas
-    Author   : Proyecto
---%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>
@@ -18,10 +14,9 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <link rel="stylesheet" href="Estilos/peliculaClienteStyle.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/PeliculaCliente.css">
     </head>
     <body>
-
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineOnline</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"

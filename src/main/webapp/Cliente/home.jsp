@@ -9,24 +9,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>CineOnline</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="Estilos/dashClienteStyle.css">
-        <style>
-            /* Ajuste del carrusel */
-            .carousel-item {
-                background-color: #000; /* Fondo negro para posters verticales */
-                text-align: center;
-            }
-            .carousel-item img {
-                max-height: 70vh;   /* Altura fija */
-                width: auto;        /* Mantiene proporción */
-                object-fit: contain; /* No recorta, muestra imagen completa */
-                margin: 0 auto;
-            }
-
-        </style>
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/home.css">
     </head>
     <body>
-        <!-- CARRUSEL DINÁMICO CON PELÍCULAS -->
         <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="margin-top:0;">
             <ol class="carousel-indicators">
                 <%
@@ -172,13 +157,11 @@
             </div>
             <% }%>
         </div>
-
         <!-- FOOTER -->
         <footer class="footer bg-dark text-white text-center py-4 mt-5">
             <p>© 2025 Cine Online | Todos los derechos reservados</p>
             <p><a href="#" class="text-white">Política de Privacidad</a> | <a href="#" class="text-white">Términos y Condiciones</a></p>
         </footer>
-
         <!-- SCRIPTS -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>

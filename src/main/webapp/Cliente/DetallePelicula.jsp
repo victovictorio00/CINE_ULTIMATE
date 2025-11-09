@@ -5,7 +5,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="modelo.Pelicula" %>
 <%@ page import="modelo.PeliculaDao" %>
-
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -13,7 +12,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Detalle de Película | CineOnline</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="<%= request.getContextPath()%>/Estilos/detallePeliculaStyle.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/DetallePelicula.css">
     </head>
     <body>
 
@@ -46,7 +45,6 @@
                     <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DashboardServlet">Inicio</a></li>
                     <li class="nav-item active"><a class="nav-link" href="<%= request.getContextPath()%>/CarteleraServlet">Películas</a></li>
                     <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DulceriaServlet">Dulcería</a></li>
-
                     <%
                         String username = (String) session.getAttribute("username");
                         String nombreCompleto = (String) session.getAttribute("nombreCompleto");
@@ -72,7 +70,6 @@
                 </ul>
             </div>
         </nav>
-
         <!--  TRAILER -->
         <%
             String trailer = pelicula.getTrailerUrl();
@@ -91,7 +88,6 @@
                 trailer = "https://www.youtube.com/embed/HeTE7j9dcGg";
             }
         %>
-
         <div class="movie-video" style="position:relative; margin-top:80px; width:100%; height:60vh;">
             <!-- Miniatura -->
             <img id="videoThumb" 
@@ -149,11 +145,8 @@
                 }
             }
         </script>
-
-        <!-- DETALLES MEJORADOS (con precio) -->
         <div class="container movie-details-container">
             <div class="row d-flex align-items-start justify-content-center">
-
                 <!-- Imagen -->
                 <div class="col-12 col-md-5 mb-4 mb-md-0 movie-poster text-center">
                     <img 
@@ -164,22 +157,18 @@
                         class="img-fluid poster-img"
                         style="border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.35); max-height:520px; object-fit:cover;">
                 </div>
-
-                <!-- Texto -->
                 <div class="col-12 col-md-7 movie-details" style="padding-left:18px;">
                     <%
                         // Formatear precio con locale de Perú
                         java.text.NumberFormat fmt = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "PE"));
                         String precioFormateado = fmt.format(pelicula.getPrecio());
                     %>
-
                     <!-- Titulo -->
                     <div class="d-flex align-items-center justify-content-between" style="gap:12px;">
                         <div style="flex:1;">
                             <h1 class="mb-1" style="font-size:1.9rem;"><%= pelicula.getNombre()%></h1>
                             <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
                         </div>
-
                         <!-- Precio -->
                         <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61); 
                             padding:12px 18px; border-radius:16px; box-shadow:0 6px 18px rgba(255,107,58,0.15);">
@@ -187,12 +176,9 @@
                             <div style="font-weight:700; font-size:1.3rem; color:white; margin-top:2px;"><%= precioFormateado %></div>
                         </div>
                     </div>
-
                     <h3 style="margin-top:12px; margin-bottom:8px;">Sinopsis</h3>
                     <p style="margin-bottom:18px; text-align:justify; color:#c7d4df;"><%= pelicula.getSinopsis()%></p>
-
                     <h3 style="margin-top:10px; margin-bottom:10px;">Horarios</h3>
-
                     <div class="mb-3">
                         <%
                             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a"); // 12h + AM/PM
@@ -204,7 +190,6 @@
                         <%
                         } else {
                         %>
-
                         <!-- Tarjeta pequeña con precio (opcional, repetido para énfasis) -->
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px;">
                             <div style="color:var(--muted); font-weight:600;">
@@ -214,8 +199,6 @@
                                 <%= precioFormateado%>
                             </div>
                         </div>
-
-                        <!-- Lista de horarios: espacio entre botones y scroll lateral en móviles -->
                         <div id="horariosWrapper" class="d-flex flex-wrap align-items-center" style="gap:10px;">
                             <%
                                 for (modelo.Funcion funcion : funciones) {
@@ -238,7 +221,6 @@
                             } // else
                         %>
                     </div>
-
                     <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
                         <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="post"
                               class="m-0 p-0 d-flex align-items-center">
@@ -258,13 +240,10 @@
                            ← Volver a cartelera
                         </a>
                     </div>
-
-                    <!-- Espacio extra para separar contenido visualmente -->
                     <div style="height:18px;"></div>
                 </div>
             </div>
         </div>
-
         <!-- FOOTER -->
         <footer>
             <p>© 2025 Cine Online | Todos los derechos reservados</p>
@@ -276,12 +255,9 @@
                 const horarioBtns = Array.from(document.querySelectorAll('.horario-btn'));
                 const btnReservar = document.getElementById('btnReservar');
                 const inputIdFuncion = document.getElementById('inputIdFuncion');
-
-                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; // string seguro
-
+                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; 
                 if (!btnReservar || !inputIdFuncion)
                     return;
-
                 btnReservar.disabled = true;
                 btnReservar.setAttribute('aria-disabled', 'true');
 
@@ -300,7 +276,6 @@
                 }
 
                 clearSelection();
-
                 horarioBtns.forEach(btn => {
                     btn.addEventListener('click', function () {
                         const wasSelected = this.classList.contains('active');
@@ -322,7 +297,6 @@
                             btnReservar.focus();
                         }
                     });
-
                     btn.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
