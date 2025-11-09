@@ -1,0 +1,227 @@
+:root {
+    --dark: #343a40;
+    --orange: #FF5733;
+    --light: #f5f5f5;
+    --white: #ffffff;
+    --gray: #6c757d;
+}
+body {
+    background-color: var(--light);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.custom-header {
+    background-color: var(--dark);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    padding: 15px 30px;
+    font-weight: bold;
+    font-size: 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.custom-header h1 {
+    margin: 0 auto;
+    font-size: 24px;
+}
+
+.payment-container {
+    flex: 1;
+    max-width: 650px;
+    margin: 40px auto;
+    background: var(--white);
+    padding: 35px 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Resumen de compra */
+.resumen-compra {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.resumen-compra h4 {
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.resumen-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.resumen-item:last-child {
+    border-bottom: none;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid rgba(255,255,255,0.5);
+}
+
+.step-progress {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+.step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gray);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+.step.active {
+    background: var(--orange);
+}
+.step.completed {
+    background: #28a745;
+}
+
+h2 {
+    color: var(--dark);
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.8rem;
+}
+
+.form-control {
+    width: 100%;
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 10px 0 5px 0;
+    background: transparent;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--orange);
+}
+
+.form-group label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    color: #777;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.form-control:focus + label,
+.form-control:not(:placeholder-shown) + label {
+    top: -12px;
+    font-size: 13px;
+    color: var(--orange);
+}
+
+.payment-options {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.3s;
+}
+.payment-options:hover,
+.payment-options:has(input:checked) {
+    border-color: var(--orange);
+    background: rgba(255, 87, 51, 0.05);
+}
+.payment-options input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+}
+.payment-options label {
+    margin: 0;
+    font-weight: 600;
+    color: var(--dark);
+    flex-grow: 1;
+    cursor: pointer;
+}
+.payment-options img {
+    max-height: 25px;
+}
+
+.checkbox-group {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.checkbox-group a {
+    color: var(--orange);
+}
+
+.notes {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.btn-continue {
+    background-color: var(--orange);
+    color: var(--white);
+    border: none;
+    padding: 12px 35px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 87, 51, 0.4);
+    display: block;
+    margin: 30px auto 0 auto;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+.btn-continue:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #ccc;
+}
+.btn-continue:hover:not(:disabled) {
+    background-color: #d44729;
+}
+
+footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray);
+    padding: 20px 0;
+    margin-top: auto;
+}
+footer a {
+    color: var(--gray);
+    text-decoration: none;
+}
+footer a:hover {
+    color: var(--orange);
+}
