@@ -50,7 +50,7 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
             }
 
             // AsientoFuncion
-            if (detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0) {
+            if (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0) {
                 pst.setInt(4, detalle.getIdAsientoFuncion().getIdAsientoFuncion());
             } else {
                 pst.setNull(4, Types.INTEGER);
