@@ -45,14 +45,38 @@ public class FuncionDao {
         }
     }
 
-    // Eliminar función
-    public void eliminar(int idFuncion) throws SQLException {
-        String sql = "DELETE FROM funciones WHERE id_funcion=?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, idFuncion);
-            ps.executeUpdate();
+   // Eliminar función junto con sus asientos asociados
+public void eliminar(int idFuncion) throws SQLException {
+    String sqlAsientos = "DELETE FROM asiento_funcion WHERE id_funcion = ?";
+    String sqlFuncion = "DELETE FROM funciones WHERE id_funcion = ?";
+
+    try (Connection con = Conexion.getConnection()) {
+        // Desactivamos auto-commit para manejar la transacción manualmente
+        con.setAutoCommit(false);
+
+        try (PreparedStatement ps1 = con.prepareStatement(sqlAsientos);
+             PreparedStatement ps2 = con.prepareStatement(sqlFuncion)) {
+
+            // Primero eliminamos los asientos vinculados a esa función
+            ps1.setInt(1, idFuncion);
+            ps1.executeUpdate();
+
+            // Luego eliminamos la función
+            ps2.setInt(1, idFuncion);
+            ps2.executeUpdate();
+
+            // Confirmamos la transacción
+            con.commit();
+        } catch (SQLException ex) {
+            // Si algo falla, revertimos los cambios
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
         }
     }
+}
+
 
     // Listar todas las funciones
     // Listar todas las funciones
