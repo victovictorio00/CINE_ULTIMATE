@@ -71,6 +71,10 @@ public class ClienteServlet extends HttpServlet {
                 case "verVoucher":
                     mostrarVoucher(request, response);
                     break;
+                case "misReservas":
+                    mostrarReservasCliente(request, response);
+                    break;
+
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             }
@@ -552,4 +556,36 @@ public class ClienteServlet extends HttpServlet {
             }
         }
     }
+    
+    private void mostrarReservasCliente(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession(false);
+    if (session == null || session.getAttribute("userId") == null) {
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        return;
+    }
+
+    int userId = (int) session.getAttribute("userId");
+    try {
+        VentaDao ventaDao = new VentaDao();
+        DetalleVentaDao detalleDao = new DetalleVentaDao();
+
+        List<Venta> ventas = ventaDao.obtenerReservasPorUsuario(userId);
+
+        // Para cada venta, obtenemos los detalles (función, asientos, etc.)
+        for (Venta v : ventas) {
+            List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
+            v.setDetalles(detalles); // ← agrega este setter si no existe
+        }
+
+        request.setAttribute("ventas", ventas);
+        request.getRequestDispatcher("Cliente/MisReservas.jsp").forward(request, response);
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error al cargar las reservas: " + e.getMessage());
+    }
+}
+
+
 }

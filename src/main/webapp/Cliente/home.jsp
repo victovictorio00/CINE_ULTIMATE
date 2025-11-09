@@ -108,7 +108,7 @@
                         </a>
                         <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item text-white bg-dark" href="#">Mi Perfil</a>
-                            <a class="dropdown-item text-white bg-dark" href="#">Mis Reservas</a>
+                            <a class="dropdown-item" href="<%= request.getContextPath()%>/ClienteServlet?action=misReservas">Mis Reservas</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/LogoutServlet">Cerrar Sesión</a>
                         </div>

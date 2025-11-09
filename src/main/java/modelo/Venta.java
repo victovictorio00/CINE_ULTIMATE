@@ -1,7 +1,7 @@
 package modelo;
 
 import java.util.Date;
-
+import java.util.List;
 public class Venta {
     // variables de entrada
     private int idVenta;
@@ -9,7 +9,7 @@ public class Venta {
     private Date fecha;
     private double total;
     private String metodoPago;
-
+private List<DetalleVenta> detalles;
     // Constructor vacío
     public Venta() {}
 
@@ -71,4 +71,12 @@ public class Venta {
         }
         this.metodoPago = metodoPago;
     }
+    
+    public List<DetalleVenta> getDetalles() {
+    return detalles;
+}
+
+public void setDetalles(List<DetalleVenta> detalles) {
+    this.detalles = detalles;
+}
 }
