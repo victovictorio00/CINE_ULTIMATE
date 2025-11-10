@@ -169,7 +169,7 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/DashboardServlet"));
             } else if (rolId == 2) {
                 session.setAttribute("rol", "admin");
-                response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/AdminDashboard.jsp"));
+                response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/AdminDashboardServlet"));
             } else {
                 session.invalidate();
                 manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");

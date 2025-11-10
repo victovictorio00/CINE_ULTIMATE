@@ -1,10 +1,5 @@
-<%-- 
-    Document   : AdminDashboard
-    Created on : 26 may. 2025, 16:02:00
-    Author     : Proyecto
---%>
-
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List, java.util.ArrayList, java.util.Collections" %>
 
 <%
     HttpSession sesion = request.getSession(false);
@@ -13,6 +8,15 @@
         response.sendRedirect(request.getContextPath() + "/Login.jsp");
         return;
     }
+
+    double totalVentas = (request.getAttribute("totalVentas") != null)
+            ? (Double) request.getAttribute("totalVentas") : 0.0;
+    int totalProductos = (request.getAttribute("totalProductos") != null)
+            ? (Integer) request.getAttribute("totalProductos") : 0;
+    int totalEmpleados = (request.getAttribute("totalEmpleados") != null)
+            ? (Integer) request.getAttribute("totalEmpleados") : 0;
+    int totalPeliculas = (request.getAttribute("totalPeliculas") != null)
+            ? (Integer) request.getAttribute("totalPeliculas") : 0;
 %>
 
 <!DOCTYPE html>
@@ -23,8 +27,9 @@
     <title>Dashboard Administrador</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        /* Barra lateral fija */
         body {
             min-height: 100vh;
             display: flex;
@@ -55,9 +60,6 @@
             border-radius: 50%;
             margin-bottom: 0.5rem;
         }
-        .sidebar .profile h5, .sidebar .profile small {
-            margin: 0;
-        }
         .sidebar .nav-link {
             color: white;
             padding: 1rem 1.5rem;
@@ -67,58 +69,49 @@
             background-color: #084298;
             color: white;
         }
-
-        /* Contenido principal */
         .content {
             margin-left: 250px;
             padding: 2rem;
             width: 100%;
+            background-color: #f8f9fa;
         }
-
-        /* Tarjetas resumen */
         .stats-card {
             border-radius: 0.5rem;
             padding: 1.5rem;
-            background: #f8f9fa;
+            background: #ffffff;
             box-shadow: 0 0 10px rgb(0 0 0 / 0.05);
             text-align: center;
         }
         .stats-card h5 {
             font-weight: 600;
+            color: #343a40;
         }
         .stats-card p {
             font-size: 1.2rem;
             font-weight: bold;
             margin: 0;
+            color: #0d6efd;
         }
-
-        /* Gráfico simulado */
-        #chart-placeholder {
-            height: 300px;
-            background: #ffe5e5;
+        #chart-container {
+            background: #fff;
             border-radius: 0.5rem;
-            padding: 1rem;
+            box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+            padding: 1rem 2rem;
             margin-top: 2rem;
-            color: #b30000;
-            font-weight: bold;
-            text-align: center;
-            line-height: 300px;
-            font-size: 1.25rem;
-            user-select: none;
         }
     </style>
 </head>
+
 <body>
 
+    <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
-
         <div class="profile">
             <img src="Cliente/images/User.png" alt="Administrador" />
             <h5>Administrador</h5>
             <small>Admin</small>
         </div>
-
         <nav class="nav flex-column">
             <a href="AdminDashboard.jsp" class="nav-link active">
                 <i class="fas fa-th-large mr-2"></i>Dashboard
@@ -141,10 +134,10 @@
             <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
                 <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
-
         </nav>
     </nav>
 
+    <!-- CONTENIDO -->
     <main class="content">
         <h2>Dashboard</h2>
 
@@ -152,37 +145,84 @@
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Ventas</h5>
-                    <p>$ 10,000</p>
+                    <p>S/ <%= String.format("%.2f", totalVentas) %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Productos</h5>
-                    <p>150</p>
+                    <p><%= totalProductos %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Empleados</h5>
-                    <p>25</p>
+                    <p><%= totalEmpleados %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Películas en Inventario</h5>
-                    <p>30</p>
+                    <p><%= totalPeliculas %></p>
                 </div>
             </div>
         </div>
 
-        <div id="chart-placeholder">
-            Ventas Mensuales (Gráfico de ejemplo)
+        <div id="chart-container">
+            <canvas id="ventasChart"></canvas>
         </div>
     </main>
 
-    <!-- JS y dependencias de Bootstrap -->
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <%
+    List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
+    if (ventasMensuales == null) {
+        ventasMensuales = java.util.Collections.nCopies(12, 0.0);
+    }
+%>
+
+<div id="chart-container">
+    <canvas id="ventasChart"></canvas>
+</div>
+
+<script>
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            datasets: [{
+                label: 'Ventas Mensuales (S/)',
+                data: <%= ventasMensuales.toString() %>,
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: '#0d6efd',
+                borderWidth: 2,
+                hoverBackgroundColor: '#084298'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true },
+                x: {}
+            },
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Ventas Mensuales - 2025',
+                    color: '#084298',
+                    font: { size: 18, weight: 'bold' }
+                }
+            }
+        }
+    });
+</script>
+
+
 </body>
 </html>

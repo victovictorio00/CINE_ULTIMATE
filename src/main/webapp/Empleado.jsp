@@ -117,7 +117,7 @@
         </div>
 
         <nav class="nav flex-column">
-            <a href="AdminDashboard.jsp" class="nav-link">
+            <a href="AdminDashboardServlet" class="nav-link">
                 <i class="fas fa-th-large mr-2"></i>Dashboard
             </a>
             <a href="UsuarioServlet?action=listar" class="nav-link">
