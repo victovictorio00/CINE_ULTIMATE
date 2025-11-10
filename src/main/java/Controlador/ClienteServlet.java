@@ -519,33 +519,32 @@ public class ClienteServlet extends HttpServlet {
     }
 
     // ============== PASO 8: MOSTRAR VOUCHER ==============
-   private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    HttpSession session = request.getSession();
-    Integer idVenta = null;
+        HttpSession session = request.getSession();
+        Integer idVenta = null;
 
-    String idVentaParam = request.getParameter("idVenta");
-    if (idVentaParam != null && !idVentaParam.isEmpty()) {
-        try {
-            idVenta = Integer.parseInt(idVentaParam);
-            session.setAttribute("idVenta", idVenta);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de venta inválido");
+        String idVentaParam = request.getParameter("idVenta");
+        if (idVentaParam != null && !idVentaParam.isEmpty()) {
+            try {
+                idVenta = Integer.parseInt(idVentaParam);
+                session.setAttribute("idVenta", idVenta);
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de venta inválido");
+                return;
+            }
+        } else {
+            idVenta = (Integer) session.getAttribute("idVenta");
+        }
+
+        if (idVenta == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
             return;
         }
-    } else {
-        idVenta = (Integer) session.getAttribute("idVenta");
+
+        request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
     }
-
-    if (idVenta == null) {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
-        return;
-    }
-
-    request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
-}
-
 
     // ============== UTILIDADES ==============
     private void limpiarSesionCompra(HttpSession session) {
@@ -572,36 +571,78 @@ public class ClienteServlet extends HttpServlet {
             }
         }
     }
-    
+
     private void mostrarReservasCliente(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    HttpSession session = request.getSession(false);
-    if (session == null || session.getAttribute("userId") == null) {
-        response.sendRedirect(request.getContextPath() + "/Login.jsp");
-        return;
-    }
-
-    int userId = (int) session.getAttribute("userId");
-    try {
-        VentaDao ventaDao = new VentaDao();
-        DetalleVentaDao detalleDao = new DetalleVentaDao();
-
-        List<Venta> ventas = ventaDao.obtenerReservasPorUsuario(userId);
-
-        // Para cada venta, obtenemos los detalles (función, asientos, etc.)
-        for (Venta v : ventas) {
-            List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
-            v.setDetalles(detalles); // ← agrega este setter si no existe
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/Login.jsp");
+            return;
         }
 
-        request.setAttribute("ventas", ventas);
-        request.getRequestDispatcher("Cliente/MisReservas.jsp").forward(request, response);
-    } catch (Exception e) {
-        e.printStackTrace();
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error al cargar las reservas: " + e.getMessage());
+        int userId = (int) session.getAttribute("userId");
+        try {
+            VentaDao ventaDao = new VentaDao();
+            DetalleVentaDao detalleDao = new DetalleVentaDao();
+
+            List<Venta> ventas = ventaDao.obtenerReservasPorUsuario(userId);
+            /* después de obtener detalles para cada venta */
+            Map<Integer, FilaReservaDTO> filasMap = new LinkedHashMap<>();
+
+            // Para cada venta, obtenemos los detalles (función, asientos, etc.)
+            for (Venta v : ventas) {
+                List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
+                v.setDetalles(detalles); // ← agrega este setter si no existe
+
+                for (DetalleVenta d : detalles) {
+                    Integer idFunc = d.getFuncion() != null ? d.getFuncion().getIdFuncion() : null;
+
+                    if (d.getTipoItem() == 1) {   // PRODUCTOS
+                        // Buscamos cualquier fila de esta venta (por ejemplo, la primera que tenga la misma idVenta)
+                        FilaReservaDTO dtoProd = filasMap.values().stream()
+                                .filter(f -> f.getIdVenta() == v.getIdVenta())
+                                .findFirst()
+                                .orElseGet(() -> {
+                                    // si no hay fila todavía, creamos una "vacía" solo para productos
+                                    FilaReservaDTO f = new FilaReservaDTO();
+                                    f.setIdVenta(v.getIdVenta());
+                                    f.setPelicula("—");
+                                    f.setSala("—");
+                                    f.setFechaHora(null);
+                                    filasMap.put(-v.getIdVenta(), f); // clave temporal
+                                    return f;
+                                });
+                        dtoProd.setCantidadProductos(dtoProd.getCantidadProductos() + d.getCantidad());
+                        dtoProd.setTotalProductos(dtoProd.getTotalProductos() + d.getPrecioUnitario() * d.getCantidad());
+                        continue; // saltamos
+                    }
+
+                    if (idFunc != null) {   // BUTACAS
+                        FilaReservaDTO dto = filasMap.computeIfAbsent(idFunc, k -> {
+                            FilaReservaDTO f = new FilaReservaDTO();
+                            Funcion func = d.getFuncion();
+                            f.setIdVenta(v.getIdVenta());
+                            f.setPelicula(func.getPelicula().getNombre());
+                            f.setSala(func.getSala().getNombre());
+                            f.setFechaHora(func.getFechaInicio());
+                            return f;
+                        });
+
+                        if (d.getTipoItem() == 2) {
+                            dto.getAsientos().add(d.getIdAsientoFuncion().getAsiento().getCodigo());
+                            dto.setTotalEntradas(dto.getTotalEntradas() + d.getPrecioUnitario() * d.getCantidad());
+                        }
+                    }
+                }
+            }
+
+            request.setAttribute("filas", filasMap.values());
+            request.setAttribute("ventas", ventas);
+            request.getRequestDispatcher("Cliente/MisReservas.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Error al cargar las reservas: " + e.getMessage());
+        }
     }
-}
-
-
 }
