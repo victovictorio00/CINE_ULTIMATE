@@ -1,18 +1,15 @@
-
-package modelo; // o dao, según tu organización
-
+package modelo;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 import Conexion.Conexion;
 
 public class GeneroDao {
 
-    // Método para obtener todos los géneros
-  public List<Genero> getTodosLosGeneros() throws SQLException {
+    // Método para obtener todos los géneros - única necesaria
+     public List<Genero> getTodosLosGeneros() throws SQLException {
         List<Genero> lista = new ArrayList<>();
-        String sql = "SELECT id_genero, nombre FROM generos"; // tabla en minúsculas, como en tu BD
+        String sql = "SELECT id_genero, nombre FROM generos";
 
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -27,11 +24,4 @@ public class GeneroDao {
         }
         return lista;
     }
-    
-    
-    
-    
-    
-    
-    
 }

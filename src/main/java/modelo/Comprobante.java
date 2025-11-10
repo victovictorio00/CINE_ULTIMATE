@@ -1,15 +1,26 @@
 package modelo;
-
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class Comprobante {
+    //variables de entrada
     private int id_comprobante;
-    private Venta id_venta;
-    private String tipo_comprobante;
-    private Date fecha_emision;
+    private Venta venta;
+    private String tipoComprobante;
+    private Timestamp fechaEmision;
 
+    //constructor vacío
     public Comprobante() {}
 
+    //constructor con parámetros
+    public Comprobante(int id_comprobante, Venta id_venta, String tipo_comprobante, Timestamp fecha_emision) {
+        this.id_comprobante = id_comprobante;
+        this.venta = id_venta;
+        this.tipoComprobante = tipo_comprobante;
+        this.fechaEmision = fecha_emision;
+    }
+
+    // getters y setters
     public int getId_comprobante() {
         return id_comprobante;
     }
@@ -18,27 +29,34 @@ public class Comprobante {
         this.id_comprobante = id_comprobante;
     }
 
-    public Venta getId_venta() {
-        return id_venta;
+    public Venta getVenta() {
+        return venta;
     }
 
-    public void setId_venta(Venta id_venta) {
-        this.id_venta = id_venta;
+    public void setVenta(Venta id_venta) {
+        if (id_venta == null) throw new IllegalArgumentException("Venta no puede ser nula.");
+        this.venta = id_venta; 
     }
 
-    public String getTipo_comprobante() {
-        return tipo_comprobante;
+    public String getTipoComprobante() {
+        return tipoComprobante;
     }
 
-    public void setTipo_comprobante(String tipo_comprobante) {
-        this.tipo_comprobante = tipo_comprobante;
+    public void setTipoComprobante(String tipo_comprobante) {
+        if (tipo_comprobante == null || tipo_comprobante.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tipo de comprobante no puede estar vacío.");
+        }
+        this.tipoComprobante = tipo_comprobante;
     }
 
-    public Date getFecha_emision() {
-        return fecha_emision;
+    public Date getFechaEmision() {
+        return fechaEmision;
     }
 
-    public void setFecha_emision(Date fecha_emision) {
-        this.fecha_emision = fecha_emision;
+    public void setFechaEmision(Timestamp fecha_emision) {
+        if (fecha_emision == null || fecha_emision.after(new Date())) {
+            throw new IllegalArgumentException("Fecha de emisión inválida.");
+        }
+        this.fechaEmision = fecha_emision;
     }
 }

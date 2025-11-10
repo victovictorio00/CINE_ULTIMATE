@@ -1,12 +1,11 @@
 package modelo;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import Conexion.Conexion;
 
 public class SalaDao implements DaoCrud<Sala> {
-
+    //los CRUD y otros métodos no fueron integrados a procedure, son básicos
     @Override
     public List<Sala> listar() throws SQLException {
         List<Sala> salas = new ArrayList<>();
@@ -76,5 +75,4 @@ public class SalaDao implements DaoCrud<Sala> {
             pst.executeUpdate();
         }
     }
-    
 }

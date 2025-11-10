@@ -1,8 +1,3 @@
-<%-- 
-    Document   : EditarPelicula
-    Created on : 27 may. 2025, 23:28:19
-    Author     : Proyecto
---%>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="modelo.Pelicula" %>
@@ -28,7 +23,7 @@
 %>
 
 <div class="container mt-5">
-    <h3>Editar Película</h3>
+    <h3 class="mb-4">Editar Película</h3>
 
     <!-- Formulario para editar una película -->
     <form action="PeliculaServlet?action=actualizar" method="POST" enctype="multipart/form-data">
@@ -73,10 +68,32 @@
                    class="form-control" value="<%= peli.getPrecio() %>" required>
         </div>
 
+        <!-- Tráiler -->
+        <div class="form-group">
+            <label for="trailerUrl">Enlace del Tráiler (YouTube, Vimeo, etc.):</label>
+            <input type="url" name="trailerUrl" id="trailerUrl" 
+                   class="form-control" placeholder="https://www.youtube.com/watch?v=..." 
+                   value="<%= peli.getTrailerUrl() != null ? peli.getTrailerUrl() : "" %>">
+            <small class="form-text text-muted">
+                Si ya tiene un tráiler, puedes reemplazar el enlace o dejarlo igual.
+            </small>
+            <% if (peli.getTrailerUrl() != null && !peli.getTrailerUrl().isEmpty()) { %>
+                <div class="mt-3">
+                    <label>Vista previa:</label><br>
+                    <iframe width="400" height="225"
+                        src="<%= peli.getTrailerUrl().replace("watch?v=", "embed/") %>"
+                        frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>
+            <% } %>
+        </div>
+
         <!-- Foto -->
         <div class="form-group">
             <label for="foto">Foto actual:</label><br>
-            <img src="ImageServlet?id=<%= peli.getIdPelicula() %>" width="150"><br><br>
+            <!-- 👇 Cambio aquí: se agrega un parámetro dinámico para evitar caché -->
+            <img src="ImageServlet?id=<%= peli.getIdPelicula() %>&t=<%= System.currentTimeMillis() %>" 
+                 width="150" class="mb-3"><br>
             <label for="foto">Cambiar foto (opcional):</label>
             <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*">
             <small class="form-text text-muted">
@@ -84,6 +101,7 @@
             </small>
         </div>
 
+        <!-- Botones -->
         <button type="submit" class="btn btn-primary">Actualizar Película</button>
         <a href="PeliculaServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>

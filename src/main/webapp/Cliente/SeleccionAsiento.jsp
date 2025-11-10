@@ -1,302 +1,385 @@
-<%--
-    Document   : SeleccionAsiento
-    Created on : 28 may. 2025, 3:47:59
-    Author     : Proyecto
---%>
-
+<%@page import="modelo.Funcion"%>
+<%@page import="modelo.Sala"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.LinkedHashMap"%>
+<%@page import="java.util.Map"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
-<%@ page import="modelo.Cliente.Asiento" %>
-<%@ page import="modelo.Cliente.Pelicula" %>
-
+<%@ page import="modelo.Asiento" %>
+<%@ page import="modelo.Pelicula" %>
 
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <title>Seleccionar Butacas</title>
-    <style>
-        /* Cabecera personalizada */
-        .custom-header {
-            background-color: #004080; /* Azul */
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            font-size: 18px;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-        .back-link {
-            color: white;
-            text-decoration: none;
-            margin-right: 20px;
-            font-size: 16px;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        .custom-header h1 {
-            margin: 0;
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        .seats-container {
-            width: 90%;
-            margin: auto;
-            background: #f0f4f7;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-            font-family: Arial, sans-serif;
-        }
-        .screen {
-            background: #ccc;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .seats-row {
-            display: flex;
-            justify-content: center; /* Centrar horizontalmente */
-            width: 100%; /* Asegura que ocupe todo el ancho posible */
-        }
-        .row-label {
-            width: 20px;
-            text-align: center;
-            margin: 0 10px;
-            font-weight: bold;
-        }
-        .seats-group {
-            display: flex;
-            justify-content: center; /* Centra horizontalmente las 3 columnas */
-            gap: 50px; /* Mantiene el espacio entre columnas */
-            flex-wrap: nowrap;
-        }
-
-        .seat {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            border: 2px solid #1d4ed8;
-            background-color: white;
-            cursor: pointer;
-            position: relative;
-        }
-        .seat.available:hover {
-            background-color: #bfdbfe;
-        }
-        .seat.occupied {
-            background-color: #ef4444;
-            cursor: not-allowed;
-            border-color: #b91c1c;
-        }
-        .seat.selected {
-            background-color: #1d4ed8;
-            border-color: #1e40af;
-        }
-        .seats-column {
-            display: flex;
-            gap: 6px;
-        }
-        /* Separación entre las 3 columnas */
-        .seats-group {
-            gap: 50px;
-        }
-
-        /* Leyenda */
-        .legend {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        .legend div {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .legend .box {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-        }
-        .legend .available { background-color: white; border: 2px solid #1d4ed8; }
-        .legend .occupied { background-color: #ef4444; border: 2px solid #b91c1c; }
-        .legend .selected { background-color: #1d4ed8; border: 2px solid #1e40af; }
-
-        /* Botón continuar */
-        .btn-continue {
-            margin-top: 20px;
-            background-color: #ec4899;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            display: block;
-            margin-left: auto;
-        }
-
-        /* Pie de página pegado hacia abajo */
-        footer {
-            background-color: #343a40;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            position: relative;
-            bottom: 0;
-            width: 100%;
-        }
-
-        footer a {
-            color: #ffffff;
-            text-decoration: none;
-            margin: 0 5px;
-        }
-
-/* Asegura que el pie de página se quede pegado al fondo */
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-footer a:hover {
-            text-decoration: underline;
-        }
-        
-        .btn-link-continue {
-    background-color: #ec4899;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    font-size: 16px;
-    border-radius: 25px;
-    cursor: pointer;
-
-    display: inline-block;
-    float: right;
-    text-align: center;
-    box-sizing: border-box;
-    margin: 20px 0 0 0;
-    width: auto; /* Que no tenga ancho 100% */
-    text-decoration: none; /* Quitar subrayado del link */
-}
-.btn-link-continue:hover {
-    background-color: #d63483; /* Opcional: cambio de color hover */
-}
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const seats = document.querySelectorAll(".seat.available");
-            const selectedSeats = new Set();
-            const selectedSeatsText = document.getElementById("selected-seats");
-
-            seats.forEach(seat => {
-                seat.addEventListener("click", () => {
-                    const seatId = seat.getAttribute("data-seat");
-                    if (seat.classList.contains("selected")) {
-                        seat.classList.remove("selected");
-                        selectedSeats.delete(seatId);
-                    } else {
-                        seat.classList.add("selected");
-                        selectedSeats.add(seatId);
-                    }
-                    selectedSeatsText.textContent = "Butacas seleccionadas: " + Array.from(selectedSeats).join(", ");
-                });
-            });
-        });
-    </script>
-</head>
-<body>
-
-    <!-- Cabecera personalizada -->
-    <header class="custom-header">
-    <a <a href="http://localhost:8080/CineJ3/Cliente/DetallePelicula.jsp?id=1" class="back-link">
-
-        ← Atrás
-      </a>
-      <h1>Selecciona tus butacas</h1>
-    </header>
-
-    <div class="seats-container">
-        <div class="screen">Pantalla</div>
-
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Seleccionar Butacas</title>
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/SeleccionAsiento.css">
+    </head>
+    <body>
         <%
-            String[] rows = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"};
-            for(int i = 0; i < rows.length; i++) {
-                String row = rows[i];
-        %>
-        <div class="seats-row">
-            <div class="row-label"><%= row %></div>
+        List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
+        System.out.println("DEBUG JSP ENTRADA: asientosFuncion size = " + (chk == null ? "null" : chk.size()));
+    %>
+        <header class="custom-header">
+            <h1>Selecciona tus butacas</h1>
+        </header>
 
-            <div class="seats-group">
-                <div class="seats-column">
-                    <%-- Primer grupo: 4 asientos --%>
-                       <% for(int j=1; j <=4; j++) {
-                String seatId = row + j;
-                // Ejemplo: algunos asientos ocupados
-                boolean occupied = seatId.equals("A3") || seatId.equals("B7") || seatId.equals("M15")||seatId.equals("A9");
-            %>
-                <div class="seat <%= occupied ? "occupied" : "available" %>" data-seat="<%= seatId %>" title="<%= seatId %>"></div>
-            <% } %>
-        </div>
+        <div class="main-container">
+            <div class="left-column">
+                <div class="screen">PANTALLA</div>
 
-                <div class="seats-column">
-                    <%-- Segundo grupo: 9 asientos --%>
-                    <% for(int j=5; j <= 13; j++) {
-                String seatId = row + j;
-                boolean occupied = seatId.equals("A3") || seatId.equals("B7") || seatId.equals("M15")||seatId.equals("A9");
-            %>
-                        <div class="seat <%= occupied ? "occupied" : "available" %>" data-seat="<%= seatId %>" title="<%= seatId %>"></div>
-                    <% } %>
+                <%-- Validar y recuperar datos --%>
+                <%
+                    Pelicula pelicula = (Pelicula) request.getAttribute("pelicula");
+                    Sala sala = (Sala) request.getAttribute("sala");
+                    Funcion funcion = (Funcion) request.getAttribute("funcion");
+                    List<Asiento> asientos = (List<Asiento>) request.getAttribute("asientosFuncion");
+                    Object precioObj = request.getAttribute("precioButaca");
+
+                    if (pelicula == null || sala == null || funcion == null || precioObj == null) {
+                        response.sendRedirect(request.getContextPath() + "/Cliente/Error.jsp");
+                        return;
+                    }
+
+                    if (asientos == null) {
+                        asientos = new ArrayList<>();
+                    }
+
+                    double precioButaca = 0.0;
+                    try {
+                        precioButaca = Double.parseDouble(precioObj.toString());
+                    } catch (Exception e) {
+                        precioButaca = 10.0;
+                    }
+                %>
+
+                <%-- Crear matriz de asientos --%>
+                <%
+                    Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
+                    System.out.println("DEBUG JSP: porFila.size = " + porFila.size());
+                    int maxColumnas = 0;
+
+                    for (Asiento a : asientos) {
+                        String codigo = a.getCodigo();
+                        if (codigo == null || codigo.isEmpty()) {
+                            continue;
+                        }
+
+                        String fila = codigo.substring(0, 1);
+                        porFila.computeIfAbsent(fila, k -> new ArrayList<>()).add(a);
+
+                        try {
+                            int numCol = Integer.parseInt(codigo.substring(1));
+                            if (numCol > maxColumnas) {
+                                maxColumnas = numCol;
+                            }
+                        } catch (Exception e) {
+                        }
+                    }
+
+                    // Ordenar asientos por número
+                    for (List<Asiento> asientosFila : porFila.values()) {
+                        asientosFila.sort((a1, a2) -> {
+                            try {
+                                int num1 = Integer.parseInt(a1.getCodigo().substring(1));
+                                int num2 = Integer.parseInt(a2.getCodigo().substring(1));
+                                return Integer.compare(num1, num2);
+                            } catch (Exception e) {
+                                return 0;
+                            }
+                        });
+                    }
+                %>
+
+                <!-- Numeración superior -->
+                <div class="column-numbers">
+                    <div class="column-number" style="width: 30px;"></div>
+                    <% for (int i = 1; i <= maxColumnas; i++) {%>
+                        <div class="column-number"><%= i%></div>
+                    <% }%>
+                    <div class="column-number" style="width: 30px;"></div>
                 </div>
 
-                <div class="seats-column">
-                    <%-- Tercer grupo: 4 asientos --%>
-                    <% for(int j=14; j <= 17; j++) {
-                String seatId = row + j;
-                boolean occupied = seatId.equals("A3") || seatId.equals("B7") || seatId.equals("M15")||seatId.equals("A9");
-            %>
-                        <div class="seat <%= occupied ? "occupied" : "available" %>" data-seat="<%= seatId %>" title="<%= seatId %>"></div>
-                    <% } %>
+                <!-- Matriz de asientos -->
+                <%
+                    for (Map.Entry<String, List<Asiento>> entry : porFila.entrySet()) {
+                        String letraFila = entry.getKey();
+                        List<Asiento> asientosFila = entry.getValue();
+                %>
+                <div class="seats-row">
+                    <div class="row-label"><%= letraFila%></div>
+                    <div class="seats-column">
+                        <%
+                            for (Asiento asiento : asientosFila) {
+                                boolean disponible = asiento.estaDisponible();
+                                String codigo = asiento.getCodigo();
+                                String claseBase = "seat";
+                                String estadoClase = disponible ? "available" : "occupied";
+                        %>
+                        <div class="<%= claseBase%> <%= estadoClase%>"
+                             data-seat="<%= codigo%>"
+                             data-available="<%= disponible%>"
+                             title="Asiento <%= codigo%> - <%= disponible ? "Disponible" : "Ocupado"%>">
+                        </div>
+                        <%
+                            }
+                        %>
+                    </div>
+                    <div class="row-label"><%= letraFila%></div>
+                </div>
+                <%
+                    }
+                %>
+
+                <!-- Numeración inferior -->
+                <div class="column-numbers">
+                    <div class="column-number" style="width: 30px;"></div>
+                    <% for (int i = 1; i <= maxColumnas; i++) {%>
+                        <div class="column-number"><%= i%></div>
+                    <% }%>
+                    <div class="column-number" style="width: 30px;"></div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="legend">
+                    <div><div class="box available"></div><span>Disponible</span></div>
+                    <div><div class="box occupied"></div><span>Ocupado</span></div>
+                    <div><div class="box selected"></div><span>Seleccionado</span></div>
                 </div>
             </div>
 
-            <div class="row-label"><%= row %></div>
+            <!-- Columna derecha: Resumen -->
+            <div class="right-column">
+                <div class="summary-card">
+                    <h2>Resumen de compra</h2>
+
+                    <div class="movie-info">
+                        <p><strong>Película:</strong> <%= pelicula.getNombre()%></p>
+                        <p><strong>Sala:</strong> <%= sala.getNombre()%></p>
+                        <p><strong>Fecha:</strong>
+                            <%
+                                java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new java.util.Locale("es", "ES"));
+                                out.print(df.format(funcion.getFechaInicio()));
+                            %>
+                        </p>
+                        <p><strong>Horario:</strong>
+                            <%
+                                java.text.SimpleDateFormat hf = new java.text.SimpleDateFormat("HH:mm");
+                                out.print(hf.format(funcion.getFechaInicio()) + " - " + hf.format(funcion.getFechaFin()));
+                            %>
+                        </p>
+                        <p><strong>Duración:</strong> <%= request.getAttribute("duracionMin")%> min</p>
+                        <p><strong>Género:</strong> <%= request.getAttribute("genero")%></p>
+                    </div>
+
+                    <div class="selected-seats-section">
+                        <h3>Butacas seleccionadas</h3>
+                        <div id="selected-seats-list">
+                            Ninguna butaca seleccionada
+                        </div>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-row">
+                            <span>Precio unitario:</span>
+                            <span>S/. <%= String.format("%.2f", precioButaca)%></span>
+                        </div>
+                        <div class="price-row">
+                            <span>Cantidad:</span>
+                            <span id="selected-count">0</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Subtotal:</span>
+                            <span>S/. <span id="subtotal">0.00</span></span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Total:</span>
+                            <span class="amount">S/. <span id="total">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Formulario POST al servlet -->
+                    <form id="formAsientos" method="POST" action="<%= request.getContextPath()%>/ClienteServlet">
+                        <input type="hidden" name="action" value="seleccionarAsientos">
+                        <input type="hidden" name="selectedSeats" id="inputSelectedSeats" value="">
+                        <button type="submit" class="btn-continue" id="btnContinue" disabled>
+                            Continuar
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <% } %>
 
-        <!-- Leyenda -->
-        <div class="legend">
-            <div><div class="box available"></div>Disponible</div>
-            <div><div class="box occupied"></div>Ocupada</div>
-            <div><div class="box selected"></div>Seleccionada</div>
-            <div><i class="fa fa-wheelchair"></i> No Disponibles</div>
-        </div>
+        <footer>
+            <p>© 2025 Cine Online | Todos los derechos reservados</p>
+            <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
+        </footer>
 
-        <!-- Butacas seleccionadas -->
-        <div id="selected-seats" style="margin-top: 20px; font-weight: bold;">Butacas seleccionadas:</div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log('🎬 Sistema de selección de asientos iniciado');
 
-        <!-- Botón continuar -->
-       <a href="http://localhost:8080/CineJ3/Cliente/SeleccionCombo.jsp" class="btn-link-continue">Continuar</a>
+                // === CONFIGURACIÓN ===
+                const PRECIO_UNITARIO = <%= precioButaca %>;
+                const MAX_ASIENTOS = 8;
 
-    </div>
+                // === ELEMENTOS DEL DOM ===
+                const selectedSeats = new Set();
+                const selectedSeatsDiv = document.getElementById('selected-seats-list');
+                const selectedCountSpan = document.getElementById('selected-count');
+                const subtotalSpan = document.getElementById('subtotal');
+                const totalSpan = document.getElementById('total');
+                const btnContinue = document.getElementById('btnContinue');
+                const inputSelectedSeats = document.getElementById('inputSelectedSeats');
+                const formAsientos = document.getElementById('formAsientos');
 
-    <!-- Pie de página -->
-    <footer>
-        <p>© 2025 Cine Online | Todos los derechos reservados</p>
-        <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
-    </footer>
+                // Verificar elementos
+                if (!selectedSeatsDiv || !btnContinue || !inputSelectedSeats) {
+                    console.error('❌ Error: Elementos del DOM no encontrados');
+                    return;
+                }
 
-</body>
+                // === FUNCIONES ===
+
+                /**
+                 * Actualiza el resumen de compra en el panel derecho
+                 */
+                function updateSummary() {
+                    const count = selectedSeats.size;
+                    const total = count * PRECIO_UNITARIO;
+
+                    // Actualizar contadores
+                    selectedCountSpan.textContent = count;
+                    subtotalSpan.textContent = total.toFixed(2);
+                    totalSpan.textContent = total.toFixed(2);
+
+                    // Actualizar lista de asientos
+                    if (count > 0) {
+                        const asientosOrdenados = Array.from(selectedSeats).sort();
+                        selectedSeatsDiv.textContent = asientosOrdenados.join(', ');
+                        selectedSeatsDiv.classList.add('has-selection');
+                    } else {
+                        selectedSeatsDiv.textContent = 'Ninguna butaca seleccionada';
+                        selectedSeatsDiv.classList.remove('has-selection');
+                    }
+
+                    // Actualizar input oculto para el formulario
+                    inputSelectedSeats.value = Array.from(selectedSeats).join(',');
+
+                    // Habilitar/deshabilitar botón
+                    if (count > 0) {
+                        btnContinue.disabled = false;
+                        btnContinue.textContent = 'Continuar · S/. ' + total.toFixed(2);
+                    } else {
+                        btnContinue.disabled = true;
+                        btnContinue.textContent = 'Continuar';
+                    }
+
+                    console.log('📊 Resumen:', {
+                        asientos: Array.from(selectedSeats),
+                        cantidad: count,
+                        total: 'S/. ' + total.toFixed(2)
+                    });
+                }
+
+                /**
+                 * Alterna la selección de un asiento
+                 */
+                function toggleSeat(seatElement) {
+                    const seatCode = seatElement.dataset.seat;
+                    const isAvailable = seatElement.dataset.available === 'true';
+
+                    console.log('🎯 Click en asiento:', seatCode, '| Disponible:', isAvailable);
+
+                    // Validar disponibilidad
+                    if (!isAvailable) {
+                        alert('⚠️ Este asiento no está disponible');
+                        return;
+                    }
+
+                    // Toggle selección
+                    if (selectedSeats.has(seatCode)) {
+                        // Deseleccionar
+                        selectedSeats.delete(seatCode);
+                        seatElement.classList.remove('selected');
+                        console.log('➖ Deseleccionado:', seatCode);
+                    } else {
+                        // Validar límite máximo
+                        if (selectedSeats.size >= MAX_ASIENTOS) {
+                            alert('⚠️ Solo puedes seleccionar hasta ' + MAX_ASIENTOS + ' asientos por compra');
+                            return;
+                        }
+
+                        // Seleccionar
+                        selectedSeats.add(seatCode);
+                        seatElement.classList.add('selected');
+                        console.log('➕ Seleccionado:', seatCode);
+                    }
+
+                    updateSummary();
+                }
+
+                // === EVENT LISTENERS ===
+
+                // Adjuntar eventos a todos los asientos disponibles
+                const asientosDisponibles = document.querySelectorAll('.seat.available');
+                console.log('✅ Asientos disponibles encontrados:', asientosDisponibles.length);
+
+                if (asientosDisponibles.length === 0) {
+                    console.warn('⚠️ No hay asientos disponibles');
+                    selectedSeatsDiv.textContent = 'No hay asientos disponibles para esta función';
+                }
+
+                asientosDisponibles.forEach((seat, index) => {
+                    // Click
+                    seat.addEventListener('click', function () {
+                        toggleSeat(this);
+                    });
+
+                    // Teclado (accesibilidad)
+                    seat.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSeat(this);
+                        }
+                    });
+
+                    // Hacer focusable
+                    seat.setAttribute('tabindex', '0');
+                });
+
+                // Validación al enviar formulario
+                formAsientos.addEventListener('submit', function (e) {
+                    if (selectedSeats.size === 0) {
+                        e.preventDefault();
+                        alert('⚠️ Debe seleccionar al menos un asiento para continuar');
+                        return false;
+                    }
+
+                    // Confirmación
+                    const asientosStr = Array.from(selectedSeats).sort().join(', ');
+                    const total = (selectedSeats.size * PRECIO_UNITARIO).toFixed(2);
+                    const confirmMsg = '¿Confirmar la reserva de ' + selectedSeats.size + ' asiento(s)?\n\n' +
+                            'Asientos: ' + asientosStr + '\n' +
+                            'Total: S/. ' + total;
+
+                    if (!confirm(confirmMsg)) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // Deshabilitar botón para evitar doble submit
+                    btnContinue.disabled = true;
+                    btnContinue.textContent = 'Procesando...';
+                    console.log('✅ Enviando formulario:', inputSelectedSeats.value);
+                });
+
+                // === INICIALIZACIÓN ===
+                updateSummary();
+                console.log('✅ Sistema listo');
+                console.log('💰 Precio unitario: S/.', PRECIO_UNITARIO);
+            });
+        </script>
+    </body>
 </html>

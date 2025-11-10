@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>
-<jsp:include page="CarteleraServlet" />   <!-- 👈 AGREGA ESTA LÍNEA AQUÍ -->
+<jsp:include page="CarteleraServlet" />
 <!DOCTYPE html>
 <html lang="es">
 <head>

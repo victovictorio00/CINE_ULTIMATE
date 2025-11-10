@@ -7,12 +7,9 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 
 <%
-    // 🔐 VERIFICACIÓN DE SESIÓN ADMINISTRADOR
     HttpSession sesion = request.getSession(false);
-
     if (sesion == null || sesion.getAttribute("rol") == null ||
         !"admin".equals(sesion.getAttribute("rol"))) {
-        // Si no hay sesión o el rol no es admin → redirige al login
         response.sendRedirect(request.getContextPath() + "/Login.jsp");
         return;
     }
@@ -24,13 +21,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard Administrador</title>
-
-    <!-- Bootstrap 4 CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
     <style>
         /* Barra lateral fija */
         body {

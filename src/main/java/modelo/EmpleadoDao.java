@@ -1,5 +1,4 @@
 package modelo;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,10 +6,11 @@ import Conexion.Conexion;
 
 public class EmpleadoDao implements DaoCrud<Empleado> {
 
+    //los CRUD no fueron integrados a procedure, son básicos
     @Override
     public List<Empleado> listar() throws SQLException {
         List<Empleado> empleados = new ArrayList<>();
-        String query = "SELECT * FROM empleados";  // Asegúrate de que la tabla y columnas existan
+        String query = "SELECT * FROM empleados";
         try (Connection con = Conexion.getConnection();
             PreparedStatement pst = con.prepareStatement(query);
             ResultSet rs = pst.executeQuery()) {

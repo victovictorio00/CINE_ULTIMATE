@@ -1,7 +1,3 @@
-<%--
-    Document : Peliculas
-    Author     : Proyecto
---%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>
@@ -18,11 +14,9 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <link rel="stylesheet" href="Estilos/peliculaClienteStyle.css">
-
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/PeliculaCliente.css">
     </head>
     <body>
-
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineOnline</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -71,7 +65,15 @@
                     <h5 class="mb-0"><i class="fas fa-filter mr-2"></i> Filtrar Por</h5>
 
                     <div class="filter-section">
-                        <h6>Fecha de Función</h6>
+                        <h6>Fecha de Estreno</h6>
+                        <%
+                            String generoActivo = request.getParameter("genero");
+                            if (generoActivo != null && !generoActivo.isEmpty()) {
+                        %>
+                        <input type="hidden" name="genero" value="<%= generoActivo%>">
+                        <%
+                            }
+                        %>
                         <form action="<%= request.getContextPath()%>/CarteleraServlet" method="GET" class="mb-3">
                             <div class="form-group">
                                 <input type="date" 
@@ -93,27 +95,28 @@
                         <h6>Género</h6>
                         <ul class="list-unstyled filter-list">
                             <%
-                                // Obtener el filtro de fecha activo del Request (enviado desde el Servlet)
+                                /*  ÚNICA declaración  */
                                 String fechaActiva = (String) request.getAttribute("filtroActivoFecha");
-                                // Crear el segmento de URL para mantener el filtro de fecha (si existe)
-                                String paramFecha = (fechaActiva != null && !fechaActiva.isEmpty()) ? "?fechaSeleccionada=" + fechaActiva : "";
-                            %>
-                            <a href="<%= request.getContextPath()%>/CarteleraServlet<%= paramFecha%>" class="active">
-                                Todos los Géneros
-                            </a>
-
-                            <%
-                                // 2. Obtener la lista de Géneros del Request
-                                List<modelo.Genero> listaGeneros = (List<modelo.Genero>) request.getAttribute("generos");
-
-                                if (listaGeneros != null) {
-                                    for (modelo.Genero genero : listaGeneros) {
-                                        // Obtiene el ID y el Nombre directamente del objeto Genero
-                                        int idGenero = genero.getIdGenero();
-                                        String nombreGenero = genero.getNombre(); // Asumiendo que Genero tiene getNombre()
+                                String paramFecha = (fechaActiva != null && !fechaActiva.isEmpty())
+                                        ? "?fechaSeleccionada=" + fechaActiva
+                                        : "";
                             %>
                             <li>
-                                <a href="<%= request.getContextPath()%>/CarteleraServlet?genero=<%= idGenero%>" data-genero="<%= nombreGenero.toLowerCase()%>">
+                                <a href="<%= request.getContextPath()%>/CarteleraServlet<%= paramFecha%>" class="active">
+                                    Todos los Géneros
+                                </a>
+                            </li>
+
+                            <%
+                                List<modelo.Genero> listaGeneros = (List<modelo.Genero>) request.getAttribute("generos");
+                                if (listaGeneros != null) {
+                                    for (modelo.Genero genero : listaGeneros) {
+                                        int idGenero = genero.getIdGenero();
+                                        String nombreGenero = genero.getNombre();
+                            %>
+                            <li>
+                                <a href="<%= request.getContextPath()%>/CarteleraServlet?genero=<%= idGenero%><%= paramFecha%>"
+                                   data-genero="<%= nombreGenero.toLowerCase()%>">
                                     <%= nombreGenero%>
                                 </a>
                             </li>
@@ -133,7 +136,6 @@
                             <i class="fas fa-times-circle mr-2"></i> Limpiar Filtros
                         </a>
                     </div>
-
                 </div>
 
                 <div class="movie-list-container">
@@ -149,7 +151,8 @@
                                 String title = pelicula.getNombre() == null ? "Sin título" : pelicula.getNombre();
                                 String sinopsis = pelicula.getSinopsis() == null || pelicula.getSinopsis().isEmpty() ? "Sin sinopsis disponible." : pelicula.getSinopsis();
                                 int id = pelicula.getIdPelicula();
-                                String imageUrl = request.getContextPath() + "/ImageServlet?id=" + id;
+                                // 👇 aquí añadimos el truco del timestamp para evitar caché
+                                String imageUrl = request.getContextPath() + "/ImageServlet?id=" + id + "&t=" + System.currentTimeMillis();
                                 String detailUrl = request.getContextPath() + "/DetallePeliculaServlet?id=" + id;
                         %>
 
@@ -184,11 +187,6 @@
                         <%
                             } // for peliculas
                         %>
-
-                        <div class="col-12 text-center mt-4">
-                            <button class="btn btn-outline-light btn-ver-mas"><i class="fas fa-arrow-down mr-2"></i> Ver más películas</button>
-                        </div>
-
                         <% } // else peliculas %>
                     </div>
                 </div>

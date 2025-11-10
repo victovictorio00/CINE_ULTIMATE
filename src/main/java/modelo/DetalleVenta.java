@@ -1,12 +1,12 @@
 package modelo;
 
 public class DetalleVenta {
-    
+    //variables de entrada
     private int idDetalleVenta;
     private Venta venta;
     private Producto producto;
     private Funcion funcion;
-    private Asiento asiento;
+    private AsientoFuncion idAsientoFuncion;
     private int cantidad;
     private int tipoItem;
     private double precioUnitario;
@@ -16,17 +16,18 @@ public class DetalleVenta {
     }
 
     //constructor con parámetros
-    public DetalleVenta(int idDetalleVenta, Venta venta, Producto producto, Funcion funcion, Asiento asiento, int cantidad, int tipoItem, double precioUnitario) {
+    public DetalleVenta(int idDetalleVenta, Venta venta, Producto producto, Funcion funcion, int cantidad, int tipoItem, double precioUnitario) {
         this.idDetalleVenta = idDetalleVenta;
         this.venta = venta;
         this.producto = producto;
         this.funcion = funcion;
-        this.asiento = asiento;
+        this.idAsientoFuncion = null;
         this.cantidad = cantidad;
         this.tipoItem = tipoItem;
         this.precioUnitario = precioUnitario;
-    }   
+    }
 
+    //getters y setters
     public int getIdDetalleVenta() {
         return idDetalleVenta;
     }
@@ -42,6 +43,7 @@ public class DetalleVenta {
     public void setVenta(Venta venta) {
         this.venta = venta;
     }
+
     public Producto getProducto() {
         return producto;
     }
@@ -49,6 +51,7 @@ public class DetalleVenta {
     public void setProducto(Producto producto) {
         this.producto = producto;
     }
+
     public Funcion getFuncion() {
         return funcion;
     }
@@ -57,13 +60,14 @@ public class DetalleVenta {
         this.funcion = funcion;
     }
 
-    public Asiento getAsiento() {
-        return asiento;
+    public AsientoFuncion getIdAsientoFuncion() {
+        return idAsientoFuncion;
     }
 
-    public void setAsiento(Asiento asiento) {
-        this.asiento = asiento;
+    public void setIdAsientoFuncion(AsientoFuncion idAsientoFuncion) {
+        this.idAsientoFuncion = idAsientoFuncion;
     }
+
     public int getCantidad() {
         return cantidad;
     }

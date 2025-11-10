@@ -64,10 +64,10 @@ public class LoginServlet extends HttpServlet {
 
         // Validación de Clave Secreta (Verificar que se cargó algo en init())
         if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
-             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
-             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
-             request.getRequestDispatcher("Login.jsp").forward(request, response);
-             return;
+            System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
+            request.setAttribute("error", "Error de configuración del servidor (Captcha).");
+            request.getRequestDispatcher("Login.jsp").forward(request, response);
+            return;
         }
 
         // 1. Obtener la respuesta de reCAPTCHA
@@ -103,62 +103,46 @@ public class LoginServlet extends HttpServlet {
         String errorMsg = null;
 
         try {
-            //Trae al usuario por username (para leer intentos y estado)
-            Usuario u = usuarioDao.getByUsername(username);
 
-            //Verifica existencia
+            // Dentro de doPost, después de verificar reCAPTCHA y obtener username/password
+            Usuario u = usuarioDao.getByUsername(username);
             if (u == null) {
-                //Mensaje de error genérico
-                errorMsg = "Credenciales incorrectas.";
-                manejarFallo(request, response, username, errorMsg);
+                manejarFallo(request, response, username, "Credenciales incorrectas.");
                 return;
             }
 
+// bloqueo / intentos (tu lógica existente)
             int intentosFallidosActuales = u.getNumeroIntentos();
             int estadoActualId = u.getIdEstadoUsuario() != null ? u.getIdEstadoUsuario().getIdEstadoUsuario() : 0;
-
-            // verifica bloqueo
             if (estadoActualId == ESTADO_BLOQUEADO) {
-                errorMsg = "Tu cuenta se encuentra bloqueada. Contacta al administrador.";
-                manejarFallo(request, response, username, errorMsg);
+                manejarFallo(request, response, username, "Tu cuenta se encuentra bloqueada.");
                 return;
             }
-
-            // verifica numero de intentos
             if (intentosFallidosActuales > MAX_INTENTOS) {
-                // Si la BD no lo había bloqueado, lo bloqueamos ahora
                 if (estadoActualId == ESTADO_ACTIVO) {
                     usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
                 }
-                errorMsg = "Has superado el límite de intentos (" + MAX_INTENTOS + "). Tu cuenta ha sido bloqueada.";
-                manejarFallo(request, response, username, errorMsg);
+                manejarFallo(request, response, username, "Has superado el límite de intentos.");
                 return;
             }
 
-            // Valida credenciales (BCrypt/fallback dentro del DAO)
+// validar credenciales
             Usuario usuarioAutenticado = usuarioDao.validateUser(username, password);
-
-            if (usuarioAutenticado != null) {
-                // Resetear intentos a 3
-                usuarioDao.resetearIntentos(u.getIdUsuario());
-                crearSesionYRedirigir(request, response, usuarioAutenticado);
+            if (usuarioAutenticado == null) {
+                usuarioDao.aumentarIntentos(u.getIdUsuario());
+                manejarFallo(request, response, username, "Credenciales incorrectas.");
                 return;
             }
 
-            // Fallo de autenticacion 
-            usuarioDao.aumentarIntentos(u.getIdUsuario());
-            int nuevosIntentosFallidos = intentosFallidosActuales + 1;
+// Si llegamos aquí: autenticación OK
+            usuarioDao.resetearIntentos(u.getIdUsuario());
 
-            if (nuevosIntentosFallidos > MAX_INTENTOS) {
-                // Bloqueo y mensaje final
-                usuarioDao.bloquearUsuario(u.getIdUsuario(), ESTADO_BLOQUEADO);
-                errorMsg = "¡Último intento fallido! Tu cuenta ha sido bloqueada.";
-            } else {
-                // Mensaje de advertencia
-                errorMsg = "Credenciales incorrectas. Intento " + nuevosIntentosFallidos + " de " + MAX_INTENTOS + ".";
-            }
+// Obtener y validar redirect (parámetro asume "redirect")
+            String redirectParam = request.getParameter("redirect");
+            String destinoSeguro = getSafeRedirect(request, redirectParam); // helper explicado abajo
 
-            manejarFallo(request, response, username, errorMsg);
+// Crear sesión y redirigir según rol o redirect seguro
+            crearSesionYRedirigir(request, response, usuarioAutenticado, destinoSeguro);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -173,36 +157,47 @@ public class LoginServlet extends HttpServlet {
         request.setAttribute("lastUsername", username);
         request.getRequestDispatcher("/Login.jsp").forward(request, response);
     }
-    
-    private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u)
-        throws IOException, ServletException {
-    HttpSession session = request.getSession(true);
-    session.setAttribute("userId", u.getIdUsuario());
-    session.setAttribute("username", u.getUsername());
-    session.setAttribute("nombreCompleto", u.getNombreCompleto());
-    Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
-    session.setAttribute("userRoleId", rolId);
 
-    // 🔹 NUEVO: atributo "rol" que usarán tus JSP para validación
-    if (rolId != null) {
-        if (rolId == 1) { // Cliente
-            session.setAttribute("rol", "cliente");  // ← añadido
-            response.sendRedirect(request.getContextPath() + "/DashboardServlet");
-        } else if (rolId == 2) { // Admin
-            session.setAttribute("rol", "admin");    // ← añadido
-            response.sendRedirect(request.getContextPath() + "/AdminDashboard.jsp");
+    private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u, String destinoSeguro)
+            throws IOException, ServletException {
+        HttpSession session = request.getSession(true);
+        session.setAttribute("userId", u.getIdUsuario());
+        session.setAttribute("username", u.getUsername());
+        session.setAttribute("nombreCompleto", u.getNombreCompleto());
+        Integer rolId = u.getIdRol() != null ? u.getIdRol().getIdRol() : null;
+        session.setAttribute("userRoleId", rolId);
+
+        // Ajustes de seguridad en cookie JSESSIONID (si quieres forzarlo)
+        Cookie jsess = new Cookie("JSESSIONID", session.getId());
+        jsess.setHttpOnly(true);
+        jsess.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+        if (request.isSecure()) {
+            jsess.setSecure(true);
+        }
+        response.addCookie(jsess);
+
+        // Si hay destino seguro, redirigir ahí; si no, usar destino por rol
+        if (destinoSeguro != null && !destinoSeguro.isEmpty()) {
+            response.sendRedirect(response.encodeRedirectURL(destinoSeguro));
+            return;
+        }
+
+        if (rolId != null) {
+            if (rolId == 1) {
+                session.setAttribute("rol", "cliente");
+                response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/DashboardServlet"));
+            } else if (rolId == 2) {
+                session.setAttribute("rol", "admin");
+                response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/AdminDashboard.jsp"));
+            } else {
+                session.invalidate();
+                manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+            }
         } else {
             session.invalidate();
-            manejarFallo(request, response, u.getUsername(), "Rol de usuario no válido.");
+            manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
         }
-    } else {
-        session.invalidate();
-        manejarFallo(request, response, u.getUsername(), "Rol de usuario no asignado.");
     }
-}
-
-
-
 
     /**
      * Método auxiliar para enviar la solicitud de verificación a Google.
@@ -241,4 +236,27 @@ public class LoginServlet extends HttpServlet {
             return responseData.toString().contains("\"success\": true");
         }
     }
+
+    private String getSafeRedirect(HttpServletRequest request, String redirectParam) {
+        if (redirectParam == null || redirectParam.isEmpty()) {
+            return null;
+        }
+        try {
+            String decoded = java.net.URLDecoder.decode(redirectParam, java.nio.charset.StandardCharsets.UTF_8.name());
+            // Evitar URIs absolutas externas y esquemas
+            if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.contains("://")) {
+                return null;
+            }
+            // Aceptar sólo URIs que empiecen con el contextPath o que sean relativas
+            String context = request.getContextPath(); // ej: /MiApp
+            if (decoded.startsWith(context) || decoded.startsWith("/")) {
+                return decoded;
+            } else {
+                return context + "/" + decoded; // opcional: normalizar relativas
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }
