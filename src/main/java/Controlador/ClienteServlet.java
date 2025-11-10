@@ -486,6 +486,8 @@ public class ClienteServlet extends HttpServlet {
                 detalle.setPrecioUnitario(funcion.getPelicula().getPrecio());
 
                 detalleVentaDao.insertar(detalle);
+                asientoFuncionDao.actualizarEstado(idAf, 2);
+                System.out.println("DEBUG: Asiento " + codigoAsiento + " marcado como ocupado (2)");
 
             }
 
