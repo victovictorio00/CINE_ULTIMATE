@@ -330,4 +330,63 @@ public class UsuarioDao implements DaoCrud<Usuario> {
         }
         return lista;
     }
+    public void actualizarDatos(int idUsuario, String nombreCompleto, String telefono, String email, String direccion) {
+        String sql = "UPDATE usuarios SET nombre_completo=?, telefono=?, email=?, direccion=? WHERE id_usuario=?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombreCompleto);
+            ps.setString(2, telefono);
+            ps.setString(3, email);
+            ps.setString(4, direccion);
+            ps.setInt(5, idUsuario);
+
+            int filas = ps.executeUpdate();
+            System.out.println("→ Filas actualizadas: " + filas); 
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public Usuario leerPorId(int idUsuario) {
+        Usuario u = null;
+        String sql = "SELECT * FROM usuarios WHERE id_usuario=?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    u = new Usuario();
+                    u.setIdUsuario(rs.getInt("id_usuario"));
+                    u.setNombreCompleto(rs.getString("nombre_completo"));
+                    u.setDni(rs.getString("dni"));
+                    u.setUsername(rs.getString("username"));
+                    u.setPassword(rs.getString("password"));
+                    u.setTelefono(rs.getString("telefono"));
+                    u.setEmail(rs.getString("email"));
+                    u.setDireccion(rs.getString("direccion"));
+                    u.setNumeroIntentos(rs.getInt("numero_intentos"));
+                    Rol rol = new Rol();
+                    rol.setIdRol(rs.getInt("id_rol"));
+                    u.setIdRol(rol);
+                    EstadoUsuario est = new EstadoUsuario();
+                    est.setIdEstadoUsuario(rs.getInt("id_estado_usuario"));
+                    u.setIdEstadoUsuario(est);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return u;
+    }
+    public void actualizarPassword(int idUsuario, String hashedPassword) throws SQLException {
+        String sql = "UPDATE usuarios SET password = ? WHERE id_usuario = ?";
+        try (Connection conn = Conexion.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, idUsuario);
+            int filas = ps.executeUpdate();
+            System.out.println("Filas afectadas en actualizarPassword(): " + filas);
+        }
+    }
 }

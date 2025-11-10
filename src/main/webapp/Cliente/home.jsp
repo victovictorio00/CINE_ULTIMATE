@@ -7,7 +7,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>CineOnline</title>
+        <title>CineMax</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/home.css">
     </head>
@@ -109,6 +109,8 @@
                         <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item text-white bg-dark" href="#">Mi Perfil</a>
                             <a class="dropdown-item" href="<%= request.getContextPath()%>/ClienteServlet?action=misReservas">Mis Reservas</a>
+                            <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/Cliente/PerfilCliente.jsp">Mi Perfil</a>
+                            <a class="dropdown-item text-white bg-dark" href="#">Mis Reservas</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/LogoutServlet">Cerrar Sesión</a>
                         </div>
