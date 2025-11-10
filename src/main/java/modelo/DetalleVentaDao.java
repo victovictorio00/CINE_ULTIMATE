@@ -49,13 +49,12 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
                 pst.setNull(3, Types.INTEGER);
             }
 
-           // AsientoFuncion
-if (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0) {
-    pst.setInt(4, detalle.getIdAsientoFuncion().getIdAsientoFuncion());
-} else {
-    pst.setNull(4, Types.INTEGER);
-}
-
+            // AsientoFuncion
+            if (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0) {
+                pst.setInt(4, detalle.getIdAsientoFuncion().getIdAsientoFuncion());
+            } else {
+                pst.setNull(4, Types.INTEGER);
+            }
 
             pst.setInt(5, detalle.getCantidad());
             pst.setInt(6, detalle.getTipoItem());

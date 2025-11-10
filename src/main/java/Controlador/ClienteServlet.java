@@ -71,6 +71,10 @@ public class ClienteServlet extends HttpServlet {
                 case "verVoucher":
                     mostrarVoucher(request, response);
                     break;
+                case "misReservas":
+                    mostrarReservasCliente(request, response);
+                    break;
+
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             }
@@ -158,7 +162,7 @@ public class ClienteServlet extends HttpServlet {
 
             if (funcion == null) {
                 request.setAttribute("error", "La función seleccionada no existe");
-                request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
 
@@ -193,7 +197,7 @@ public class ClienteServlet extends HttpServlet {
                 funcion = funcionDao.leer(idFuncion);
                 if (funcion == null) {
                     request.setAttribute("error", "Función no encontrada");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
                 session.setAttribute(ATTR_FUNCION, funcion);
@@ -205,7 +209,7 @@ public class ClienteServlet extends HttpServlet {
 
         if (funcion.getSala() == null) {
             request.setAttribute("error", "La función no tiene sala asignada");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
@@ -270,7 +274,7 @@ public class ClienteServlet extends HttpServlet {
                         funcion.getSala().getIdSala());
                 if (asiento == null) {
                     request.setAttribute("error", "Asiento " + codigoAsiento + " no existe");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
 
@@ -281,7 +285,7 @@ public class ClienteServlet extends HttpServlet {
                 if (idAf == 0) {
                     System.out.println("ENTRO AQUI EL ERROR 2");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " no está registrado para esta función");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
 
@@ -290,7 +294,7 @@ public class ClienteServlet extends HttpServlet {
                 if (af == null || af.getEstadoAsiento().getIdEstadoAsiento() != 1) {
                     System.out.println("ENTRO AQUI EL ERROR 3");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " ya no está disponible");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
             }
@@ -380,7 +384,7 @@ public class ClienteServlet extends HttpServlet {
                 || session.getAttribute(ATTR_TOTAL_ASIENTOS) == null) {
 
             request.setAttribute("error", "Faltan datos para confirmar la reserva. Por favor, inicie el proceso nuevamente.");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
@@ -513,19 +517,33 @@ public class ClienteServlet extends HttpServlet {
     }
 
     // ============== PASO 8: MOSTRAR VOUCHER ==============
-    private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+   private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
-        Integer idVenta = (Integer) session.getAttribute("idVenta");
+    HttpSession session = request.getSession();
+    Integer idVenta = null;
 
-        if (idVenta == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
+    String idVentaParam = request.getParameter("idVenta");
+    if (idVentaParam != null && !idVentaParam.isEmpty()) {
+        try {
+            idVenta = Integer.parseInt(idVentaParam);
+            session.setAttribute("idVenta", idVenta);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de venta inválido");
             return;
         }
-
-        request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
+    } else {
+        idVenta = (Integer) session.getAttribute("idVenta");
     }
+
+    if (idVenta == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
+        return;
+    }
+
+    request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
+}
+
 
     // ============== UTILIDADES ==============
     private void limpiarSesionCompra(HttpSession session) {
@@ -552,4 +570,36 @@ public class ClienteServlet extends HttpServlet {
             }
         }
     }
+    
+    private void mostrarReservasCliente(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession(false);
+    if (session == null || session.getAttribute("userId") == null) {
+        response.sendRedirect(request.getContextPath() + "/Login.jsp");
+        return;
+    }
+
+    int userId = (int) session.getAttribute("userId");
+    try {
+        VentaDao ventaDao = new VentaDao();
+        DetalleVentaDao detalleDao = new DetalleVentaDao();
+
+        List<Venta> ventas = ventaDao.obtenerReservasPorUsuario(userId);
+
+        // Para cada venta, obtenemos los detalles (función, asientos, etc.)
+        for (Venta v : ventas) {
+            List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
+            v.setDetalles(detalles); // ← agrega este setter si no existe
+        }
+
+        request.setAttribute("ventas", ventas);
+        request.getRequestDispatcher("Cliente/MisReservas.jsp").forward(request, response);
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "Error al cargar las reservas: " + e.getMessage());
+    }
+}
+
+
 }

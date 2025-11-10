@@ -199,4 +199,40 @@ public class VentaDao implements DaoCrud<Venta> {
             return false;
         }
     }
+    
+    public List<Venta> obtenerReservasPorUsuario(int idUsuario) throws SQLException {
+    List<Venta> lista = new ArrayList<>();
+
+    String sql = "SELECT v.id_venta, v.fecha, v.total, v.metodo_pago, "
+               + "u.nombre_completo "
+               + "FROM ventas v "
+               + "JOIN usuarios u ON v.id_usuario_cliente = u.id_usuario "
+               + "WHERE v.id_usuario_cliente = ? "
+               + "ORDER BY v.fecha DESC";
+
+    try (Connection con = Conexion.getConnection();
+         PreparedStatement pst = con.prepareStatement(sql)) {
+
+        pst.setInt(1, idUsuario);
+        try (ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Venta venta = new Venta();
+                venta.setIdVenta(rs.getInt("id_venta"));
+                venta.setFecha(rs.getTimestamp("fecha"));
+                venta.setTotal(rs.getDouble("total"));
+                venta.setMetodoPago(rs.getString("metodo_pago"));
+
+                Usuario usuario = new Usuario();
+                usuario.setIdUsuario(idUsuario);
+                usuario.setNombreCompleto(rs.getString("nombre_completo"));
+                venta.setIdUsuarioCliente(usuario);
+
+                lista.add(venta);
+            }
+        }
+    }
+
+    return lista;
+}
+
 }
