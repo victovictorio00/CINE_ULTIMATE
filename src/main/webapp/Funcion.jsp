@@ -98,7 +98,7 @@
             <small>Admin</small>
         </div>
         <nav class="nav flex-column">
-            <a href="AdminDashboard.jsp" class="nav-link"><i class="fas fa-th-large mr-2"></i>Dashboard</a>
+            <a href="AdminDashboardServlet" class="nav-link"><i class="fas fa-th-large mr-2"></i>Dashboard</a>
             <a href="UsuarioServlet?action=listar" class="nav-link"><i class="fas fa-users mr-2"></i>Usuarios</a>
             <a href="ProductoServlet?action=listar" class="nav-link"><i class="fas fa-box mr-2"></i>Productos</a>
             <a href="EmpleadoServlet?action=listar" class="nav-link"><i class="fas fa-user-tie mr-2"></i>Empleados</a>
