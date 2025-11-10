@@ -1,6 +1,9 @@
 package Controlador;
 
+import Conexion.Conexion;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -33,7 +36,7 @@ public class DetallePeliculaServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
-        
+
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el ID de la película");
@@ -47,6 +50,14 @@ public class DetallePeliculaServlet extends HttpServlet {
             if (pelicula == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Película no encontrada");
                 return;
+            }
+
+            try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(
+                    "UPDATE funciones SET activa = 0 WHERE fecha_fin < NOW()")) {
+                int rows = ps.executeUpdate();
+                System.out.println("Funciones desactivadas al inicio: " + rows);
+            } catch (Exception e) {
+                System.err.println("Error al desactivar funciones: " + e.getMessage());
             }
 
             // Enviar la película al JSP

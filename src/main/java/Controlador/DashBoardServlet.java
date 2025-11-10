@@ -17,7 +17,7 @@ import javax.servlet.http.HttpSession;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
 
-@WebServlet("/DashboardServlet")
+@WebServlet(urlPatterns = "/DashboardServlet", loadOnStartup = 1)
 public class DashBoardServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(DashBoardServlet.class.getName());
@@ -25,6 +25,7 @@ public class DashBoardServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        super.init();
         this.peliculaDao = new PeliculaDao();
         // Desactivar funciones pasadas al iniciar
         try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(
@@ -34,6 +35,7 @@ public class DashBoardServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("Error al desactivar funciones: " + e.getMessage());
         }
+        
     }
 
     @Override
