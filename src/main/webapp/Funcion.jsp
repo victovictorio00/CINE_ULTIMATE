@@ -21,6 +21,7 @@
     <title>Funciones - CINEMAX</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             min-height: 100vh;
@@ -155,12 +156,7 @@
                         <td class="acciones">
                             <a href="FuncionServlet?action=editar&id=<%= f.getIdFuncion() %>" 
                                class="btn btn-primary btn-sm">
-                               Editar
-                            </a>
-                            <a href="FuncionServlet?action=eliminar&id=<%= f.getIdFuncion() %>" 
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('¿Está seguro de eliminar esta función?');">
-                               Eliminar
+                               <i class="fas fa-edit"></i>
                             </a>
                         </td>
                     </tr>
