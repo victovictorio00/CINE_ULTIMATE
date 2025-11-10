@@ -92,6 +92,12 @@
             width: 100px;
             margin: 4px auto;
         }
+
+        /* 🔒 Ocultar la columna ID */
+        th:first-child,
+        td:first-child {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -137,11 +143,13 @@
             <h3 class="text-center mb-4">Lista de Productos</h3>
 
             <a href="ProductoServlet?action=nuevo" class="btn btn-success btn-agregar mb-3">
-                    <i class="fas fa-plus"></i> Agregar Producto
-                </a>
+                <i class="fas fa-plus"></i> Agregar Producto
+            </a>
+
             <table class="table table-striped table-bordered table-hover text-center">
                 <thead class="thead-dark">
                     <tr>
+                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Precio</th>
                         <th>Descripción</th>
@@ -156,6 +164,7 @@
                             for (Producto producto : listaProductos) {
                     %>
                     <tr>
+                        <td><%= producto.getIdProducto() %></td>
                         <td><%= producto.getNombre() %></td>
                         <td>S/ <%= producto.getPrecio() %></td>
                         <td><%= producto.getDescripcion() %></td>
@@ -174,14 +183,10 @@
                         </td>
                         <td class="text-center acciones">
                             <a href="ProductoServlet?action=editar&id=<%= producto.getIdProducto() %>" 
-                               class="btn btn-primary btn-sm">
-                               Editar
-                            </a>
+                               class="btn btn-primary btn-sm">Editar</a>
                             <a href="ProductoServlet?action=eliminar&id=<%= producto.getIdProducto() %>" 
                                class="btn btn-danger btn-sm"
-                               onclick="return confirm('¿Está seguro de eliminar este producto?');">
-                               Eliminar
-                            </a>
+                               onclick="return confirm('¿Está seguro de eliminar este producto?');">Eliminar</a>
                         </td>
                     </tr>
                     <%
