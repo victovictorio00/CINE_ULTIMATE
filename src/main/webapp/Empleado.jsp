@@ -154,7 +154,6 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Dirección</th>
                         <th>Teléfono</th>
@@ -168,7 +167,7 @@
                             for (Empleado empleado : lista) {
                     %>
                     <tr>
-                        <td><%= empleado.getIdEmpleado() %></td>
+                       
                         <td><%= empleado.getNombre() %></td>
                         <td><%= empleado.getDireccion() %></td>
                         <td><%= empleado.getTelefono() %></td>
@@ -200,3 +199,4 @@
 
 </body>
 </html>
+

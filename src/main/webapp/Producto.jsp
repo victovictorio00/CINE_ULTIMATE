@@ -142,7 +142,6 @@
             <table class="table table-striped table-bordered table-hover text-center">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Precio</th>
                         <th>Descripción</th>
@@ -157,7 +156,6 @@
                             for (Producto producto : listaProductos) {
                     %>
                     <tr>
-                        <td><%= producto.getIdProducto() %></td>
                         <td><%= producto.getNombre() %></td>
                         <td>S/ <%= producto.getPrecio() %></td>
                         <td><%= producto.getDescripcion() %></td>
