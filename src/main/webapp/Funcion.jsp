@@ -122,7 +122,6 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Película</th>
                         <th>Sala</th>
                         <th>Inicio</th>
@@ -139,7 +138,6 @@
                             for (Funcion f : lista) {
                     %>
                     <tr>
-                        <td><%= f.getIdFuncion() %></td>
                         <td><%= f.getPelicula() != null ? f.getPelicula().getNombre() : "Sin película" %></td>
                         <td><%= f.getSala() != null ? f.getSala().getNombre() : "Sin sala" %></td>
                         <td><%= f.getFechaInicio() %></td>

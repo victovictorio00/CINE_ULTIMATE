@@ -142,7 +142,6 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
                 <tr>
-                    <th>ID</th>
                     <th>Rol</th>
                     <th>Estado</th>
                     <th>Nombre Completo</th>
@@ -161,7 +160,6 @@
                         for (Usuario usuario : listaUsuarios) {
                 %>
                 <tr>
-                    <td><%= usuario.getIdUsuario() %></td>
                     <td><%= usuario.getIdRol() != null ? usuario.getIdRol().getNombre() : "Sin rol" %></td>
                     <td><%= usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getNombre() : "Sin estado" %></td>
                     <td><%= usuario.getNombreCompleto() %></td>

@@ -135,7 +135,6 @@
             <table class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Sinopsis</th>
                         <th>Horario</th>
@@ -151,7 +150,6 @@
                             for (Pelicula pelicula : listaPeliculas) {
                     %>
                     <tr>
-                        <td><%= pelicula.getIdPelicula() %></td>
                         <td><%= pelicula.getNombre() %></td>
                         <td><%= pelicula.getSinopsis() %></td>
                         <td><%= pelicula.getFechaEstreno() %></td>
