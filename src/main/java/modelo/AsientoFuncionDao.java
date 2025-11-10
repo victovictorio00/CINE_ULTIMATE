@@ -148,10 +148,11 @@ public class AsientoFuncionDao implements DaoCrud<AsientoFuncion> {
     public List<AsientoFuncion> listarPorSalaYFuncion(int idFuncion) throws SQLException {
         List<AsientoFuncion> lista = new ArrayList<>();
 
-        String sql = "SELECT af.id_asiento_funcion, af.id_asiento, af.id_funcion, af.id_estado_asiento, "
-                   + "       a.codigo, a.id_sala "
+        String sql = "SELECT af.id_asiento_funcion, af.id_funcion, af.id_asiento, af.id_estado_asiento, "
+                   + "a.codigo, a.id_sala, ea.nombre AS nombre_estado "
                    + "FROM asiento_funcion af "
-                   + "JOIN asientos a ON a.id_asiento = af.id_asiento "
+                   + "INNER JOIN asientos a ON af.id_asiento = a.id_asiento "
+                   + "INNER JOIN estado_asientos ea ON af.id_estado_asiento = ea.id_estado_asiento "
                    + "WHERE af.id_funcion = ? "
                    + "ORDER BY a.codigo";
 
@@ -162,7 +163,27 @@ public class AsientoFuncionDao implements DaoCrud<AsientoFuncion> {
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(mapear(rs));
+                    AsientoFuncion af = new AsientoFuncion();
+                    af.setIdAsientoFuncion(rs.getInt("id_asiento_funcion"));
+
+                    Funcion f = new Funcion();
+                    f.setIdFuncion(rs.getInt("id_funcion"));
+                    af.setFuncion(f);
+
+                    Asiento a = new Asiento();
+                    a.setId_asiento(rs.getInt("id_asiento"));
+                    a.setCodigo(rs.getString("codigo"));
+                    Sala s = new Sala();
+                    s.setIdSala(rs.getInt("id_sala"));
+                    a.setId_sala(s);
+                    af.setAsiento(a);
+
+                    EstadoAsiento ea = new EstadoAsiento();
+                    ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
+                    ea.setNombre(rs.getString("nombre_estado"));
+                    af.setEstadoAsiento(ea);
+
+                    lista.add(af);
                 }
             }
         }
@@ -238,5 +259,14 @@ public class AsientoFuncionDao implements DaoCrud<AsientoFuncion> {
         af.setEstadoAsiento(ea);
 
         return af;
+    }
+    public void actualizarEstado(int idAsientoFuncion, int nuevoEstado) throws SQLException {
+        String sql = "UPDATE asiento_funcion SET id_estado_asiento = ? WHERE id_asiento_funcion = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, nuevoEstado);
+            pst.setInt(2, idAsientoFuncion);
+            pst.executeUpdate();
+        }
     }
 }
