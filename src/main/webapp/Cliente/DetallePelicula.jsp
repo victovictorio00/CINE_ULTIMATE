@@ -12,7 +12,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Detalle de Película | CineMax</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/DetallePelicula.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/DetallePelicula.css">
     </head>
     <body>
 
@@ -45,11 +45,11 @@
                     <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DashboardServlet">Inicio</a></li>
                     <li class="nav-item active"><a class="nav-link" href="<%= request.getContextPath()%>/CarteleraServlet">Películas</a></li>
                     <li class="nav-item"><a class="nav-link" href="<%= request.getContextPath()%>/DulceriaServlet">Dulcería</a></li>
-                    <%
-                        String username = (String) session.getAttribute("username");
-                        String nombreCompleto = (String) session.getAttribute("nombreCompleto");
-                        if (username == null || username.isEmpty()) {
-                    %>
+                        <%
+                            String username = (String) session.getAttribute("username");
+                            String nombreCompleto = (String) session.getAttribute("nombreCompleto");
+                            if (username == null || username.isEmpty()) {
+                        %>
                     <li class="nav-item">
                         <a class="nav-link" href="<%= request.getContextPath()%>/Login.jsp">Mi Cuenta</a>
                     </li>
@@ -91,19 +91,19 @@
         <div class="movie-video" style="position:relative; margin-top:80px; width:100%; height:60vh;">
             <!-- Miniatura -->
             <img id="videoThumb" 
-                 src="https://img.youtube.com/vi/<%= trailer.substring(trailer.lastIndexOf('/')+1) %>/hqdefault.jpg"
+                 src="https://img.youtube.com/vi/<%= trailer.substring(trailer.lastIndexOf('/') + 1)%>/hqdefault.jpg"
                  style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
 
             <div id="playerContainer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
 
             <div id="playOverlay" 
-                 style="position:absolute; top:0; left:0; width:100%; height:100%; 
-                        display:flex; justify-content:center; align-items:center; 
-                        cursor:pointer;">
+                 style="position:absolute; top:0; left:0; width:100%; height:100%;
+                 display:flex; justify-content:center; align-items:center;
+                 cursor:pointer;">
                 <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,87,51,0.85);
-                            display:flex; justify-content:center; align-items:center;">
+                     display:flex; justify-content:center; align-items:center;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                        <path d="M8 5V19L19 12L8 5Z"/>
+                    <path d="M8 5V19L19 12L8 5Z"/>
                     </svg>
                 </div>
             </div>
@@ -112,7 +112,7 @@
         <script>
             const overlay = document.getElementById('playOverlay');
             const container = document.getElementById('playerContainer');
-            const videoId = "<%= trailer.substring(trailer.lastIndexOf('/')+1) %>";
+            const videoId = "<%= trailer.substring(trailer.lastIndexOf('/') + 1)%>";
             let player;
 
             overlay.addEventListener('click', () => {
@@ -151,8 +151,8 @@
                 <div class="col-12 col-md-5 mb-4 mb-md-0 movie-poster text-center">
                     <img 
                         src="<%= (pelicula.getFoto() != null && pelicula.getFoto().length > 0)
-            ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis())
-            : (request.getContextPath() + "/Cliente/images/pelicula6.jpg") %>" 
+                                ? (request.getContextPath() + "/ImageServlet?id=" + pelicula.getIdPelicula() + "&t=" + System.currentTimeMillis())
+                                : (request.getContextPath() + "/Cliente/images/pelicula6.jpg")%>" 
                         alt="Póster de <%= pelicula.getNombre()%>" 
                         class="img-fluid poster-img"
                         style="border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.35); max-height:520px; object-fit:cover;">
@@ -170,10 +170,10 @@
                             <h5 class="text-muted mb-3"><%= pelicula.getIdGenero().getNombre()%></h5>
                         </div>
                         <!-- Precio -->
-                        <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61); 
-                            padding:12px 18px; border-radius:16px; box-shadow:0 6px 18px rgba(255,107,58,0.15);">
+                        <div style="display:inline-block; text-align:center; background: linear-gradient(90deg,#FF6B3A,#FF8A61);
+                             padding:12px 18px; border-radius:16px; box-shadow:0 6px 18px rgba(255,107,58,0.15);">
                             <div style="font-size:0.85rem; color:rgba(255,255,255,0.9); font-weight:500;">Entrada</div>
-                            <div style="font-weight:700; font-size:1.3rem; color:white; margin-top:2px;"><%= precioFormateado %></div>
+                            <div style="font-weight:700; font-size:1.3rem; color:white; margin-top:2px;"><%= precioFormateado%></div>
                         </div>
                     </div>
                     <h3 style="margin-top:12px; margin-bottom:8px;">Sinopsis</h3>
@@ -182,7 +182,18 @@
                     <div class="mb-3">
                         <%
                             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a"); // 12h + AM/PM
-                            if (funciones == null || funciones.isEmpty()) {
+
+                            // Contar funciones activas
+                            int contadorActivas = 0;
+                            if (funciones != null && !funciones.isEmpty()) {
+                                for (modelo.Funcion f : funciones) {
+                                    if (f.getActiva() == 1) {
+                                        contadorActivas++;
+                                    }
+                                }
+                            }
+
+                            if (funciones == null || funciones.isEmpty() || contadorActivas == 0) {
                         %>
                         <div class="alert alert-info w-100" role="alert" style="background:#f2f4f7; color:#333; border-color:#e1e6ef;">
                             No hay funciones disponibles
@@ -199,9 +210,15 @@
                                 <%= precioFormateado%>
                             </div>
                         </div>
+
                         <div id="horariosWrapper" class="d-flex flex-wrap align-items-center" style="gap:10px;">
                             <%
                                 for (modelo.Funcion funcion : funciones) {
+                                    // Solo renderizamos botones para funciones activas
+                                    if (funcion.getActiva() != 1) {
+                                        continue;
+                                    }
+
                                     String horarioInicio = sdf.format(funcion.getFechaInicio());
                                     String horarioFin = sdf.format(funcion.getFechaFin());
                                     int idFuncion = funcion.getIdFuncion();
@@ -210,6 +227,8 @@
                                     class="btn btn-outline-primary horario-btn"
                                     data-idfuncion="<%= idFuncion%>"
                                     data-label="<%= horarioInicio%> - <%= horarioFin%>"
+                                    data-activa="1"
+                                    title="Seleccionar horario"
                                     style="border-radius:999px; padding:10px 16px; font-weight:600;">
                                 <%= horarioInicio%> - <%= horarioFin%>
                             </button>
@@ -219,7 +238,7 @@
                         </div>
                         <%
                             } // else
-                        %>
+%>
                     </div>
                     <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
                         <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="post"
@@ -237,7 +256,7 @@
                         <a href="<%= request.getContextPath()%>/CarteleraServlet"
                            class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
                            style="height:40px; min-width:160px; border-radius:6px; font-weight:600; line-height:1; margin-top:11px;">
-                           ← Volver a cartelera
+                            ← Volver a cartelera
                         </a>
                     </div>
                     <div style="height:18px;"></div>
@@ -255,7 +274,7 @@
                 const horarioBtns = Array.from(document.querySelectorAll('.horario-btn'));
                 const btnReservar = document.getElementById('btnReservar');
                 const inputIdFuncion = document.getElementById('inputIdFuncion');
-                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>"; 
+                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>";
                 if (!btnReservar || !inputIdFuncion)
                     return;
                 btnReservar.disabled = true;

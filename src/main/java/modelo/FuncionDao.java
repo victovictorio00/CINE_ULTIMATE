@@ -8,82 +8,80 @@ import java.util.List;
 public class FuncionDao {
 
     public void insertar(Funcion f) throws SQLException {
-    String sqlFuncion = "INSERT INTO funciones (id_pelicula, id_sala, fecha_inicio, fecha_fin, id_estado_funcion, asientos_disponibles) "
-            + "VALUES (?, ?, ?, ?, ?, ?)";
-    String sqlAsientoFuncion = "INSERT INTO asiento_funcion (id_asiento, id_funcion, id_estado_asiento) VALUES (?, ?, 1)";
+        String sqlFuncion = "INSERT INTO funciones (id_pelicula, id_sala, fecha_inicio, fecha_fin, id_estado_funcion, asientos_disponibles) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlAsientoFuncion = "INSERT INTO asiento_funcion (id_asiento, id_funcion, id_estado_asiento) VALUES (?, ?, 1)";
 
-    try (Connection con = Conexion.getConnection()) {
-        con.setAutoCommit(false);
-        try (PreparedStatement psFuncion = con.prepareStatement(sqlFuncion, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = Conexion.getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement psFuncion = con.prepareStatement(sqlFuncion, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Insertar función
-            psFuncion.setInt(1, f.getPelicula().getIdPelicula());
-            psFuncion.setInt(2, f.getSala().getIdSala());
-            psFuncion.setTimestamp(3, f.getFechaInicio());
-            psFuncion.setTimestamp(4, f.getFechaFin());
-            psFuncion.setInt(5, f.getEstadoFuncion().getIdEstadoFuncion());
-            psFuncion.setInt(6, f.getAsientosDisponibles());
+                // Insertar función
+                psFuncion.setInt(1, f.getPelicula().getIdPelicula());
+                psFuncion.setInt(2, f.getSala().getIdSala());
+                psFuncion.setTimestamp(3, f.getFechaInicio());
+                psFuncion.setTimestamp(4, f.getFechaFin());
+                psFuncion.setInt(5, f.getEstadoFuncion().getIdEstadoFuncion());
+                psFuncion.setInt(6, f.getAsientosDisponibles());
 
-            psFuncion.executeUpdate();
+                psFuncion.executeUpdate();
 
-            // Obtener ID de la función recién creada
-            int idFuncion = 0;
-            try (ResultSet keys = psFuncion.getGeneratedKeys()) {
-                if (keys.next()) {
-                    idFuncion = keys.getInt(1);
-                    f.setIdFuncion(idFuncion);
-                } else {
-                    throw new SQLException("No se pudo obtener id de la función insertada.");
+                // Obtener ID de la función recién creada
+                int idFuncion = 0;
+                try (ResultSet keys = psFuncion.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        idFuncion = keys.getInt(1);
+                        f.setIdFuncion(idFuncion);
+                    } else {
+                        throw new SQLException("No se pudo obtener id de la función insertada.");
+                    }
                 }
-            }
 
-            // Definir rango de asientos según la sala (sintaxis clásica)
-            int idSala = f.getSala().getIdSala();
-            int inicio;
-            int fin;
+                // Definir rango de asientos según la sala (sintaxis clásica)
+                int idSala = f.getSala().getIdSala();
+                int inicio;
+                int fin;
 
-            switch (idSala) {
-                case 1:
-                    inicio = 1;
-                    fin = 100;
-                    break;
-                case 2:
-                    inicio = 101;
-                    fin = 200;
-                    break;
-                case 3:
-                    inicio = 201;
-                    fin = 300;
-                    break;
-                case 4:
-                    inicio = 301;
-                    fin = 400;
-                    break;
-                default:
-                    throw new SQLException("Sala no válida (debe ser 1-4). idSala=" + idSala);
-            }
-
-            // Insertar los 100 asientos para esa función usando batch
-            try (PreparedStatement psAsiento = con.prepareStatement(sqlAsientoFuncion)) {
-                for (int i = inicio; i <= fin; i++) {
-                    psAsiento.setInt(1, i);
-                    psAsiento.setInt(2, idFuncion);
-                    psAsiento.addBatch();
+                switch (idSala) {
+                    case 1:
+                        inicio = 1;
+                        fin = 100;
+                        break;
+                    case 2:
+                        inicio = 101;
+                        fin = 200;
+                        break;
+                    case 3:
+                        inicio = 201;
+                        fin = 300;
+                        break;
+                    case 4:
+                        inicio = 301;
+                        fin = 400;
+                        break;
+                    default:
+                        throw new SQLException("Sala no válida (debe ser 1-4). idSala=" + idSala);
                 }
-                psAsiento.executeBatch();
-            }
 
-            con.commit();
-        } catch (SQLException ex) {
-            con.rollback();
-            throw ex;
-        } finally {
-            con.setAutoCommit(true);
+                // Insertar los 100 asientos para esa función usando batch
+                try (PreparedStatement psAsiento = con.prepareStatement(sqlAsientoFuncion)) {
+                    for (int i = inicio; i <= fin; i++) {
+                        psAsiento.setInt(1, i);
+                        psAsiento.setInt(2, idFuncion);
+                        psAsiento.addBatch();
+                    }
+                    psAsiento.executeBatch();
+                }
+
+                con.commit();
+            } catch (SQLException ex) {
+                con.rollback();
+                throw ex;
+            } finally {
+                con.setAutoCommit(true);
+            }
         }
     }
-}
-
-
 
     // Actualizar función existente
     public void actualizar(Funcion f) throws SQLException {
@@ -101,40 +99,37 @@ public class FuncionDao {
         }
     }
 
-   // Eliminar función junto con sus asientos asociados
-public void eliminar(int idFuncion) throws SQLException {
-    String sqlAsientos = "DELETE FROM asiento_funcion WHERE id_funcion = ?";
-    String sqlFuncion = "DELETE FROM funciones WHERE id_funcion = ?";
+    // Eliminar función junto con sus asientos asociados
+    public void eliminar(int idFuncion) throws SQLException {
+        String sqlAsientos = "DELETE FROM asiento_funcion WHERE id_funcion = ?";
+        String sqlFuncion = "DELETE FROM funciones WHERE id_funcion = ?";
 
-    try (Connection con = Conexion.getConnection()) {
-        // Desactivamos auto-commit para manejar la transacción manualmente
-        con.setAutoCommit(false);
+        try (Connection con = Conexion.getConnection()) {
+            // Desactivamos auto-commit para manejar la transacción manualmente
+            con.setAutoCommit(false);
 
-        try (PreparedStatement ps1 = con.prepareStatement(sqlAsientos);
-             PreparedStatement ps2 = con.prepareStatement(sqlFuncion)) {
+            try (PreparedStatement ps1 = con.prepareStatement(sqlAsientos); PreparedStatement ps2 = con.prepareStatement(sqlFuncion)) {
 
-            // Primero eliminamos los asientos vinculados a esa función
-            ps1.setInt(1, idFuncion);
-            ps1.executeUpdate();
+                // Primero eliminamos los asientos vinculados a esa función
+                ps1.setInt(1, idFuncion);
+                ps1.executeUpdate();
 
-            // Luego eliminamos la función
-            ps2.setInt(1, idFuncion);
-            ps2.executeUpdate();
+                // Luego eliminamos la función
+                ps2.setInt(1, idFuncion);
+                ps2.executeUpdate();
 
-            // Confirmamos la transacción
-            con.commit();
-        } catch (SQLException ex) {
-            // Si algo falla, revertimos los cambios
-            con.rollback();
-            throw ex;
-        } finally {
-            con.setAutoCommit(true);
+                // Confirmamos la transacción
+                con.commit();
+            } catch (SQLException ex) {
+                // Si algo falla, revertimos los cambios
+                con.rollback();
+                throw ex;
+            } finally {
+                con.setAutoCommit(true);
+            }
         }
     }
-}
 
-
-    // Listar todas las funciones
     // Listar todas las funciones
     public List<Funcion> listar() throws SQLException {
         List<Funcion> lista = new ArrayList<>();
@@ -178,15 +173,15 @@ public void eliminar(int idFuncion) throws SQLException {
 
     public List<Funcion> obtenerFunciones(int idPelicula) throws SQLException {
         List<Funcion> lista = new ArrayList<>();
-        String sql = "SELECT f.id_funcion, f.fecha_inicio, f.fecha_fin, f.asientos_disponibles, "
-                + "p.id_pelicula, p.nombre AS pelicula, "
-                + "s.id_sala, s.nombre AS sala, "
-                + "e.id_estado_funcion, e.nombre AS estado "
-                + "FROM funciones f "
-                + "JOIN peliculas p ON f.id_pelicula = p.id_pelicula "
-                + "JOIN salas s ON f.id_sala = s.id_sala "
-                + "JOIN estado_funciones e ON f.id_estado_funcion = e.id_estado_funcion "
-                + "WHERE p.id_pelicula = ?";  // ← filtro por película
+        String sql = "SELECT f.id_funcion, f.fecha_inicio, f.fecha_fin, f.asientos_disponibles, f.activa, "
+           + "p.id_pelicula, p.nombre AS pelicula, "
+           + "s.id_sala, s.nombre AS sala, "
+           + "e.id_estado_funcion, e.nombre AS estado "
+           + "FROM funciones f "
+           + "JOIN peliculas p ON f.id_pelicula = p.id_pelicula "
+           + "JOIN salas s ON f.id_sala = s.id_sala "
+           + "JOIN estado_funciones e ON f.id_estado_funcion = e.id_estado_funcion "
+           + "WHERE p.id_pelicula = ?";  // ← filtro por película
 
         try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -214,6 +209,7 @@ public void eliminar(int idFuncion) throws SQLException {
                     f.setFechaInicio(rs.getTimestamp("fecha_inicio"));
                     f.setFechaFin(rs.getTimestamp("fecha_fin"));
                     f.setAsientosDisponibles(rs.getInt("asientos_disponibles"));
+                    f.setActiva(rs.getInt("activa"));
 
                     lista.add(f);
                 }

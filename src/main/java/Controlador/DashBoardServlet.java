@@ -1,11 +1,14 @@
 package Controlador;
 
+import Conexion.Conexion;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,14 @@ public class DashBoardServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         this.peliculaDao = new PeliculaDao();
+        // Desactivar funciones pasadas al iniciar
+        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(
+                "UPDATE funciones SET activa = 0 WHERE fecha_fin < NOW()")) {
+            int rows = ps.executeUpdate();
+            System.out.println("Funciones desactivadas al inicio: " + rows);
+        } catch (Exception e) {
+            System.err.println("Error al desactivar funciones: " + e.getMessage());
+        }
     }
 
     @Override
@@ -31,24 +42,24 @@ public class DashBoardServlet extends HttpServlet {
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
-        
+
         HttpSession session = request.getSession(false);
         if (session != null) {
-        System.out.println("Limpiando datos de reserva de la sesión...");
-        
-        // **IMPORTANTE:** Usa los nombres EXACTOS de tus atributos
-        session.removeAttribute("funcionSeleccionada"); 
-        session.removeAttribute("asientosSeleccionados");
-        session.removeAttribute("totalAsientos");
-        session.removeAttribute("carritoDulceria");
-        session.removeAttribute("totalDulces");
-        session.removeAttribute("metodoPago");
-        session.removeAttribute("nombreCompleto");
-        session.removeAttribute("correoElectronico");
-        
-        System.out.println("✅ Sesión de reserva limpiada al acceder a Home.");
-    }
-        
+            System.out.println("Limpiando datos de reserva de la sesión...");
+
+            // **IMPORTANTE:** Usa los nombres EXACTOS de tus atributos
+            session.removeAttribute("funcionSeleccionada");
+            session.removeAttribute("asientosSeleccionados");
+            session.removeAttribute("totalAsientos");
+            session.removeAttribute("carritoDulceria");
+            session.removeAttribute("totalDulces");
+            session.removeAttribute("metodoPago");
+            session.removeAttribute("nombreCompleto");
+            session.removeAttribute("correoElectronico");
+
+            System.out.println("✅ Sesión de reserva limpiada al acceder a Home.");
+        }
+
         try {
             // Obtener la lista de películas desde la base de datos
             List<Pelicula> lista = peliculaDao.listar();

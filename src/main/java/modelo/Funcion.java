@@ -11,12 +11,13 @@ public class Funcion {
     private Timestamp fechaFin;
     private EstadoFuncion estadoFuncion;
     private int asientosDisponibles;
+    private int activa;
 
     // Constructor vacío
     public Funcion() {}
 
     //Constructor con parámetros
-    public Funcion(int idFuncion, Pelicula pelicula, Sala sala, Timestamp fechaInicio, Timestamp fechaFin, EstadoFuncion estadoFuncion, int asientosDisponibles) {
+    public Funcion(int idFuncion, Pelicula pelicula, Sala sala, Timestamp fechaInicio, Timestamp fechaFin, EstadoFuncion estadoFuncion, int asientosDisponibles, int activa) {
         this.idFuncion = idFuncion;
         this.pelicula = pelicula;
         this.sala = sala;
@@ -24,6 +25,7 @@ public class Funcion {
         this.fechaFin = fechaFin;
         this.estadoFuncion = estadoFuncion;
         this.asientosDisponibles = asientosDisponibles;
+        this.activa = activa;
         
         //última capa de validación en capa modelo
         validar();
@@ -115,5 +117,13 @@ public class Funcion {
     
     public void setAsientosDisponibles(int asientosDisponibles) {
         this.asientosDisponibles = asientosDisponibles; 
+    }
+
+    public int getActiva() {
+        return activa;
+    }
+
+    public void setActiva(int activa) {
+        this.activa = activa;
     }
 }
