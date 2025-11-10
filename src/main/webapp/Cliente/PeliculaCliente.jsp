@@ -44,10 +44,8 @@
                             Hola, <%= (nombreCompleto != null && !nombreCompleto.isEmpty()) ? nombreCompleto.split(" ")[0] : username%>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Mi Perfil</a>
-                            <a class="dropdown-item" href="<%= request.getContextPath()%>/ClienteServlet?action=misReservas">Mis Reservas</a>
+                            <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/ClienteServlet?action=misReservas">Mis Reservas</a>
                             <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/Cliente/PerfilCliente.jsp">Mi Perfil</a>
-                            <a class="dropdown-item" href="#">Mis Reservas</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="<%= request.getContextPath()%>/LogoutServlet">Cerrar Sesión</a>
                         </div>
