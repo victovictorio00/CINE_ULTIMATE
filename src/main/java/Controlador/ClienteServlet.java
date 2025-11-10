@@ -517,19 +517,33 @@ public class ClienteServlet extends HttpServlet {
     }
 
     // ============== PASO 8: MOSTRAR VOUCHER ==============
-    private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+   private void mostrarVoucher(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
-        Integer idVenta = (Integer) session.getAttribute("idVenta");
+    HttpSession session = request.getSession();
+    Integer idVenta = null;
 
-        if (idVenta == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
+    String idVentaParam = request.getParameter("idVenta");
+    if (idVentaParam != null && !idVentaParam.isEmpty()) {
+        try {
+            idVenta = Integer.parseInt(idVentaParam);
+            session.setAttribute("idVenta", idVenta);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de venta inválido");
             return;
         }
-
-        request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
+    } else {
+        idVenta = (Integer) session.getAttribute("idVenta");
     }
+
+    if (idVenta == null) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay venta registrada");
+        return;
+    }
+
+    request.getRequestDispatcher("Cliente/Voucher.jsp").forward(request, response);
+}
+
 
     // ============== UTILIDADES ==============
     private void limpiarSesionCompra(HttpSession session) {
