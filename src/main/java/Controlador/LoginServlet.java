@@ -20,7 +20,6 @@ public class LoginServlet extends HttpServlet {
 
     private UsuarioDao usuarioDao;
 
-    // constantes de lógica
     private static final int MAX_INTENTOS = 3;
     private static final int ESTADO_ACTIVO = 1;     // ajusta al id real de "ACTIVO"
     private static final int ESTADO_BLOQUEADO = 2;  // ajusta al id real de "BLOQUEADO"
@@ -30,15 +29,11 @@ public class LoginServlet extends HttpServlet {
         super.init();
         usuarioDao = new UsuarioDao();
 
-        // Cargar la clave secreta desde el archivo de propiedades
         Properties props = new Properties();
 
-        // La ruta es relativa a la raíz de la aplicación web (WEB-INF)
         try (InputStream input = getServletContext().getResourceAsStream("/WEB-INF/secrets_temp.properties")) {
             if (input == null) {
-                // Si el archivo no se encuentra (típico si el compañero olvida crearlo)
                 System.err.println("ERROR CRÍTICO: No se encontró /WEB-INF/secret.properties.");
-                // Asigna un valor vacío para que la validación del doPost falle de forma controlada
                 RECAPTCHA_SECRET_KEY = "";
             } else {
                 props.load(input);
@@ -53,7 +48,6 @@ public class LoginServlet extends HttpServlet {
             }
         } catch (IOException e) {
             System.err.println("Error al leer el archivo de propiedades: " + e.getMessage());
-            // Lanza una excepción para detener el servlet si la configuración es crítica
             throw new ServletException("Fallo en la configuración de la clave secreta.", e);
         }
     }
@@ -62,7 +56,6 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Validación de Clave Secreta (Verificar que se cargó algo en init())
         if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
@@ -70,17 +63,12 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 1. Obtener la respuesta de reCAPTCHA
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
-
-        // 2. Validación Inicial: ¿El usuario hizo clic en la casilla?
         if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty()) {
             request.setAttribute("error", "Por favor, complete el reCAPTCHA.");
             request.getRequestDispatcher("Login.jsp").forward(request, response);
             return;
         }
-
-        // 3. Verificación con Google (La parte que llama al servidor)
         try {
             if (!verifyRecaptcha(gRecaptchaResponse)) {
                 request.setAttribute("error", "Verificación de reCAPTCHA fallida. Intente de nuevo.");
@@ -88,15 +76,12 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
         } catch (Exception e) {
-            // Manejar errores de conexión (ej: la máquina no tiene internet)
             request.setAttribute("error", "Error de conexión con el servicio de Captcha.");
             request.getRequestDispatcher("Login.jsp").forward(request, response);
             return;
         }
 
-        // Opcional pero recomendado para caracteres especiales
         request.setCharacterEncoding("UTF-8");
-
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
@@ -111,7 +96,7 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
-// bloqueo / intentos (tu lógica existente)
+            // bloqueo / intentos (tu lógica existente)
             int intentosFallidosActuales = u.getNumeroIntentos();
             int estadoActualId = u.getIdEstadoUsuario() != null ? u.getIdEstadoUsuario().getIdEstadoUsuario() : 0;
             if (estadoActualId == ESTADO_BLOQUEADO) {
@@ -126,22 +111,18 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
-// validar credenciales
+            // validar credenciales
             Usuario usuarioAutenticado = usuarioDao.validateUser(username, password);
             if (usuarioAutenticado == null) {
                 usuarioDao.aumentarIntentos(u.getIdUsuario());
                 manejarFallo(request, response, username, "Credenciales incorrectas.");
                 return;
             }
-
-// Si llegamos aquí: autenticación OK
             usuarioDao.resetearIntentos(u.getIdUsuario());
-
-// Obtener y validar redirect (parámetro asume "redirect")
             String redirectParam = request.getParameter("redirect");
             String destinoSeguro = getSafeRedirect(request, redirectParam); // helper explicado abajo
 
-// Crear sesión y redirigir según rol o redirect seguro
+            // Crear sesión y redirigir según rol o redirect seguro
             crearSesionYRedirigir(request, response, usuarioAutenticado, destinoSeguro);
 
         } catch (SQLException e) {
@@ -161,6 +142,7 @@ public class LoginServlet extends HttpServlet {
     private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u, String destinoSeguro)
             throws IOException, ServletException {
         HttpSession session = request.getSession(true);
+        session.setAttribute("usuario", u);
         session.setAttribute("userId", u.getIdUsuario());
         session.setAttribute("username", u.getUsername());
         session.setAttribute("nombreCompleto", u.getNombreCompleto());
@@ -176,7 +158,6 @@ public class LoginServlet extends HttpServlet {
         }
         response.addCookie(jsess);
 
-        // Si hay destino seguro, redirigir ahí; si no, usar destino por rol
         if (destinoSeguro != null && !destinoSeguro.isEmpty()) {
             response.sendRedirect(response.encodeRedirectURL(destinoSeguro));
             return;
@@ -199,13 +180,9 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Método auxiliar para enviar la solicitud de verificación a Google.
-     */
     private boolean verifyRecaptcha(String gRecaptchaResponse) throws Exception {
         String url = "https://www.google.com/recaptcha/api/siteverify";
 
-        // Construir la URL con parámetros: clave secreta y respuesta del usuario
         String postParams = "secret=" + RECAPTCHA_SECRET_KEY
                 + "&response=" + gRecaptchaResponse;
 
@@ -215,13 +192,11 @@ public class LoginServlet extends HttpServlet {
         con.setRequestMethod("POST");
         con.setDoOutput(true);
 
-        // Enviar parámetros
         try (java.io.DataOutputStream wr = new java.io.DataOutputStream(con.getOutputStream())) {
             wr.writeBytes(postParams);
             wr.flush();
         }
 
-        // Leer la respuesta JSON
         try (java.io.BufferedReader in = new java.io.BufferedReader(
                 new java.io.InputStreamReader(con.getInputStream()))) {
 
@@ -231,8 +206,6 @@ public class LoginServlet extends HttpServlet {
                 responseData.append(inputLine);
             }
 
-            // Simplemente busca la cadena "success": true. 
-            // Idealmente, usarías una librería JSON (Gson) aquí.
             return responseData.toString().contains("\"success\": true");
         }
     }
