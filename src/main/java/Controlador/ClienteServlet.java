@@ -162,7 +162,7 @@ public class ClienteServlet extends HttpServlet {
 
             if (funcion == null) {
                 request.setAttribute("error", "La función seleccionada no existe");
-                request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
 
@@ -197,7 +197,7 @@ public class ClienteServlet extends HttpServlet {
                 funcion = funcionDao.leer(idFuncion);
                 if (funcion == null) {
                     request.setAttribute("error", "Función no encontrada");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
                 session.setAttribute(ATTR_FUNCION, funcion);
@@ -209,7 +209,7 @@ public class ClienteServlet extends HttpServlet {
 
         if (funcion.getSala() == null) {
             request.setAttribute("error", "La función no tiene sala asignada");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
@@ -274,7 +274,7 @@ public class ClienteServlet extends HttpServlet {
                         funcion.getSala().getIdSala());
                 if (asiento == null) {
                     request.setAttribute("error", "Asiento " + codigoAsiento + " no existe");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
 
@@ -285,7 +285,7 @@ public class ClienteServlet extends HttpServlet {
                 if (idAf == 0) {
                     System.out.println("ENTRO AQUI EL ERROR 2");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " no está registrado para esta función");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
 
@@ -294,7 +294,7 @@ public class ClienteServlet extends HttpServlet {
                 if (af == null || af.getEstadoAsiento().getIdEstadoAsiento() != 1) {
                     System.out.println("ENTRO AQUI EL ERROR 3");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " ya no está disponible");
-                    request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+                    request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
                 }
             }
@@ -384,7 +384,7 @@ public class ClienteServlet extends HttpServlet {
                 || session.getAttribute(ATTR_TOTAL_ASIENTOS) == null) {
 
             request.setAttribute("error", "Faltan datos para confirmar la reserva. Por favor, inicie el proceso nuevamente.");
-            request.getRequestDispatcher("Cliente/Error.jsp").forward(request, response);
+            request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
