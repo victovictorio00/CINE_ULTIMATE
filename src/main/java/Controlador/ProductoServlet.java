@@ -13,27 +13,33 @@ import modelo.Producto;
 import modelo.ProductoDao;
 
 @WebServlet("/ProductoServlet")
-@MultipartConfig( // límites opcionales
-    maxFileSize = 5 * 1024 * 1024,       // 5 MB por archivo
-    maxRequestSize = 10 * 1024 * 1024    // 10 MB por request
+@MultipartConfig( // configuración para manejar formularios con archivos (imágenes)
+    maxFileSize = 5 * 1024 * 1024,       // Tamaño máximo por archivo: 5 MB
+    maxRequestSize = 10 * 1024 * 1024    // Tamaño máximo total por request: 10 MB
 )
 public class ProductoServlet extends HttpServlet {
 
+    // Instancia del DAO para acceder a la base de datos
     private ProductoDao productoDao;
 
+    // ==========================================================
+    // MÉTODO init(): se ejecuta una sola vez al iniciar el servlet
+    // ==========================================================
     @Override
     public void init() {
-        productoDao = new ProductoDao();
+        productoDao = new ProductoDao(); // Inicializa el DAO
     }
 
+    // ==========================================================
+    // MÉTODO doGet(): maneja peticiones tipo GET (listar, editar, eliminar, etc.)
+    // ==========================================================
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        
 
+        // Obtiene la acción enviada desde la URL (por ejemplo ?action=listar)
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) action = "listar"; // acción por defecto
 
         try {
             switch (action) {
@@ -57,6 +63,9 @@ public class ProductoServlet extends HttpServlet {
         }
     }
 
+    // ==========================================================
+    // MÉTODO doPost(): maneja peticiones tipo POST (insertar, actualizar, etc.)
+    // ==========================================================
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -80,17 +89,21 @@ public class ProductoServlet extends HttpServlet {
         }
     }
 
-    /* ======================= GET actions ======================= */
+    // ==========================================================
+    // ACCIONES GET
+    // ==========================================================
 
+    // Muestra la lista completa de productos
     private void listarProductos(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
 
-        List<Producto> lista = productoDao.listar();
-        request.setAttribute("listaProductos", lista);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("Producto.jsp");
+        List<Producto> lista = productoDao.listar(); // obtiene todos los productos
+        request.setAttribute("listaProductos", lista); // los envía a la vista
+        RequestDispatcher dispatcher = request.getRequestDispatcher("Producto.jsp"); // JSP destino
         dispatcher.forward(request, response);
     }
 
+    // Muestra el formulario para registrar un nuevo producto
     private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -98,6 +111,7 @@ public class ProductoServlet extends HttpServlet {
         dispatcher.forward(request, response);
     }
 
+    // Muestra el formulario con los datos de un producto existente
     private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
 
@@ -113,6 +127,7 @@ public class ProductoServlet extends HttpServlet {
         }
     }
 
+    // Elimina un producto según su ID
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
 
@@ -123,8 +138,11 @@ public class ProductoServlet extends HttpServlet {
         response.sendRedirect("ProductoServlet?action=listar");
     }
 
-    /* ======================= POST actions ======================= */
+    // ==========================================================
+    // ACCIONES POST
+    // ==========================================================
 
+    // Inserta un nuevo producto en la base de datos
     private void insertarProducto(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
 
@@ -133,7 +151,7 @@ public class ProductoServlet extends HttpServlet {
         double precio = parseDoubleSafe(request.getParameter("precio"), 0.0);
         int stock = parseIntSafe(request.getParameter("stock"), 0);
 
-        // Imagen
+        // Lee la imagen subida desde el formulario
         byte[] foto = leerBytesDeParte(request.getPart("foto"));
 
         Producto p = new Producto();
@@ -143,10 +161,11 @@ public class ProductoServlet extends HttpServlet {
         p.setStock(stock);
         p.setPrecio(precio);
 
-        productoDao.insertar(p);
+        productoDao.insertar(p); // Guarda el producto
         response.sendRedirect("ProductoServlet?action=listar");
     }
 
+    // Actualiza un producto existente
     private void actualizarProducto(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
 
@@ -156,7 +175,7 @@ public class ProductoServlet extends HttpServlet {
         double precio = parseDoubleSafe(request.getParameter("precio"), 0.0);
         int stock = parseIntSafe(request.getParameter("stock"), 0);
 
-        // Imagen: si no suben nueva, conservar la actual
+        // Si no se sube una nueva imagen, se conserva la existente
         byte[] fotoNueva = leerBytesDeParte(request.getPart("foto"));
         byte[] fotoFinal = fotoNueva;
 
@@ -175,20 +194,25 @@ public class ProductoServlet extends HttpServlet {
         p.setStock(stock);
         p.setPrecio(precio);
 
-        productoDao.editar(p); // o productoDao.actualizar(p) si dejaste ese alias
+        productoDao.editar(p); // Actualiza la base de datos
         response.sendRedirect("ProductoServlet?action=listar");
     }
 
-    /* ======================= Helpers ======================= */
+    // ==========================================================
+    // MÉTODOS AUXILIARES (Helpers)
+    // ==========================================================
 
+    // Convierte un String a entero de forma segura
     private static int parseIntSafe(String s, int def) {
         try { return Integer.parseInt(s); } catch (Exception e) { return def; }
     }
 
+    // Convierte un String a double de forma segura
     private static double parseDoubleSafe(String s, double def) {
         try { return Double.parseDouble(s); } catch (Exception e) { return def; }
     }
 
+    // Lee los bytes de un archivo enviado desde un formulario (Part)
     private static byte[] leerBytesDeParte(Part part) throws IOException {
         if (part == null || part.getSize() <= 0) return null;
         try (InputStream is = part.getInputStream()) {
