@@ -68,11 +68,11 @@ public class Usuario {
     }
 
     public void setNombreCompleto(String nombreCompleto) {
-        if (nombreCompleto == null || nombreCompleto.trim().isEmpty())
-            throw new IllegalArgumentException("El nombre completo no puede estar vacío.");
-        if (!nombreCompleto.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-            throw new IllegalArgumentException("El nombre completo solo puede contener letras y espacios.");
-        this.nombreCompleto = nombreCompleto;
+        if (nombreCompleto == null) {
+            this.nombreCompleto = null;
+            return;
+        }
+        this.nombreCompleto = nombreCompleto.trim().replaceAll("\\s{2,}", " ");
     }
 
     public String getDni() {

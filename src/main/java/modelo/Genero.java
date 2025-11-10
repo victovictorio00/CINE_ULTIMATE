@@ -13,8 +13,9 @@ public class Genero {
         this.idGenero = idGenero;
         this.nombre = nombre;
         
-        //última capa de validación en capa modelo
-        validar();
+        if (nombre != null) {
+            validar();
+        }
     }
 
     // Validación estructural (antes de guardar)
