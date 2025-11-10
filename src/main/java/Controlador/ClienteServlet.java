@@ -586,39 +586,31 @@ public class ClienteServlet extends HttpServlet {
             DetalleVentaDao detalleDao = new DetalleVentaDao();
 
             List<Venta> ventas = ventaDao.obtenerReservasPorUsuario(userId);
-            /* después de obtener detalles para cada venta */
             Map<Integer, FilaReservaDTO> filasMap = new LinkedHashMap<>();
 
-            // Para cada venta, obtenemos los detalles (función, asientos, etc.)
             for (Venta v : ventas) {
                 List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
-                v.setDetalles(detalles); // ← agrega este setter si no existe
+                v.setDetalles(detalles); 
 
                 for (DetalleVenta d : detalles) {
                     Integer idFunc = d.getFuncion() != null ? d.getFuncion().getIdFuncion() : null;
 
-                    if (d.getTipoItem() == 1) {   // PRODUCTOS
-                        // Buscamos cualquier fila de esta venta (por ejemplo, la primera que tenga la misma idVenta)
-                        FilaReservaDTO dtoProd = filasMap.values().stream()
-                                .filter(f -> f.getIdVenta() == v.getIdVenta())
-                                .findFirst()
-                                .orElseGet(() -> {
-                                    // si no hay fila todavía, creamos una "vacía" solo para productos
-                                    FilaReservaDTO f = new FilaReservaDTO();
-                                    f.setIdVenta(v.getIdVenta());
-                                    f.setPelicula("—");
-                                    f.setSala("—");
-                                    f.setFechaHora(null);
-                                    filasMap.put(-v.getIdVenta(), f); // clave temporal
-                                    return f;
-                                });
+                    if (d.getTipoItem() == 1) { 
+                        FilaReservaDTO dtoProd = filasMap.computeIfAbsent(v.getIdVenta(), k -> {
+                            FilaReservaDTO f = new FilaReservaDTO();
+                            f.setIdVenta(v.getIdVenta());
+                            f.setPelicula("—");
+                            f.setSala("—");
+                            f.setFechaHora(null);
+                            return f;
+                        });
                         dtoProd.setCantidadProductos(dtoProd.getCantidadProductos() + d.getCantidad());
                         dtoProd.setTotalProductos(dtoProd.getTotalProductos() + d.getPrecioUnitario() * d.getCantidad());
-                        continue; // saltamos
+                        continue;
                     }
 
                     if (idFunc != null) {   // BUTACAS
-                        FilaReservaDTO dto = filasMap.computeIfAbsent(idFunc, k -> {
+                        FilaReservaDTO dto = filasMap.computeIfAbsent(v.getIdVenta(), k -> {
                             FilaReservaDTO f = new FilaReservaDTO();
                             Funcion func = d.getFuncion();
                             f.setIdVenta(v.getIdVenta());
