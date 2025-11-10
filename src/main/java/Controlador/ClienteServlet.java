@@ -1,4 +1,4 @@
-package Controlador.Cliente;
+package Controlador;
 
 import java.io.IOException;
 import java.sql.*;
