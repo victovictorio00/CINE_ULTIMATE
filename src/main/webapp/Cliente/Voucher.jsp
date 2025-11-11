@@ -74,6 +74,8 @@
 
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/Voucher.css">
     </head>
     <body>
@@ -84,6 +86,18 @@
             <div class="title">Voucher de Compra</div>
             <div></div>
         </header>
+        <% if (request.getAttribute("mensaje") != null) { %>
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+            <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>¡Upss!</strong> <%= request.getAttribute("mensaje") %>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+            </div>
+        </div>
+        <% } %>
         <div class="voucher-container">
             <div class="success-badge">
                 <i class="fas fa-check-circle"></i>
