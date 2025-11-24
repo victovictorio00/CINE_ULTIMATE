@@ -4,6 +4,12 @@
     // Mensajes y valores que envía el servlet con request.setAttribute("error", ...);
     String error = (String) request.getAttribute("error");
     String lastUsername = (String) request.getAttribute("lastUsername");
+
+    HttpSession ses = request.getSession(true);
+    if (ses.getAttribute("csrfToken") == null) {
+        String token = java.util.UUID.randomUUID().toString();
+        ses.setAttribute("csrfToken", token);
+    }
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -32,6 +38,7 @@
 
                 <!-- Usa el contextPath para que funcione en cualquier contexto -->
                 <form action="<%= request.getContextPath()%>/LoginServlet" method="post">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="text"
                            name="username"
                            class="form-control"

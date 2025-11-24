@@ -3,6 +3,13 @@
 <%@page import="modelo.Rol"%>
 <%@page import="modelo.EstadoUsuario"%>
 <%@page contentType="text/html; charset=UTF-8" language="java" %>
+<%
+    HttpSession ses = request.getSession(true);
+    if (ses.getAttribute("csrfToken") == null) {
+        String token = java.util.UUID.randomUUID().toString();
+        ses.setAttribute("csrfToken", token);
+    }
+%>
 <!DOCTYPE html>
 <html lang="es">
 <head>

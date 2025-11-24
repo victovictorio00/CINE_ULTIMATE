@@ -51,11 +51,30 @@ public class LoginServlet extends HttpServlet {
             throw new ServletException("Fallo en la configuración de la clave secreta.", e);
         }
     }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
+        HttpSession session = request.getSession(true);
+
+        // Generar token si no existe
+        if (session.getAttribute("csrfToken") == null) {
+            String token = java.util.UUID.randomUUID().toString();
+            session.setAttribute("csrfToken", token);
+        }
+
+        request.getRequestDispatcher("Login.jsp").forward(request, response);
+    }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+        String formToken = request.getParameter("csrfToken");
 
+        if (sessionToken == null || !sessionToken.equals(formToken)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
+            return;
+        }
         if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
@@ -142,6 +161,9 @@ public class LoginServlet extends HttpServlet {
     private void crearSesionYRedirigir(HttpServletRequest request, HttpServletResponse response, Usuario u, String destinoSeguro)
             throws IOException, ServletException {
         HttpSession session = request.getSession(true);
+        String csrfToken = java.util.UUID.randomUUID().toString();
+        session.setAttribute("csrfToken", csrfToken);
+        
         session.setAttribute("usuario", u);
         session.setAttribute("userId", u.getIdUsuario());
         session.setAttribute("username", u.getUsername());

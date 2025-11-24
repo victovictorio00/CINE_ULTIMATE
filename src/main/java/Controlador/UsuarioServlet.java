@@ -159,6 +159,11 @@ public class UsuarioServlet extends HttpServlet {
        =============================== */
     private void mostrarFormularioNuevo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(true);
+        if (session.getAttribute("csrfToken") == null) {
+            String token = java.util.UUID.randomUUID().toString();
+            session.setAttribute("csrfToken", token);
+        }
         RequestDispatcher dispatcher = request.getRequestDispatcher("CrearUsuario.jsp");
         dispatcher.forward(request, response);
     }
@@ -168,7 +173,12 @@ public class UsuarioServlet extends HttpServlet {
 
     int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
     UsuarioDao usuarioDao = new UsuarioDao();
-
+    
+    HttpSession session = request.getSession(true);
+    if (session.getAttribute("csrfToken") == null) {
+        String token = java.util.UUID.randomUUID().toString();
+        session.setAttribute("csrfToken", token);
+    }
     try {
         // Usuario que vamos a editar
         Usuario usuario = usuarioDao.leer(idUsuario);
@@ -197,7 +207,12 @@ public class UsuarioServlet extends HttpServlet {
        =============================== */
 private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletResponse response)
         throws SQLException, IOException, ServletException {
-
+    String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+    String formToken = request.getParameter("csrfToken");
+    if (sessionToken == null || !sessionToken.equals(formToken)) {
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
+        return;
+    }
     String nombreCompleto = request.getParameter("nombreCompleto");
     String dni = request.getParameter("dni");
     String username = request.getParameter("username");
@@ -258,7 +273,13 @@ private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletRespo
        =============================== */
     private void insertarUsuarioCliente(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
+        String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+        String formToken = request.getParameter("csrfToken");
 
+        if (sessionToken == null || !sessionToken.equals(formToken)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
+            return;
+        }
         String nombreCompleto = request.getParameter("nombreCompleto");
         String dni = request.getParameter("dni");
         String username = request.getParameter("username");
@@ -316,7 +337,12 @@ private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletRespo
     }
     private void actualizarUsuario(HttpServletRequest request, HttpServletResponse response)
         throws SQLException, IOException, ServletException {
-
+    String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+    String formToken = request.getParameter("csrfToken");
+    if (sessionToken == null || !sessionToken.equals(formToken)) {
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
+        return;
+    }
     int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
     String nombreCompleto = request.getParameter("nombreCompleto");
     String dni = request.getParameter("dni");
@@ -371,7 +397,12 @@ private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletRespo
    =============================== */
 private void eliminarUsuario(HttpServletRequest request, HttpServletResponse response)
         throws SQLException, IOException {
-
+    String sessionToken = (String) request.getSession().getAttribute("csrfToken");
+    String formToken = request.getParameter("csrfToken");
+    if (sessionToken == null || !sessionToken.equals(formToken)) {
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
+        return;
+    }
     // Obtener el ID desde el parámetro
     int idUsuario = Integer.parseInt(request.getParameter("id"));
 
