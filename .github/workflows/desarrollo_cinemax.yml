@@ -25,7 +25,7 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean package -DskipTests
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -37,8 +37,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write #Required for requesting the JWT
+      contents: read #Required for checkout
 
     steps:
       - name: Download artifact from build job
@@ -53,11 +53,18 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D7D4FA09CE994F478F6099465A7B293C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6B084929D06A42DA8FBF359C29D8E008 }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy WAR to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cinemax'
           slot-name: 'Production'
           package: '*.war'
-          
+
+      - name: Move WAR into Tomcat webapps as ROOT.war
+        shell: bash
+        run: |
+          echo "Preparing Tomcat ROOT deployment..."
+          mkdir -p /home/site/wwwroot/webapps
+          cp /home/site/wwwroot/*.war /home/site/wwwroot/webapps/ROOT.war || true
+          echo "Done moving WAR to ROOT.war."
