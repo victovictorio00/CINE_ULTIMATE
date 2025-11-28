@@ -50,14 +50,14 @@
                     <a href="#" class="forgot-link">Olvidé mi contraseña</a>
 
                     <div class="g-recaptcha" 
-                         data-sitekey="6Lf6HOorAAAAAOh0rkyVn0DXPsJklpcECHSygiHf">
+                         data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
                     </div>
 
                     <!-- Campo oculto para reenviar el parámetro 'redirect' -->
                     <input type="hidden" name="redirect"
                            value="${param.redirect != null ? param.redirect : ''}">
-                    <button type="submit" class="btn btn-login">ENTRAR</button>
-                    <button type="button" class="btn btn-register" onclick="window.location.href = 'Register.jsp'">REGISTRARSE</button>
+                    <button type="submit" class="btn btn-login">Entrar</button>
+                    <button type="button" class="btn btn-register" onclick="window.location.href = 'Register.jsp'">Registrarse</button>
                 </form>
             </div>
         </div>

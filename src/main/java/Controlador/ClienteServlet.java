@@ -394,16 +394,14 @@ public class ClienteServlet extends HttpServlet {
     // ============== PASO 7: FINALIZAR COMPRA ==============
     private void finalizarCompra(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-
         HttpSession session = request.getSession();
-
         try {
             Integer userIdObj = (Integer) session.getAttribute("userId");
             if (userIdObj == null) {
                 throw new IllegalStateException("Usuario no identificado en sesión");
             }
-            int userId = userIdObj;
 
+            int userId = userIdObj;
             Funcion funcion = (Funcion) session.getAttribute(ATTR_FUNCION);
             String asientosStr = (String) session.getAttribute(ATTR_ASIENTOS);
             Double totalAsientos = (Double) session.getAttribute(ATTR_TOTAL_ASIENTOS);
@@ -414,32 +412,48 @@ public class ClienteServlet extends HttpServlet {
             if (funcion == null || asientosStr == null || totalAsientos == null) {
                 throw new IllegalStateException("Datos incompletos para finalizar compra");
             }
-            if (totalDulces == null) {
-                totalDulces = 0.0;
-            }
-            if (carrito == null) {
-                carrito = new HashMap<>();
-            }
-            if (metodoPago == null || metodoPago.isEmpty()) {
-                metodoPago = "efectivo";
-            }
+            if (totalDulces == null) totalDulces = 0.0;
+            if (carrito == null) carrito = new HashMap<>();
+            if (metodoPago == null || metodoPago.isEmpty()) metodoPago = "efectivo";
 
             List<String> asientos = Arrays.asList(asientosStr.split(","));
+            Usuario usuario = usuarioDao.leer(userId);
+            if (usuario == null) throw new IllegalStateException("Usuario no encontrado: " + userId);
 
-            // VALIDACIÓN FINAL: Verificar disponibilidad de asientos
             for (String codigoAsiento : asientos) {
-                Asiento asiento = asientoDao.leerPorCodigoYSala(codigoAsiento.trim(),
-                        funcion.getSala().getIdSala());
-                if (asiento == null || !asiento.estaDisponible()) {
-                    request.setAttribute("error", "El asiento " + codigoAsiento + " ya no está disponible");
-                    request.getRequestDispatcher("error.jsp").forward(request, response);
+                Asiento asiento = asientoDao.leerPorCodigoYSala(
+                        codigoAsiento.trim(),
+                        funcion.getSala().getIdSala()
+                );
+
+                int idAf = obtenerIdAsientoFuncion(funcion.getIdFuncion(), asiento.getId_asiento());
+                AsientoFuncion afExistente = asientoFuncionDao.leer(idAf);
+
+                if (afExistente == null || afExistente.getEstadoAsiento().getIdEstadoAsiento() != 1) {
+                    // 🔄 Recargar los asientos actualizados para mostrar disponibilidad real
+                    List<AsientoFuncion> afListActualizada = asientoFuncionDao.listarPorSalaYFuncion(funcion.getIdFuncion());
+                    List<Asiento> asientosActualizados = new ArrayList<>();
+                    for (AsientoFuncion af : afListActualizada) {
+                        Asiento a = af.getAsiento();
+                        a.setId_estado_asiento(af.getEstadoAsiento());
+                        asientosActualizados.add(a);
+                    }
+
+                    request.setAttribute("mensaje",
+                            "El asiento " + codigoAsiento +
+                            " ya fue ocupado por otro usuario justo antes de tu confirmación. Por favor selecciona otro disponible.");
+                    request.setAttribute("asientosFuncion", asientosActualizados);
+                    request.setAttribute("funcion", funcion);
+                    request.setAttribute("sala", funcion.getSala());
+                    request.setAttribute("pelicula", funcion.getPelicula());
+                    request.setAttribute("precioButaca", funcion.getPelicula().getPrecio());
+                    request.setAttribute("genero", funcion.getPelicula().getIdGenero().getNombre());
+                    long duracionMin = (funcion.getFechaFin().getTime() - funcion.getFechaInicio().getTime()) / 60000;
+                    request.setAttribute("duracionMin", duracionMin);
+
+                    request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp").forward(request, response);
                     return;
                 }
-            }
-
-            Usuario usuario = usuarioDao.leer(userId);
-            if (usuario == null) {
-                throw new IllegalStateException("Usuario no encontrado: " + userId);
             }
 
             Venta venta = new Venta();
@@ -447,32 +461,32 @@ public class ClienteServlet extends HttpServlet {
             venta.setFecha(new java.util.Date());
             venta.setTotal(totalAsientos + totalDulces);
             venta.setMetodoPago(metodoPago);
-
             int idVenta = ventaDao.insertarYDevolverId(venta);
             venta.setIdVenta(idVenta);
 
             Comprobante comp = new Comprobante();
-            comp.setVenta(venta);  // venta ya tiene idVenta
-            comp.setTipoComprobante("Boleta");  // o "Factura", según tu lógica
+            comp.setVenta(venta);
+            comp.setTipoComprobante("Boleta");
             comp.setFechaEmision(new Timestamp(System.currentTimeMillis()));
+            new ComprobanteDao().insertar(comp);
 
-            ComprobanteDao compDao = new ComprobanteDao();
-            compDao.insertar(comp);
-            // Guardar detalles de asientos y ocuparlos en asiento_funcion
             for (String codigoAsiento : asientos) {
-                Asiento asiento = asientoDao.leerPorCodigoYSala(codigoAsiento.trim(),
-                        funcion.getSala().getIdSala());
+                Asiento asiento = asientoDao.leerPorCodigoYSala(
+                        codigoAsiento.trim(),
+                        funcion.getSala().getIdSala()
+                );
 
-                // 1. Obtener el ID de la relación Asiento-Funcion
-                int idAf = obtenerIdAsientoFuncion(funcion.getIdFuncion(), asiento.getId_asiento()); // Una sola llamada
-
-                // 2. Verificar que sigue libre
+                int idAf = obtenerIdAsientoFuncion(funcion.getIdFuncion(), asiento.getId_asiento());
                 AsientoFuncion afExistente = asientoFuncionDao.leer(idAf);
+
                 if (afExistente == null || afExistente.getEstadoAsiento().getIdEstadoAsiento() != 1) {
-                    throw new IllegalStateException("Asiento " + codigoAsiento + " fue ocupado por otro usuario");
+                    request.setAttribute("mensaje",
+                            "El asiento " + codigoAsiento +
+                            " fue ocupado por otro usuario segundos antes de confirmar. Selecciona otro disponible.");
+                    request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp").forward(request, response);
+                    return;
                 }
 
-                // 3. CREAR EL OBJETO ASIENTOFUNCION STUB
                 AsientoFuncion afParaDetalle = new AsientoFuncion();
                 afParaDetalle.setIdAsientoFuncion(idAf);
 
@@ -482,16 +496,13 @@ public class ClienteServlet extends HttpServlet {
                 detalle.setIdAsientoFuncion(afParaDetalle);
                 detalle.setProducto(null);
                 detalle.setCantidad(1);
-                detalle.setTipoItem(2); // Asiento
+                detalle.setTipoItem(2);
                 detalle.setPrecioUnitario(funcion.getPelicula().getPrecio());
-
                 detalleVentaDao.insertar(detalle);
+
                 asientoFuncionDao.actualizarEstado(idAf, 2);
                 System.out.println("DEBUG: Asiento " + codigoAsiento + " marcado como ocupado (2)");
-
             }
-
-            // Guardar detalles de dulcería
             for (Map.Entry<Integer, Integer> entry : carrito.entrySet()) {
                 Producto producto = productoDao.leer(entry.getKey());
                 if (producto != null) {
@@ -501,12 +512,11 @@ public class ClienteServlet extends HttpServlet {
                     detalle.setFuncion(null);
                     detalle.setIdAsientoFuncion(null);
                     detalle.setCantidad(entry.getValue());
-                    detalle.setTipoItem(1); // Producto
+                    detalle.setTipoItem(1);
                     detalle.setPrecioUnitario(producto.getPrecio());
                     detalleVentaDao.insertar(detalle);
                 }
             }
-
             session.setAttribute("idVenta", idVenta);
             limpiarSesionCompra(session);
             response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=verVoucher");

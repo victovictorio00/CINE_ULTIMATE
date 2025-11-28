@@ -162,7 +162,7 @@
                     <input type="text" name="direccion" class="form-control" placeholder="Dirección" maxlength="200" />
 
                     <div class="g-recaptcha" 
-                         data-sitekey="6Lf6HOorAAAAAOh0rkyVn0DXPsJklpcECHSygiHf">
+                         data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
                     </div>
                     <button type="submit" class="btn btn-login mt-2">Registrar</button>
                     <button type="button" class="btn btn-register" onclick="window.location.href = 'Login.jsp'">Regresar</button>

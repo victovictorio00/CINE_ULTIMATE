@@ -49,6 +49,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Confirmación de Compra</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/Confirmacion.css">
     </head>
@@ -56,6 +58,18 @@
         <header class="custom-header">
             <h1><i class="fas fa-check-circle"></i> Confirmación de Compra</h1>
         </header>
+        <% if (request.getAttribute("mensaje") != null) { %>
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+            <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>¡Upss!</strong> <%= request.getAttribute("mensaje") %>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+            </div>
+        </div>
+        <% } %>
         <div class="confirmation-container">
             <div class="section">
                 <div class="alert-info">
