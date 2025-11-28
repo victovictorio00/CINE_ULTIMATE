@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class Conexion {
     private static final String URL = "jdbc:mysql://localhost/empleados1?useUnicode=true&characterEncoding=UTF-8"; //CAMBIAR SOLAMENTE empleados1 con el nombre de tu bd no tocar mas
     private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "admin";
 
     public static Connection getConnection() throws SQLException {
         try {
