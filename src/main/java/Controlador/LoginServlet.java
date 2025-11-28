@@ -75,30 +75,7 @@ public class LoginServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "CSRF token inválido");
             return;
         }
-        if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
-            System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
-            request.setAttribute("error", "Error de configuración del servidor (Captcha).");
-            request.getRequestDispatcher("Login.jsp").forward(request, response);
-            return;
-        }
-
-        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
-        if (gRecaptchaResponse == null || gRecaptchaResponse.isEmpty()) {
-            request.setAttribute("error", "Por favor, complete el reCAPTCHA.");
-            request.getRequestDispatcher("Login.jsp").forward(request, response);
-            return;
-        }
-        try {
-            if (!verifyRecaptcha(gRecaptchaResponse)) {
-                request.setAttribute("error", "Verificación de reCAPTCHA fallida. Intente de nuevo.");
-                request.getRequestDispatcher("Login.jsp").forward(request, response);
-                return;
-            }
-        } catch (Exception e) {
-            request.setAttribute("error", "Error de conexión con el servicio de Captcha.");
-            request.getRequestDispatcher("Login.jsp").forward(request, response);
-            return;
-        }
+        
 
         request.setCharacterEncoding("UTF-8");
         String username = request.getParameter("username");

@@ -21,6 +21,12 @@
     if (nombrePrevio == null) nombrePrevio = "";
     if (correoPrevio == null) correoPrevio = "";
     if (metodoPagoPrevio == null) metodoPagoPrevio = "";
+    HttpSession ses = request.getSession(true);
+    if (ses.getAttribute("csrfToken") == null) {
+        String token = java.util.UUID.randomUUID().toString();
+        ses.setAttribute("csrfToken", token);
+    }
+    String csrfToken = (String) ses.getAttribute("csrfToken");
 %>
 
 <!DOCTYPE html>
@@ -72,6 +78,10 @@
                 </div>
                 <h2>Completa tus Datos</h2>
                 <form id="formPago" action="<%= request.getContextPath() %>/ClienteServlet" method="post">
+                    <input type="hidden" name="action" value="ingresarDatosPago">
+                    <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                    ...
+                </form>
                     <input type="hidden" name="action" value="ingresarDatosPago">
 
                     <div class="form-group">

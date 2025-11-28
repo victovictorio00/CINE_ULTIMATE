@@ -18,7 +18,7 @@
         <title>Login</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="Estilos/loginStyle.css">
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script src="https://www.google.com/recaptcha/api.js" async defer nonce="${cspNonce}"></script>
     </head>
     <body>
         <div class="video-bg">
@@ -38,7 +38,7 @@
 
                 <!-- Usa el contextPath para que funcione en cualquier contexto -->
                 <form action="<%= request.getContextPath()%>/LoginServlet" method="post">
-                    <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+                    <input type="hidden" name="csrfToken" value="<%= ses.getAttribute("csrfToken") %>">
                     <input type="text"
                            name="username"
                            class="form-control"
@@ -64,7 +64,12 @@
                     <input type="hidden" name="redirect"
                            value="${param.redirect != null ? param.redirect : ''}">
                     <button type="submit" class="btn btn-login">Entrar</button>
-                    <button type="button" class="btn btn-register" onclick="window.location.href = 'Register.jsp'">Registrarse</button>
+                    <button type="button" id="btnRegister" class="btn btn-register">Registrarse</button>
+                    <script nonce="${cspNonce}">
+                    document.getElementById("btnRegister").addEventListener("click", () => {
+                        window.location.href = 'Register.jsp';
+                    });
+                    </script>
                 </form>
             </div>
         </div>
