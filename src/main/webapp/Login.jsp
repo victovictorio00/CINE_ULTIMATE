@@ -50,7 +50,7 @@
                     <a href="#" class="forgot-link">Olvidé mi contraseña</a>
 
                     <div class="g-recaptcha" 
-                         data-sitekey="6LcXjxosAAAAAA3cx5zrQ6dl2YKfw0Pzk3VKPi2y">
+                         data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
                     </div>
 
                     <!-- Campo oculto para reenviar el parámetro 'redirect' -->
