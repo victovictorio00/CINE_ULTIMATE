@@ -21,7 +21,6 @@
     <body>
         <%
         List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
-        System.out.println("DEBUG JSP ENTRADA: asientosFuncion size = " + (chk == null ? "null" : chk.size()));
     %>
         <header class="custom-header">
             <h1>Selecciona tus butacas</h1>
@@ -70,7 +69,6 @@
                 <%-- Crear matriz de asientos --%>
                 <%
                     Map<String, List<Asiento>> porFila = new LinkedHashMap<>();
-                    System.out.println("DEBUG JSP: porFila.size = " + porFila.size());
                     int maxColumnas = 0;
 
                     for (Asiento a : asientos) {
@@ -214,6 +212,7 @@
 
                     <!-- Formulario POST al servlet -->
                     <form id="formAsientos" method="POST" action="<%= request.getContextPath()%>/ClienteServlet">
+                        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                         <input type="hidden" name="action" value="seleccionarAsientos">
                         <input type="hidden" name="selectedSeats" id="inputSelectedSeats" value="">
                         <button type="submit" class="btn-continue" id="btnContinue" disabled>

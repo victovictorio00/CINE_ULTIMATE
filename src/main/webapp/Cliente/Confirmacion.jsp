@@ -195,6 +195,7 @@
             <!-- Acciones -->
             <div class="actions">
                 <form id="formConfirmar" action="<%= request.getContextPath() %>/ClienteServlet" method="post" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="finalizarCompra">
                     <button type="submit" class="btn-confirm" id="btnConfirmar">
                         <i class="fas fa-check"></i> Confirmar y Pagar

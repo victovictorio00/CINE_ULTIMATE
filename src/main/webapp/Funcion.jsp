@@ -178,6 +178,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <form action="FuncionServlet?action=insertar" method="post">
+                    <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="modalNuevaFuncionLabel">Agregar Nueva Función</h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>

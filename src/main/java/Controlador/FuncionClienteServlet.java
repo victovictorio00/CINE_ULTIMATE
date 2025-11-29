@@ -29,7 +29,6 @@ public class FuncionClienteServlet extends HttpServlet {
 
             // 🔹 Si quieres filtrar solo las activas, puedes hacer esto:
             // funciones.removeIf(f -> f.getEstadoFuncion() == null || !"Activa".equalsIgnoreCase(f.getEstadoFuncion().getNombre()));
-
             // 🔹 Enviamos la lista al JSP
             request.setAttribute("funciones", funciones);
 

@@ -27,6 +27,7 @@
 
     <!-- Formulario para editar una película -->
     <form action="PeliculaServlet?action=actualizar" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="id" value="<%= peli.getIdPelicula() %>">  
 
         <!-- Nombre -->
@@ -35,7 +36,7 @@
             <input type="text" name="nombre" id="nombre" class="form-control" 
                    value="<%= peli.getNombre() %>" required>
         </div>
-
+<input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <!-- Sinopsis -->
         <div class="form-group">
             <label for="sinopsis">Sinopsis:</label>

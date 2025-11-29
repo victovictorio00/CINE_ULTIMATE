@@ -1,8 +1,3 @@
-<%-- 
-    Document   : CrearProducto
-    Created on : 26 may. 2025, 18:06:04
-    Author     : Proyecto
---%>
 <%@ page import="modelo.Producto" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -50,6 +45,7 @@
     <div class="form-container">
         <h3>Agregar Producto</h3>
         <form action="ProductoServlet?action=insertar" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
+            <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
                 <input type="text" class="form-control" name="nombre" id="nombre" required />

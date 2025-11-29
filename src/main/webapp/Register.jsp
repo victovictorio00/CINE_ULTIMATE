@@ -1,7 +1,3 @@
-<%-- 
-    Document   : Register
-    Author     : Proyecto
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -129,6 +125,7 @@
 
                 <!-- IMPORTANTE: ajusta action si tu servlet usa otra ruta -->
                 <form id="registroForm" action="UsuarioServlet?action=insertarcliente" method="post" novalidate>
+                    <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
 
                     <!-- Ocultos: id_rol (cliente), id_estado_usuario (activo), numeroIntentos (3) -->
                     <input type="hidden" name="idRol" value="1" />

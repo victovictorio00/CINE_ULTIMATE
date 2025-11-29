@@ -72,6 +72,7 @@
                 </div>
                 <h2>Completa tus Datos</h2>
                 <form id="formPago" action="<%= request.getContextPath() %>/ClienteServlet" method="post">
+                    <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="ingresarDatosPago">
 
                     <div class="form-group">

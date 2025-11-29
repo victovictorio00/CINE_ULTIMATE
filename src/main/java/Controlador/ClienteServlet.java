@@ -46,7 +46,6 @@ public class ClienteServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         if (!validarSesion(request, response)) {
             return;
         }
@@ -140,7 +139,7 @@ public class ClienteServlet extends HttpServlet {
             throws ServletException, IOException, SQLException {
         List<Pelicula> peliculas = peliculaDao.listar();
         request.setAttribute("peliculas", peliculas);
-        request.getRequestDispatcher("Cliente/DashboardCliente.jsp").forward(request, response);
+        request.getRequestDispatcher("Cliente/home.jsp").forward(request, response);
     }
 
     // ============== PASO 1.5: INICIAR RESERVA DESDE DETALLE DE PELÍCULA ==============
@@ -215,7 +214,6 @@ public class ClienteServlet extends HttpServlet {
 
         List<AsientoFuncion> afList = asientoFuncionDao.listarPorSalaYFuncion(funcion.getIdFuncion());
 
-        System.out.println("DEBUG SERVLET: AsientoFuncionDao devolvió " + afList.size() + " filas");
 
         // Convertir a List<Asiento> con el estado ya seteado
         List<Asiento> asientos = new ArrayList<>();
@@ -225,7 +223,6 @@ public class ClienteServlet extends HttpServlet {
             a.setId_estado_asiento(af.getEstadoAsiento());
             asientos.add(a);
         }
-        System.out.println("DEBUG: asientos.size = " + asientos.size());
         request.setAttribute("asientosFuncion", asientos);
 
         long duracionMin = (funcion.getFechaFin().getTime() - funcion.getFechaInicio().getTime()) / 60000;
@@ -245,23 +242,17 @@ public class ClienteServlet extends HttpServlet {
     private void procesarSeleccionAsientos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
 
-        System.out.println("DEBUG: entra procesarSeleccionAsientos"); //---------------
-
         try {
             String selectedSeats = request.getParameter("selectedSeats");
-            System.out.println("DEBUG: selectedSeats = " + selectedSeats); //-----------------
 
             if (selectedSeats == null || selectedSeats.trim().isEmpty()) {
-                System.out.println("DEBUG: selectedSeats vacío → error 400"); //--------------
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Debe seleccionar al menos un asiento");
                 return;
             }
 
             HttpSession session = request.getSession();
             Funcion funcion = (Funcion) session.getAttribute(ATTR_FUNCION);
-            System.out.println("DEBUG: función en sesión = " + (funcion == null ? "null" : "ok")); //-----------------
             if (funcion == null) {
-                System.out.println("DEBUG: función null → error 400"); //------------------
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No hay función seleccionada");
                 return;
             }
@@ -279,11 +270,8 @@ public class ClienteServlet extends HttpServlet {
                 }
 
                 // 2. consultar SU estado en esta función
-                System.out.println("aqui id funcion:     " + funcion.getIdFuncion());
-                System.out.println("aqui id asiento:    " + asiento.getId_asiento());
                 int idAf = obtenerIdAsientoFuncion(funcion.getIdFuncion(), asiento.getId_asiento());
                 if (idAf == 0) {
-                    System.out.println("ENTRO AQUI EL ERROR 2");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " no está registrado para esta función");
                     request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
@@ -292,7 +280,6 @@ public class ClienteServlet extends HttpServlet {
                 // 3. verificar que esté libre (estado 1 = disponible)
                 AsientoFuncion af = asientoFuncionDao.leer(idAf);
                 if (af == null || af.getEstadoAsiento().getIdEstadoAsiento() != 1) {
-                    System.out.println("ENTRO AQUI EL ERROR 3");
                     request.setAttribute("error", "Asiento " + codigoAsiento + " ya no está disponible");
                     request.getRequestDispatcher("error.jsp").forward(request, response);
                     return;
@@ -304,14 +291,11 @@ public class ClienteServlet extends HttpServlet {
             session.setAttribute(ATTR_ASIENTOS, selectedSeats);
             session.setAttribute(ATTR_TOTAL_ASIENTOS, totalAsientos);
 
-            System.out.println("DEBUG: redirigiendo a DulceriaServlet");
             response.sendRedirect(request.getContextPath() + "/DulceriaServlet");
         } catch (Exception e) {
-            System.out.println("DEBUG: EXCEPCIÓN → " + e.getClass().getSimpleName() + ": " + e.getMessage());
             e.printStackTrace();
             throw new ServletException("Error en procesarSeleccionAsientos", e);
         }
-        System.out.println("DEBUG: sale procesarSeleccionAsientos");
     }
 
     // ============== PASO 4: PROCESAR SELECCIÓN DE COMBO ==============
@@ -412,13 +396,21 @@ public class ClienteServlet extends HttpServlet {
             if (funcion == null || asientosStr == null || totalAsientos == null) {
                 throw new IllegalStateException("Datos incompletos para finalizar compra");
             }
-            if (totalDulces == null) totalDulces = 0.0;
-            if (carrito == null) carrito = new HashMap<>();
-            if (metodoPago == null || metodoPago.isEmpty()) metodoPago = "efectivo";
+            if (totalDulces == null) {
+                totalDulces = 0.0;
+            }
+            if (carrito == null) {
+                carrito = new HashMap<>();
+            }
+            if (metodoPago == null || metodoPago.isEmpty()) {
+                metodoPago = "efectivo";
+            }
 
             List<String> asientos = Arrays.asList(asientosStr.split(","));
             Usuario usuario = usuarioDao.leer(userId);
-            if (usuario == null) throw new IllegalStateException("Usuario no encontrado: " + userId);
+            if (usuario == null) {
+                throw new IllegalStateException("Usuario no encontrado: " + userId);
+            }
 
             for (String codigoAsiento : asientos) {
                 Asiento asiento = asientoDao.leerPorCodigoYSala(
@@ -440,8 +432,8 @@ public class ClienteServlet extends HttpServlet {
                     }
 
                     request.setAttribute("mensaje",
-                            "El asiento " + codigoAsiento +
-                            " ya fue ocupado por otro usuario justo antes de tu confirmación. Por favor selecciona otro disponible.");
+                            "El asiento " + codigoAsiento
+                            + " ya fue ocupado por otro usuario justo antes de tu confirmación. Por favor selecciona otro disponible.");
                     request.setAttribute("asientosFuncion", asientosActualizados);
                     request.setAttribute("funcion", funcion);
                     request.setAttribute("sala", funcion.getSala());
@@ -481,8 +473,8 @@ public class ClienteServlet extends HttpServlet {
 
                 if (afExistente == null || afExistente.getEstadoAsiento().getIdEstadoAsiento() != 1) {
                     request.setAttribute("mensaje",
-                            "El asiento " + codigoAsiento +
-                            " fue ocupado por otro usuario segundos antes de confirmar. Selecciona otro disponible.");
+                            "El asiento " + codigoAsiento
+                            + " fue ocupado por otro usuario segundos antes de confirmar. Selecciona otro disponible.");
                     request.getRequestDispatcher("Cliente/SeleccionAsiento.jsp").forward(request, response);
                     return;
                 }
@@ -600,12 +592,12 @@ public class ClienteServlet extends HttpServlet {
 
             for (Venta v : ventas) {
                 List<DetalleVenta> detalles = detalleDao.listarPorVenta(v.getIdVenta());
-                v.setDetalles(detalles); 
+                v.setDetalles(detalles);
 
                 for (DetalleVenta d : detalles) {
                     Integer idFunc = d.getFuncion() != null ? d.getFuncion().getIdFuncion() : null;
 
-                    if (d.getTipoItem() == 1) { 
+                    if (d.getTipoItem() == 1) {
                         FilaReservaDTO dtoProd = filasMap.computeIfAbsent(v.getIdVenta(), k -> {
                             FilaReservaDTO f = new FilaReservaDTO();
                             f.setIdVenta(v.getIdVenta());

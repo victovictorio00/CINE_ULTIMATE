@@ -7,6 +7,12 @@
         response.sendRedirect(request.getContextPath() + "/Login.jsp");
         return;
     }
+    // Generar token CSRF si no existe en la sesión
+    String csrfToken = (String) session.getAttribute("csrfToken");
+    if (csrfToken == null) {
+        csrfToken = java.util.UUID.randomUUID().toString();
+        session.setAttribute("csrfToken", csrfToken);
+    }
 
     String username = (String) session.getAttribute("username");
     String nombreCompleto = (String) session.getAttribute("nombreCompleto");
@@ -103,6 +109,7 @@
     <!-- DATOS DE CONTACTO -->
     <h5 class="section-title">Datos de Contacto</h5>
     <form action="<%= request.getContextPath() %>/ActualizarPerfilServlet" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="idUsuario" value="<%= usuario.getIdUsuario() %>">
 
         <div class="form-row">
@@ -138,6 +145,7 @@
     <!-- CAMBIAR CONTRASEÑA -->
     <h5 class="section-title">Cambiar Contraseña</h5>
     <form action="<%= request.getContextPath() %>/CambiarPasswordServlet" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="idUsuario" value="<%= usuario.getIdUsuario() %>">
 
         <div class="form-row">

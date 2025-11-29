@@ -17,10 +17,10 @@ public class AdminDashboardServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
         HttpSession sesion = request.getSession(false);
-        if (sesion == null || sesion.getAttribute("rol") == null ||
-            !"admin".equals(sesion.getAttribute("rol"))) {
+        if (sesion == null || sesion.getAttribute("rol") == null
+                || !"admin".equals(sesion.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -32,9 +32,8 @@ public class AdminDashboardServlet extends HttpServlet {
             request.setAttribute("totalProductos", dao.getTotalProductos());
             request.setAttribute("totalEmpleados", dao.getTotalEmpleados());
             request.setAttribute("totalPeliculas", dao.getTotalPeliculas());
-             
-    request.setAttribute("ventasMensuales", dao.getVentasMensuales2025());
 
+            request.setAttribute("ventasMensuales", dao.getVentasMensuales2025());
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,8 +1,3 @@
-<%-- 
-    Document   : Pelicula
-    Created on : 27 may. 2025, 23:29:04
-    Author     : Proyecto
---%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>

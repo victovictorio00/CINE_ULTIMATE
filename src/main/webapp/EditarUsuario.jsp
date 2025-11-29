@@ -20,6 +20,7 @@
     %>
 
     <form action="<%= request.getContextPath() %>/UsuarioServlet" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="action" value="actualizar">
         <input type="hidden" name="idUsuario" value="<%= usuario.getIdUsuario() %>">
 

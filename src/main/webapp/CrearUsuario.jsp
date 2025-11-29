@@ -24,6 +24,7 @@
         <% } %>
 
         <form action="<%= request.getContextPath() %>/UsuarioServlet?action=crearUsuarioAdminPanel" method="post">
+            <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
             <div class="mb-3">
                 <label for="nombre_completo" class="form-label">Nombre Completo:</label>
                 <input type="text" id="nombre_completo" name="nombreCompleto" class="form-control" required>

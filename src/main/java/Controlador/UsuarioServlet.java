@@ -64,26 +64,26 @@ public class UsuarioServlet extends HttpServlet {
         }
 
         try {
-        switch (action) {
-            case "listar":
-                listarUsuarios(request, response);
-                break;
-            case "nuevo":
-                mostrarFormularioNuevo(request, response);
-                break;
-            case "editar":
-                mostrarFormularioEditar(request, response);
-                break;
-            case "eliminar": 
-                eliminarUsuario(request, response);
-                break;
-            default:
-                listarUsuarios(request, response);
-                break;
+            switch (action) {
+                case "listar":
+                    listarUsuarios(request, response);
+                    break;
+                case "nuevo":
+                    mostrarFormularioNuevo(request, response);
+                    break;
+                case "editar":
+                    mostrarFormularioEditar(request, response);
+                    break;
+                case "eliminar":
+                    eliminarUsuario(request, response);
+                    break;
+                default:
+                    listarUsuarios(request, response);
+                    break;
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
-    } catch (SQLException e) {
-        throw new ServletException(e);
-    }
     }
 
     /* ===============================
@@ -94,7 +94,7 @@ public class UsuarioServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-
+/*
         // Solo verificar reCAPTCHA para registro público
         if ("insertarcliente".equals(action)) {
             String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
@@ -116,22 +116,22 @@ public class UsuarioServlet extends HttpServlet {
                 return;
             }
         }
-
+*/
         try {
-           switch (action) {
-    case "insertarcliente":
-        insertarUsuarioCliente(request, response);
-        break;
-    case "crearUsuarioAdminPanel": 
-        crearUsuarioAdminPanel(request, response);
-        break;
-    case "actualizar":
-        actualizarUsuario(request, response);
-    break;
-    default:
-        response.sendRedirect("UsuarioServlet?action=listar");
-        break;
-}
+            switch (action) {
+                case "insertarcliente":
+                    insertarUsuarioCliente(request, response);
+                    break;
+                case "crearUsuarioAdminPanel":
+                    crearUsuarioAdminPanel(request, response);
+                    break;
+                case "actualizar":
+                    actualizarUsuario(request, response);
+                    break;
+                default:
+                    response.sendRedirect("UsuarioServlet?action=listar");
+                    break;
+            }
         } catch (SQLException e) {
             throw new ServletException(e);
         }
@@ -164,94 +164,92 @@ public class UsuarioServlet extends HttpServlet {
     }
 
     protected void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
 
-    int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-    UsuarioDao usuarioDao = new UsuarioDao();
+        int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
+        UsuarioDao usuarioDao = new UsuarioDao();
 
-    try {
-        // Usuario que vamos a editar
-        Usuario usuario = usuarioDao.leer(idUsuario);
+        try {
+            // Usuario que vamos a editar
+            Usuario usuario = usuarioDao.leer(idUsuario);
 
-        // Listado de roles (desde la base de datos)
-        List<Rol> roles = usuarioDao.listarRoles(); // Debes crear este método en UsuarioDao
+            // Listado de roles (desde la base de datos)
+            List<Rol> roles = usuarioDao.listarRoles(); // Debes crear este método en UsuarioDao
 
-        // Listado de estados de usuario
-        List<EstadoUsuario> estados = usuarioDao.listarEstados(); // También debes crearlo en UsuarioDao
+            // Listado de estados de usuario
+            List<EstadoUsuario> estados = usuarioDao.listarEstados(); // También debes crearlo en UsuarioDao
 
-        // Enviar al JSP
-        request.setAttribute("usuario", usuario);
-        request.setAttribute("roles", roles);
-        request.setAttribute("estados", estados);
+            // Enviar al JSP
+            request.setAttribute("usuario", usuario);
+            request.setAttribute("roles", roles);
+            request.setAttribute("estados", estados);
 
-        request.getRequestDispatcher("/EditarUsuario.jsp").forward(request, response);
+            request.getRequestDispatcher("/EditarUsuario.jsp").forward(request, response);
 
-    } catch (SQLException ex) {
-        throw new ServletException("Error al cargar el formulario de edición", ex);
+        } catch (SQLException ex) {
+            throw new ServletException("Error al cargar el formulario de edición", ex);
+        }
     }
-}
 
 
     /* ===============================
        REGISTRAR ADMINISTRADOR DESDE PANEL
        =============================== */
-private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletResponse response)
-        throws SQLException, IOException, ServletException {
+    private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
 
-    String nombreCompleto = request.getParameter("nombreCompleto");
-    String dni = request.getParameter("dni");
-    String username = request.getParameter("username");
-    String password = request.getParameter("password");
-    String telefono = request.getParameter("telefono");
-    String email = request.getParameter("email");
-    String direccion = request.getParameter("direccion");
+        String nombreCompleto = request.getParameter("nombreCompleto");
+        String dni = request.getParameter("dni");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String telefono = request.getParameter("telefono");
+        String email = request.getParameter("email");
+        String direccion = request.getParameter("direccion");
 
-    // Validaciones básicas de campos obligatorios
-    if (nombreCompleto == null || nombreCompleto.isEmpty() ||
-        dni == null || dni.isEmpty() ||
-        username == null || username.isEmpty() ||
-        password == null || password.isEmpty()) {
+        // Validaciones básicas de campos obligatorios
+        if (nombreCompleto == null || nombreCompleto.isEmpty()
+                || dni == null || dni.isEmpty()
+                || username == null || username.isEmpty()
+                || password == null || password.isEmpty()) {
 
-        request.setAttribute("error", "Debe completar todos los campos obligatorios.");
-        request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
-        return;
+            request.setAttribute("error", "Debe completar todos los campos obligatorios.");
+            request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
+            return;
+        }
+
+        // Verificar que el username no exista
+        if (usuarioDao.existeUsername(username)) {
+            request.setAttribute("error", "El nombre de usuario ya existe. Intente con otro.");
+            request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
+            return;
+        }
+
+        // Verificar que el DNI no exista
+        if (usuarioDao.existeDNI(dni)) {
+            request.setAttribute("error", "El DNI ya está registrado. Intente con otro.");
+            request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
+            return;
+        }
+
+        // Crear usuario
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        Rol rol = new Rol(1, "Cliente"); // se asigna automáticamente
+        EstadoUsuario estado = new EstadoUsuario(1, "Activo");
+
+        Usuario usuario = new Usuario(
+                0, rol, estado, nombreCompleto, dni, username,
+                hashedPassword, telefono, email, direccion, 0
+        );
+
+        try {
+            usuarioDao.insertar(usuario);
+            response.sendRedirect("UsuarioServlet?action=listar");
+        } catch (SQLException e) {
+            // Atrapar cualquier otro error de BD inesperado
+            request.setAttribute("error", "Ocurrió un error al registrar el usuario: " + e.getMessage());
+            request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
+        }
     }
-
-    // Verificar que el username no exista
-    if (usuarioDao.existeUsername(username)) {
-        request.setAttribute("error", "El nombre de usuario ya existe. Intente con otro.");
-        request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
-        return;
-    }
-
-    // Verificar que el DNI no exista
-    if (usuarioDao.existeDNI(dni)) {
-        request.setAttribute("error", "El DNI ya está registrado. Intente con otro.");
-        request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
-        return;
-    }
-
-    // Crear usuario
-    String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-    Rol rol = new Rol(1, "Cliente"); // se asigna automáticamente
-    EstadoUsuario estado = new EstadoUsuario(1, "Activo");
-
-    Usuario usuario = new Usuario(
-        0, rol, estado, nombreCompleto, dni, username,
-        hashedPassword, telefono, email, direccion, 0
-    );
-
-    try {
-        usuarioDao.insertar(usuario);
-        response.sendRedirect("UsuarioServlet?action=listar");
-    } catch (SQLException e) {
-        // Atrapar cualquier otro error de BD inesperado
-        request.setAttribute("error", "Ocurrió un error al registrar el usuario: " + e.getMessage());
-        request.getRequestDispatcher("CrearUsuario.jsp").forward(request, response);
-    }
-}
-
-
 
     /* ===============================
        REGISTRAR CLIENTE
@@ -314,73 +312,74 @@ private void crearUsuarioAdminPanel(HttpServletRequest request, HttpServletRespo
             return responseData.toString().contains("\"success\": true");
         }
     }
+
     private void actualizarUsuario(HttpServletRequest request, HttpServletResponse response)
-        throws SQLException, IOException, ServletException {
+            throws SQLException, IOException, ServletException {
 
-    int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-    String nombreCompleto = request.getParameter("nombreCompleto");
-    String dni = request.getParameter("dni");
-    String username = request.getParameter("username");
-    String password = request.getParameter("password"); // Puede estar vacío
-    String telefono = request.getParameter("telefono");
-    String email = request.getParameter("email");
-    String direccion = request.getParameter("direccion");
+        int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
+        String nombreCompleto = request.getParameter("nombreCompleto");
+        String dni = request.getParameter("dni");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password"); // Puede estar vacío
+        String telefono = request.getParameter("telefono");
+        String email = request.getParameter("email");
+        String direccion = request.getParameter("direccion");
 
-    int idRol = Integer.parseInt(request.getParameter("idRol"));
-    int idEstado = Integer.parseInt(request.getParameter("idEstadoUsuario"));
+        int idRol = Integer.parseInt(request.getParameter("idRol"));
+        int idEstado = Integer.parseInt(request.getParameter("idEstadoUsuario"));
 
-    // Crear objetos Rol y EstadoUsuario
-    Rol rol = new Rol();
-    rol.setIdRol(idRol);
+        // Crear objetos Rol y EstadoUsuario
+        Rol rol = new Rol();
+        rol.setIdRol(idRol);
 
-    EstadoUsuario estado = new EstadoUsuario();
-    estado.setIdEstadoUsuario(idEstado);
+        EstadoUsuario estado = new EstadoUsuario();
+        estado.setIdEstadoUsuario(idEstado);
 
-    // Leer usuario actual de la base de datos
-    Usuario usuario = usuarioDao.leer(idUsuario);
-    if (usuario == null) {
-        request.setAttribute("error", "Usuario no encontrado.");
-        request.getRequestDispatcher("EditarUsuario.jsp").forward(request, response);
-        return;
+        // Leer usuario actual de la base de datos
+        Usuario usuario = usuarioDao.leer(idUsuario);
+        if (usuario == null) {
+            request.setAttribute("error", "Usuario no encontrado.");
+            request.getRequestDispatcher("EditarUsuario.jsp").forward(request, response);
+            return;
+        }
+
+        // Actualizar datos
+        usuario.setNombreCompleto(nombreCompleto);
+        usuario.setDni(dni);
+        usuario.setUsername(username);
+        usuario.setTelefono(telefono);
+        usuario.setEmail(email);
+        usuario.setDireccion(direccion);
+        usuario.setIdRol(rol);
+        usuario.setIdEstadoUsuario(estado);
+
+        // Actualizar contraseña solo si se ingresó una nueva
+        if (password != null && !password.trim().isEmpty()) {
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            usuario.setPassword(hashedPassword);
+        }
+
+        // Guardar cambios en la base de datos
+        usuarioDao.editar(usuario);
+
+        // Redirigir a la lista de usuarios
+        response.sendRedirect("UsuarioServlet?action=listar");
     }
 
-    // Actualizar datos
-    usuario.setNombreCompleto(nombreCompleto);
-    usuario.setDni(dni);
-    usuario.setUsername(username);
-    usuario.setTelefono(telefono);
-    usuario.setEmail(email);
-    usuario.setDireccion(direccion);
-    usuario.setIdRol(rol);
-    usuario.setIdEstadoUsuario(estado);
-
-    // Actualizar contraseña solo si se ingresó una nueva
-    if (password != null && !password.trim().isEmpty()) {
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        usuario.setPassword(hashedPassword);
-    }
-
-    // Guardar cambios en la base de datos
-    usuarioDao.editar(usuario);
-
-    // Redirigir a la lista de usuarios
-    response.sendRedirect("UsuarioServlet?action=listar");
-}
-/* ===============================
+    /* ===============================
    ELIMINAR USUARIO
    =============================== */
-private void eliminarUsuario(HttpServletRequest request, HttpServletResponse response)
-        throws SQLException, IOException {
+    private void eliminarUsuario(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
 
-    // Obtener el ID desde el parámetro
-    int idUsuario = Integer.parseInt(request.getParameter("id"));
+        // Obtener el ID desde el parámetro
+        int idUsuario = Integer.parseInt(request.getParameter("id"));
 
-    // Llamar al DAO para eliminar
-    usuarioDao.eliminar(idUsuario);
+        // Llamar al DAO para eliminar
+        usuarioDao.eliminar(idUsuario);
 
-    // Redirigir nuevamente a la lista
-    response.sendRedirect("UsuarioServlet?action=listar");
-}
-
+        // Redirigir nuevamente a la lista
+        response.sendRedirect("UsuarioServlet?action=listar");
+    }
 
 }

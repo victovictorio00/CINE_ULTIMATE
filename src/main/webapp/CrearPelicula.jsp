@@ -1,8 +1,3 @@
-<%-- 
-    Document   : CrearPelicula
-    Created on : 27 may. 2025, 23:27:28
-    Author     : Proyecto
---%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Genero" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -41,7 +36,7 @@
 
     <!-- Formulario para agregar una nueva película -->
     <form action="PeliculaServlet?action=insertar" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
-        
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <!-- Nombre -->
         <div class="form-group">
             <label for="nombre">Nombre de la Película:</label>

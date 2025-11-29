@@ -32,6 +32,7 @@
 
                 <!-- Usa el contextPath para que funcione en cualquier contexto -->
                 <form action="<%= request.getContextPath()%>/LoginServlet" method="post">
+                    <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                     <input type="text"
                            name="username"
                            class="form-control"
@@ -49,9 +50,9 @@
 
                     <a href="#" class="forgot-link">Olvidé mi contraseña</a>
 
-                    <div class="g-recaptcha" 
+                    <!-- <div class="g-recaptcha" 
                          data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
-                    </div>
+                    </div> -->
 
                     <!-- Campo oculto para reenviar el parámetro 'redirect' -->
                     <input type="hidden" name="redirect"

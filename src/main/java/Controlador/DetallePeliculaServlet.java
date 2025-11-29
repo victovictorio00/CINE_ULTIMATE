@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
 
@@ -32,7 +33,7 @@ public class DetallePeliculaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
@@ -55,7 +56,6 @@ public class DetallePeliculaServlet extends HttpServlet {
             try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(
                     "UPDATE funciones SET activa = 0 WHERE fecha_fin < NOW()")) {
                 int rows = ps.executeUpdate();
-                System.out.println("Funciones desactivadas al inicio: " + rows);
             } catch (Exception e) {
                 System.err.println("Error al desactivar funciones: " + e.getMessage());
             }

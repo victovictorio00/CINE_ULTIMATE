@@ -34,8 +34,8 @@ public class CambiarPasswordServlet extends HttpServlet {
         String nuevaPass = request.getParameter("nuevaPass");
         String confirmPass = request.getParameter("confirmPass");
 
-        if (nuevaPass == null || confirmPass == null ||
-            nuevaPass.trim().isEmpty() || confirmPass.trim().isEmpty()) {
+        if (nuevaPass == null || confirmPass == null
+                || nuevaPass.trim().isEmpty() || confirmPass.trim().isEmpty()) {
             request.setAttribute("error", "Debes ingresar ambos campos de contraseña.");
             request.getRequestDispatcher("/Cliente/PerfilCliente.jsp").forward(request, response);
             return;
@@ -52,8 +52,6 @@ public class CambiarPasswordServlet extends HttpServlet {
 
         try {
             usuarioDao.actualizarPassword(idUsuario, hashedPassword);
-            System.out.println("✅ Contraseña actualizada correctamente para ID=" + idUsuario);
-
             response.sendRedirect(request.getContextPath() + "/Cliente/PerfilCliente.jsp?success=1");
         } catch (Exception e) {
             e.printStackTrace();

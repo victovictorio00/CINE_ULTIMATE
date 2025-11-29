@@ -35,6 +35,7 @@
     <div class="form-container">
         <h3>Editar Producto</h3>
         <form action="ProductoServlet?action=actualizar" method="POST"  enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
             <input type="hidden" name="id" value="${producto.idProducto}" />
             <div class="form-group">
                 <label for="nombre">Nombre:</label>

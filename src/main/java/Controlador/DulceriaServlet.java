@@ -24,7 +24,6 @@ public class DulceriaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // ✅ NO leer de parámetros - ya están en sesión
         HttpSession session = request.getSession(false);
 
         // Validar sesión

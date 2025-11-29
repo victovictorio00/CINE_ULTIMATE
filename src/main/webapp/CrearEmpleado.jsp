@@ -14,6 +14,7 @@
 <div class="container mt-5">
     <h3>Crear Nuevo Empleado</h3>
     <form action="EmpleadoServlet?action=insertar" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <div class="form-group">
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" class="form-control" required>

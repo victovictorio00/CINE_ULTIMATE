@@ -35,19 +35,15 @@ public class DashBoardServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("Error al desactivar funciones: " + e.getMessage());
         }
-        
+
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma", "no-cache");
-        response.setDateHeader("Expires", 0);
-
+   
         HttpSession session = request.getSession(false);
         if (session != null) {
-            System.out.println("Limpiando datos de reserva de la sesión...");
 
             // **IMPORTANTE:** Usa los nombres EXACTOS de tus atributos
             session.removeAttribute("funcionSeleccionada");
@@ -58,8 +54,6 @@ public class DashBoardServlet extends HttpServlet {
             session.removeAttribute("metodoPago");
             session.removeAttribute("nombreCompleto");
             session.removeAttribute("correoElectronico");
-
-            System.out.println("✅ Sesión de reserva limpiada al acceder a Home.");
         }
 
         try {
@@ -72,7 +66,6 @@ public class DashBoardServlet extends HttpServlet {
             request.setAttribute("peliculas", lista);
             // Hacer forward al JSP
             request.getRequestDispatcher("/Cliente/home.jsp").forward(request, response);
-            System.out.println("Número de películas: " + lista.size());
         } catch (SQLException e) {
             logger.severe("Error al listar películas: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al cargar las películas.");

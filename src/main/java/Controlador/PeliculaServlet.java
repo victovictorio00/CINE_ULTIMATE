@@ -29,14 +29,16 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
@@ -66,8 +68,8 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -93,7 +95,6 @@ public class PeliculaServlet extends HttpServlet {
     // ==============================
     // MÉTODOS CRUD
     // ==============================
-
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
 
@@ -203,7 +204,7 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setTrailerUrl(trailerUrl);
 
         if (foto != null) {
-            pelicula.setFoto(foto); 
+            pelicula.setFoto(foto);
         }
 
         peliculaDao.editar(pelicula);

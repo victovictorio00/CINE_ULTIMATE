@@ -22,18 +22,19 @@ public class EmpleadoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // 🔐 Control de acceso: solo administradores
+       
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             // 🚪 Si no hay sesión o no es admin → redirige al Login.jsp
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
@@ -62,7 +63,6 @@ public class EmpleadoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 🔐 Control de acceso: Solo administradores pueden acceder
         HttpSession session = request.getSession(false);
         if (session == null || !"admin".equals(session.getAttribute("rol"))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
@@ -91,7 +91,6 @@ public class EmpleadoServlet extends HttpServlet {
     // ==============================
     // MÉTODOS CRUD
     // ==============================
-
     private void listarEmpleados(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
 

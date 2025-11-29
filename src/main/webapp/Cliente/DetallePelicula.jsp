@@ -243,6 +243,7 @@
                     <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
                         <form id="reservarForm" action="<%= request.getContextPath()%>/ClienteServlet" method="post"
                               class="m-0 p-0 d-flex align-items-center">
+                            <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                             <input type="hidden" name="action" value="reservar_p">
                             <input type="hidden" name="id" value="<%= pelicula.getIdPelicula()%>">
                             <input type="hidden" name="idFuncion" id="inputIdFuncion" value="">

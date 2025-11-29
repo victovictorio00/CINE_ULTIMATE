@@ -20,6 +20,8 @@ public class CarritoDulceriaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+        
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
@@ -28,13 +30,11 @@ public class CarritoDulceriaServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no válida");
             return;
         }
-
-        HttpSession session = request.getSession();
+        
         String carritoJson = request.getParameter("carritoData");
 
         if (carritoJson == null || carritoJson.trim().isEmpty()) {
             session.removeAttribute("carritoDulceria");
-            System.out.println("Carrito vacío o nulo.");
             redirigirMetodoPago(request, response);
             return;
         }
@@ -46,7 +46,6 @@ public class CarritoDulceriaServlet extends HttpServlet {
             double totalDulces = calcularTotalDulces(carrito);
             session.setAttribute("precioDulces", totalDulces);
 
-            System.out.println("Carrito: " + carrito);
             redirigirMetodoPago(request, response);
 
         } catch (Exception e) {
@@ -54,15 +53,20 @@ public class CarritoDulceriaServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error al procesar el carrito");
         }
     }
+
     private Map<Integer, Integer> parsearCarrito(String carritoJson) {
         Map<Integer, Integer> carrito = new HashMap<>();
         String limpio = carritoJson.trim().replaceAll("[{}\"]", "");
-        if (limpio.isEmpty()) return carrito;
+        if (limpio.isEmpty()) {
+            return carrito;
+        }
 
         String[] pares = limpio.split(",");
         for (String par : pares) {
             String[] kv = par.split(":");
-            if (kv.length != 2) continue;
+            if (kv.length != 2) {
+                continue;
+            }
             try {
                 int id = Integer.parseInt(kv[0].trim());
                 int cantidad = Integer.parseInt(kv[1].trim());
@@ -73,6 +77,7 @@ public class CarritoDulceriaServlet extends HttpServlet {
         }
         return carrito;
     }
+
     private double calcularTotalDulces(Map<Integer, Integer> carrito) {
         double total = 0.0;
         ProductoDao dao = new ProductoDao();
@@ -87,12 +92,12 @@ public class CarritoDulceriaServlet extends HttpServlet {
                     total += producto.getPrecio() * cantidad;
                 }
             } catch (SQLException e) {
-                System.err.println("⚠ Error al obtener producto ID: " + idProducto);
                 e.printStackTrace();
             }
         }
         return total;
     }
+
     private void redirigirMetodoPago(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.sendRedirect(request.getContextPath() + "/ClienteServlet?action=metodoPago");
     }

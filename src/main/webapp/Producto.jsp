@@ -1,8 +1,3 @@
-<%-- 
-    Document   : Producto
-    Created on : 26 may. 2025, 18:16:41
-    Author     : Proyecto
---%>
 <%@page import="java.util.Base64"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Producto" %>

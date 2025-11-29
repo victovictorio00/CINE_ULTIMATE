@@ -203,6 +203,7 @@
 
         <%-- FORMULARIO OCULTO --%>
         <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/ClienteServlet" style="display: none;">
+            <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
             <input type="hidden" name="action" value="seleccionarCombo">
             <div id="productosHidden"></div>
         </form>
