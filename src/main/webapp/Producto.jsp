@@ -24,6 +24,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
+        .product-img {
+    width: 80px;          /* Ancho fijo */
+    height: 80px;         /* Alto fijo */
+    object-fit: cover;    /* Recorta sin deformar */
+    border-radius: 5px;
+}
         body {
             min-height: 100vh;
             display: flex;
@@ -169,7 +175,8 @@
                                 if (foto != null) {
                                     String base64Image = Base64.getEncoder().encodeToString(foto);
                             %>
-                            <img src="data:image/jpeg;base64,<%= base64Image %>" alt="Foto" style="width: 60px; height: auto; border-radius:5px;" />
+                            <img src="data:image/jpeg;base64,<%= base64Image %>" alt="Foto" class="product-img" />
+
                             <%
                                 } else {
                             %>
