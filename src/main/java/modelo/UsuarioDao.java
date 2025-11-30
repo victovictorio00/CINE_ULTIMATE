@@ -207,30 +207,32 @@ public class UsuarioDao implements DaoCrud<Usuario> {
         }
     }
 
-    public Usuario validateUser(String username, String plainPassword) throws SQLException {
-        String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setString(1, username);
-            pst.setInt(2, ESTADO_ACTIVO_ID);
+   public Usuario validateUser(String username, String Password) throws SQLException {
+    String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
+    try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+        pst.setString(1, username);
+        pst.setInt(2, ESTADO_ACTIVO_ID);
 
-            try (ResultSet rs = pst.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
+        try (ResultSet rs = pst.executeQuery()) {
+            if (!rs.next()) return null;
 
-                Usuario u = mapRow(rs);
-                String stored = u.getPassword();
+            Usuario u = mapRow(rs);
+            String stored = u.getPassword(); // bcrypt en la DB
 
-                boolean ok;
-                if (looksLikeBCrypt(stored)) {
-                    ok = BCrypt.checkpw(plainPassword, stored);
-                } else {
-                    ok = plainPassword != null && plainPassword.equals(stored);
-                }
-                return ok ? u : null;
+            if (stored == null || Password == null) return null;
+
+            // validar bcrypt de la contraseña SHA-256
+            if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+                return BCrypt.checkpw(Password, stored) ? u : null;
             }
+
+            // soporte legacy solo si lo necesitas (plain text)
+            return Password.equals(stored) ? u : null;
         }
     }
+}
+
+
 
     //no lo usa la bd, es creada por si se necesita usar después
     public void aumentarIntentos(int idUsuario) throws SQLException {
