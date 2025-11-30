@@ -56,10 +56,13 @@
     </head>
     <body>
         <header class="custom-header">
-            <h1><i class="fas fa-check-circle"></i> Confirmación de Compra</h1>
+            <h1><i class="fas fa-check-circle mb-2"></i> Confirmación de Compra</h1>
+            <button type="button" class="btn-back" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i> Volver
+            </button>
         </header>
         <% if (request.getAttribute("mensaje") != null) { %>
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        <div class="position-fixed top-0 end-0 p-3">
             <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
@@ -150,7 +153,7 @@
                     <i class="fas fa-candy-cane"></i>
                     <span>Dulcería</span>
                 </div>
-                <p style="color: #999; font-style: italic;">No se seleccionaron productos de dulcería</p>
+                <p>No se seleccionaron productos de dulcería</p>
             </div>
             <% } %>
 
@@ -194,16 +197,13 @@
 
             <!-- Acciones -->
             <div class="actions">
-                <form id="formConfirmar" action="<%= request.getContextPath() %>/ClienteServlet" method="post" style="display: inline;">
+                <form id="formConfirmar" action="<%= request.getContextPath() %>/ClienteServlet" method="post">
                     <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="finalizarCompra">
                     <button type="submit" class="btn-confirm" id="btnConfirmar">
                         <i class="fas fa-check"></i> Confirmar y Pagar
                     </button>
                 </form>
-                <button type="button" class="btn-back" onclick="history.back()">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </button>
             </div>
         </div>
         <footer>

@@ -97,7 +97,7 @@
                                maxlength="100"/>
                         <label for="correoElectronico">Correo electrónico</label>
                     </div>
-                    <h5 style="margin-top: 25px; margin-bottom: 15px; color: var(--dark);">
+                    <h5>
                         Selecciona Método de Pago
                     </h5>
                     <div class="payment-options">

@@ -47,7 +47,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Estilos/peliculaClienteStyle.css"> 
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/DulceriaCliente.css">
     </head>
-    <body style="background-color: var(--main-bg, #1e1e1e);">
+    <body>
 
         <%-- NAVBAR --%>
         <nav class="navbar navbar-expand-lg navbar-dark">
@@ -198,11 +198,11 @@
         <% if (esFlujoDeCompra) { %>
         <button class="btn-flotante btn btn-success" id="btnContinuar" onclick="continuarConCompra()">
             <i class="fas fa-arrow-right"></i> Continuar
-            <span id="totalDulceria" style="display: none;"> · S/. 0.00</span>
+            <span id="totalDulceria"> · S/. 0.00</span>
         </button>
 
         <%-- FORMULARIO OCULTO --%>
-        <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/ClienteServlet" style="display: none;">
+        <form id="carritoForm" method="POST" action="<%= request.getContextPath()%>/ClienteServlet">
             <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
             <input type="hidden" name="action" value="seleccionarCombo">
             <div id="productosHidden"></div>

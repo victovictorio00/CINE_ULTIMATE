@@ -87,7 +87,7 @@
             <div></div>
         </header>
         <% if (request.getAttribute("mensaje") != null) { %>
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        <div class="position-fixed top-0 end-0 p-3">
             <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
@@ -107,7 +107,7 @@
                 <div class="order-info">
                     <h6>N° de Orden:</h6>
                     <div class="order-number">#<%= String.format("%06d", venta.getIdVenta())%></div>
-                    <small style="color: #999; margin-top: 5px;"><%= fechaVenta%></small>
+                    <small><%= fechaVenta%></small>
                 </div>
                 <div class="qr-code">
                     <img src="<%= request.getContextPath()%>/Cliente/images/qr.png" alt="Código QR" />
@@ -160,7 +160,7 @@
                         <td class="text-right"><strong>S/. <%= String.format("%.2f", totalItem)%></strong></td>
                     </tr>
                     <% }%>
-                    <tr style="background: #f8f9fa; font-weight: 600;">
+                    <tr>
                         <td colspan="4" class="text-right">Subtotal Entradas:</td>
                         <td class="text-right">S/. <%= String.format("%.2f", subtotalEntradas)%></td>
                     </tr>
@@ -195,7 +195,7 @@
                         <td class="text-right"><strong>S/. <%= String.format("%.2f", totalItem)%></strong></td>
                     </tr>
                     <% }%>
-                    <tr style="background: #f8f9fa; font-weight: 600;">
+                    <tr class="colorcito">
                         <td colspan="3" class="text-right">Subtotal Dulcería:</td>
                         <td class="text-right">S/. <%= String.format("%.2f", subtotalDulceria)%></td>
                     </tr>
@@ -234,7 +234,7 @@
             </div>
 
             <div class="footer-thanks">
-                <i class="fas fa-heart" style="color: #e74c3c;"></i>
+                <i class="fas fa-heart"></i>
                 ¡Gracias por tu compra!
             </div>
         </div>

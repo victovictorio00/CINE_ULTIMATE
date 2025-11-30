@@ -127,7 +127,7 @@ body {
     background: var(--success);
     color: white;
     border: none;
-    padding: 15px 40px;
+    padding: 10px 40px;
     font-size: 18px;
     font-weight: bold;
     border-radius: 50px;
@@ -147,7 +147,7 @@ body {
     background: var(--dark);
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 10px 30px;
     font-size: 16px;
     font-weight: 600;
     border-radius: 50px;

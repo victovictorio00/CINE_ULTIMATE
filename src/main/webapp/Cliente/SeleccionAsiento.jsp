@@ -26,7 +26,7 @@
             <h1>Selecciona tus butacas</h1>
         </header>
         <% if (request.getAttribute("mensaje") != null) { %>
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+        <div class="position-fixed top-0 end-0 p-3">
             <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
@@ -105,11 +105,11 @@
 
                 <!-- Numeración superior -->
                 <div class="column-numbers">
-                    <div class="column-number" style="width: 30px;"></div>
+                    <div class="column-number"></div>
                     <% for (int i = 1; i <= maxColumnas; i++) {%>
                         <div class="column-number"><%= i%></div>
                     <% }%>
-                    <div class="column-number" style="width: 30px;"></div>
+                    <div class="column-number"></div>
                 </div>
 
                 <!-- Matriz de asientos -->
@@ -145,11 +145,11 @@
 
                 <!-- Numeración inferior -->
                 <div class="column-numbers">
-                    <div class="column-number" style="width: 30px;"></div>
+                    <div class="column-number"></div>
                     <% for (int i = 1; i <= maxColumnas; i++) {%>
                         <div class="column-number"><%= i%></div>
                     <% }%>
-                    <div class="column-number" style="width: 30px;"></div>
+                    <div class="column-number"></div>
                 </div>
 
                 <!-- Leyenda -->

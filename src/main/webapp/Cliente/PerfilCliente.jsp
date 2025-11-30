@@ -60,7 +60,6 @@
         </ul>
     </div>
 </nav>
-
 <!-- PERFIL -->
 <div class="profile-container">
     <%
