@@ -75,7 +75,7 @@
     <h2 class="text-center">Mi Perfil</h2>
 
     <h5 class="section-title">Datos de Socio CineMax</h5>
-    <p style="font-size: 0.9rem; color: #666;">
+    <p>
         La información que te identifica como cliente de CineMax no puede ser editada.
         Si alguno de los datos no es correcto o deseas cambiarlo, escríbenos a 
         <a href="#">Contáctanos</a>.

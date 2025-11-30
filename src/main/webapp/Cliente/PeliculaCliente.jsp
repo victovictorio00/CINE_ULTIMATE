@@ -80,12 +80,10 @@
                                        class="form-control form-control-sm" 
                                        name="fechaSeleccionada" 
                                        id="fechaSeleccionada"
-                                       value="<%= (request.getParameter("fechaSeleccionada") != null ? request.getParameter("fechaSeleccionada") : "")%>"
-                                       style="color: var(--main-text); background-color: var(--main-bg); border-color: var(--border-color);" 
+                                       value="<%= (request.getParameter("fechaSeleccionada") != null ? request.getParameter("fechaSeleccionada") : "")%>" 
                                        required>
                             </div>
-                            <button type="submit" class="btn btn-sm btn-block" 
-                                    style="background-color: var(--accent); color: white; border: none;">
+                            <button type="submit" class="btn btn-sm btn-block btn-primary">
                                 <i class="fas fa-search"></i> Filtrar Día
                             </button>
                         </form>
@@ -131,8 +129,7 @@
 
                     <div class="filter-section mt-3">
                         <a href="<%= request.getContextPath()%>/CarteleraServlet" 
-                           class="btn btn-block btn-outline-light" 
-                           style="border-color: var(--accent); color: var(--accent); font-weight: 600;">
+                           class="btn btn-block btn-primary">
                             <i class="fas fa-times-circle mr-2"></i> Limpiar Filtros
                         </a>
                     </div>
@@ -144,7 +141,7 @@
                             List<Pelicula> peliculas = (List<Pelicula>) request.getAttribute("peliculas");
                             if (peliculas == null || peliculas.isEmpty()) {
                         %>
-                        <div class="alert alert-info col-12" style="background-color: var(--card-bg); color: var(--secondary-text); border-color: var(--border-color);">No hay películas que coincidan con los filtros.</div>
+                        <div class="alert alert-info col-12">No hay películas que coincidan con los filtros.</div>
                         <%
                         } else {
                             for (modelo.Pelicula pelicula : peliculas) {

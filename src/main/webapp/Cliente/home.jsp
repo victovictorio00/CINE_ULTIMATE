@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/home.css">
     </head>
     <body>
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="margin-top:0;">
+        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
                 <%
                     List<Pelicula> peliculas = (List<Pelicula>) request.getAttribute("peliculas");
