@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import modelo.Pelicula;
 import modelo.PeliculaDao;
 
@@ -23,41 +24,20 @@ public class DetallePeliculaServlet extends HttpServlet {
         this.peliculaDao = new PeliculaDao();
     }
 
-    // No se usa, pero se mantiene para compatibilidad
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // -------------------------------------------------------------
-        // 1. Cabeceras de control de caché
-        // -------------------------------------------------------------
+        
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
-        // -------------------------------------------------------------
-        // 2. Cabecera de Seguridad CSP (soluciona alerta ZAP)
-        // -------------------------------------------------------------
-        response.setHeader("Content-Security-Policy",
-            "default-src 'self'; " +
-            "img-src 'self' data:; " +
-            "script-src 'self' https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com;"
-        );
-
-        // Para versión más estricta (si no usas Bootstrap CDN):
-        // response.setHeader("Content-Security-Policy",
-        //     "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline';"
-        // );
-
-        // -------------------------------------------------------------
-        // 3. Validación de ID recibido
-        // -------------------------------------------------------------
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Falta el ID de la película");
@@ -73,32 +53,21 @@ public class DetallePeliculaServlet extends HttpServlet {
                 return;
             }
 
-            // ---------------------------------------------------------
-            // 4. Desactivar funciones vencidas automáticamente
-            // ---------------------------------------------------------
-            try (Connection con = Conexion.getConnection();
-                 PreparedStatement ps = con.prepareStatement(
-                     "UPDATE funciones SET activa = 0 WHERE fecha_fin < NOW()")) {
-
+            try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(
+                    "UPDATE funciones SET activa = 0 WHERE fecha_fin < NOW()")) {
                 int rows = ps.executeUpdate();
-                // (No afecta UX, solo mantenimiento automático)
             } catch (Exception e) {
                 System.err.println("Error al desactivar funciones: " + e.getMessage());
             }
 
-            // ---------------------------------------------------------
-            // 5. Enviar la película al JSP
-            // ---------------------------------------------------------
+            // Enviar la película al JSP
             request.setAttribute("pelicula", pelicula);
-            request.getRequestDispatcher("/Cliente/DetallePelicula.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/Cliente/DetallePelicula.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID inválido");
-
         } catch (SQLException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Error al obtener la película");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al obtener la película");
         }
     }
 
@@ -110,6 +79,6 @@ public class DetallePeliculaServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Detalle de Película - Cinemax";
-    }
+        return "Short description";
+    }// </editor-fold>
 }
