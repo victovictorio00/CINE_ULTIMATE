@@ -84,8 +84,13 @@ public class LoginServlet extends HttpServlet {
         }
          */
         request.setCharacterEncoding("UTF-8");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+String username = request.getParameter("username");
+String password = request.getParameter("password"); // SHA-256 enviado desde frontend
+
+// LOG para auditoría / pruebas ZAP (opcional)
+Logger logger = LoggerFactory.getLogger(LoginServlet.class);
+logger.info("Login attempt: username={}, password={}", username, password);
+
 
         String errorMsg = null;
 

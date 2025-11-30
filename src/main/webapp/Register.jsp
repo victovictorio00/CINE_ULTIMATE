@@ -147,6 +147,7 @@
                            required minlength="6" autocomplete="new-password" />
                     <input type="password" id="passwordconfirm" name="passwordconfirm" class="form-control" 
                            placeholder="Confirmar contraseña" required minlength="6" autocomplete="new-password" />
+                  
 
                     <!-- teléfono (Perú mobile: 9 dígitos) -->
                     <input type="text" name="telefono" class="form-control" placeholder="Teléfono (9 dígitos)" 
@@ -169,12 +170,13 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 <script>
-    (function () {
-        const form = document.getElementById("registroForm");
-        form.addEventListener("submit", function (event) {
-            const pass = document.getElementById("password").value.trim();
-            const confirm = document.getElementById("passwordconfirm").value.trim();
+(function () {
+    const form = document.getElementById("registroForm");
+    form.addEventListener("submit", function (event) {
+        const pass = document.getElementById("password").value.trim();
+        const confirm = document.getElementById("passwordconfirm").value.trim();
 
             // Validación HTML5 general
             //if (!form.checkValidity()) {
@@ -183,22 +185,24 @@
             //alert("Revisa los campos resaltados. Asegúrate de completar los obligatorios y con el formato correcto.");
             //return;
             //}
+        if (pass !== confirm) {
+            event.preventDefault();
+            alert("Las contraseñas no coinciden.");
+            return;
+        }
 
-            // Contraseñas iguales
-            if (pass !== confirm) {
-                event.preventDefault();
-                alert("Las contraseñas no coinciden.");
-                return;
-            }
+        if (pass.length < 6) {
+            event.preventDefault();
+            alert("La contraseña debe tener al menos 6 caracteres.");
+            return;
+        }
 
-            // Reglas mínimas de contraseña (ejemplo)
-            if (pass.length < 6) {
-                event.preventDefault();
-                alert("La contraseña debe tener al menos 6 caracteres.");
-                return;
-            }
-        }, false);
-    })();
+        // Generar SHA-256 y guardarlo en el input oculto
+        document.getElementById("password").value = sha256(pass);
+        document.getElementById("passwordconfirm").value = "";
+    }, false);
+})();
 </script>
+
 </body>
 </html>
