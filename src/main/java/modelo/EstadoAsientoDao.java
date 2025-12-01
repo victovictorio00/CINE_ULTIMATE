@@ -8,74 +8,81 @@ public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
 
     //los CRUD no fueron integrados a procedure, son básicos
     @Override
-    public List<EstadoAsiento> listar() throws SQLException {
-        List<EstadoAsiento> lista = new ArrayList<>();
-        String query = "SELECT * FROM estado_asientos";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
+public List<EstadoAsiento> listar() throws SQLException {
+    List<EstadoAsiento> lista = new ArrayList<>();
+    String sql = "{CALL listarEstadoAsientos()}";
 
-            while (rs.next()) {
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
+
+        while (rs.next()) {
+            EstadoAsiento ea = new EstadoAsiento();
+            ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
+            ea.setNombre(rs.getString("nombre"));
+            lista.add(ea);
+        }
+    }
+    return lista;
+}
+
+
+    @Override
+public void insertar(EstadoAsiento ea) throws SQLException {
+    String sql = "{CALL insertarEstadoAsiento(?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setString(1, ea.getNombre());
+        cs.executeUpdate();
+    }
+}
+
+
+    @Override
+public EstadoAsiento leer(int id) throws SQLException {
+    String sql = "{CALL leerEstadoAsiento(?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, id);
+        try (ResultSet rs = cs.executeQuery()) {
+            if (rs.next()) {
                 EstadoAsiento ea = new EstadoAsiento();
                 ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
                 ea.setNombre(rs.getString("nombre"));
-                lista.add(ea);
+                return ea;
             }
         }
-        return lista;
     }
+    return null;
+}
+
 
     @Override
-    public void insertar(EstadoAsiento ea) throws SQLException {
-        String query = "INSERT INTO estado_asientos (nombre) VALUES (?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+public void editar(EstadoAsiento ea) throws SQLException {
+    String sql = "{CALL editarEstadoAsiento(?, ?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
 
-            pst.setString(1, ea.getNombre());
-            pst.executeUpdate();
-        }
+        cs.setInt(1, ea.getIdEstadoAsiento());
+        cs.setString(2, ea.getNombre());
+        cs.executeUpdate();
     }
+}
+
 
     @Override
-    public EstadoAsiento leer(int id) throws SQLException {
-        String query = "SELECT * FROM estado_asientos WHERE id_estado_asiento = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+public void eliminar(int id) throws SQLException {
+    String sql = "{CALL eliminarEstadoAsiento(?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
 
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    EstadoAsiento ea = new EstadoAsiento();
-                    ea.setIdEstadoAsiento(rs.getInt("id_estado_asiento"));
-                    ea.setNombre(rs.getString("nombre"));
-                    return ea;
-                }
-            }
-        }
-        return null;
+        cs.setInt(1, id);
+        cs.executeUpdate();
     }
+}
 
-    @Override
-    public void editar(EstadoAsiento ea) throws SQLException {
-        String query = "UPDATE estado_asientos SET nombre = ? WHERE id_estado_asiento = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setString(1, ea.getNombre());
-            pst.setInt(2, ea.getIdEstadoAsiento());
-            pst.executeUpdate();
-        }
-    }
-
-    @Override
-    public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM estado_asientos WHERE id_estado_asiento = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
-    }
 }

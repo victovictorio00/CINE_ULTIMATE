@@ -6,6 +6,9 @@ package modelo;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import Conexion.Conexion;
+import java.sql.*;
+
 
 
 import java.sql.Connection;
@@ -21,49 +24,52 @@ public class DashboardDAO {
         this.con = con;
     }
 
-    public double getTotalVentas() throws SQLException {
-        String sql = "SELECT IFNULL(SUM(total), 0) AS total FROM ventas";
-        try (PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getDouble("total") : 0;
-        }
-    }
+   public double getTotalVentas() throws SQLException {
+    String sql = "{CALL getTotalVentas()}";
+    try (CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
 
-    public int getTotalProductos() throws SQLException {
-        String sql = "SELECT COUNT(id_producto) AS total FROM productos";
-        try (PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt("total") : 0;
-        }
+        return rs.next() ? rs.getDouble("total") : 0;
     }
+}
+
+
+
+   public int getTotalProductos() throws SQLException {
+    String sql = "{CALL getTotalProductos(?)}";
+    try (CallableStatement cs = con.prepareCall(sql)) {
+        cs.registerOutParameter(1, java.sql.Types.INTEGER);
+        cs.execute();
+        return cs.getInt(1);
+    }
+}
+
 
     public int getTotalEmpleados() throws SQLException {
-        String sql = "SELECT COUNT(id_empleado) AS total FROM empleados";
-        try (PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt("total") : 0;
-        }
+    String sql = "{CALL getTotalEmpleados(?)}";
+    try (CallableStatement cs = con.prepareCall(sql)) {
+        cs.registerOutParameter(1, java.sql.Types.INTEGER);
+        cs.execute();
+        return cs.getInt(1);
     }
+}
+
 
     public int getTotalPeliculas() throws SQLException {
-        String sql = "SELECT COUNT(id_pelicula) AS total FROM peliculas";
-        try (PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt("total") : 0;
-        }
+    String sql = "{CALL getTotalPeliculas(?)}";
+    try (CallableStatement cs = con.prepareCall(sql)) {
+        cs.registerOutParameter(1, java.sql.Types.INTEGER);
+        cs.execute();
+        return cs.getInt(1);
     }
-    public List<Double> getVentasMensuales2025() throws SQLException {
-   String sql = "SELECT MONTH(fecha) AS mes, " +
-             "IFNULL(SUM(total), 0) AS total_mensual " +
-             "FROM ventas " +
-             "WHERE YEAR(fecha) = 2025 " +
-             "GROUP BY MONTH(fecha) " +
-             "ORDER BY mes;";
+}
 
-
+   public List<Double> getVentasMensuales2025() throws SQLException {
+    String sql = "{CALL getVentasMensuales2025()}";
     List<Double> ventasMensuales = new ArrayList<>(Collections.nCopies(12, 0.0)); // 12 meses
-    try (PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+
+    try (CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
 
         while (rs.next()) {
             int mes = rs.getInt("mes");
@@ -73,8 +79,10 @@ public class DashboardDAO {
             }
         }
     }
+
     return ventasMensuales;
 }
+
 
 }
 

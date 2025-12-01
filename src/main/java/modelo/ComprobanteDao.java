@@ -5,18 +5,65 @@ import java.util.List;
 import Conexion.Conexion;
 
 public class ComprobanteDao implements DaoCrud<Comprobante> {
-
+    
     //los CRUD no fueron integrados a procedure, son básicos
+ @Override
+public List<Comprobante> listar() throws SQLException {
+    List<Comprobante> lista = new ArrayList<>();
+    String sql = "{CALL listarComprobantes()}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
+
+        while (rs.next()) {
+            Comprobante comp = new Comprobante();
+            comp.setId_comprobante(rs.getInt("id_comprobante"));
+            comp.setTipoComprobante(rs.getString("tipo_comprobante"));
+            comp.setFechaEmision(rs.getTimestamp("fecha_emision"));
+
+            Venta venta = new Venta();
+            venta.setIdVenta(rs.getInt("id_venta"));
+            comp.setVenta(venta);
+
+            lista.add(comp);
+        }
+    }
+
+    return lista;
+}
+
+
+
     @Override
-    public List<Comprobante> listar() throws SQLException {
-        List<Comprobante> lista = new ArrayList<>();
-        String query = "SELECT * FROM comprobantes";
+public void insertar(Comprobante comp) throws SQLException {
+    String sql = "{CALL insertarComprobante(?, ?, ?)}";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
+    // Abrir la conexión dentro del método
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
 
-            while (rs.next()) {
+        cs.setInt(1, comp.getVenta().getIdVenta());
+        cs.setString(2, comp.getTipoComprobante());
+        cs.setTimestamp(3, new java.sql.Timestamp(comp.getFechaEmision().getTime()));
+        cs.executeUpdate();
+    }
+}
+
+
+
+  @Override
+public Comprobante leer(int id) throws SQLException {
+    String sql = "{CALL leerComprobante(?)}";
+
+    // Abrir la conexión dentro del try
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, id);
+
+        try (ResultSet rs = cs.executeQuery()) {
+            if (rs.next()) {
                 Comprobante comp = new Comprobante();
                 comp.setId_comprobante(rs.getInt("id_comprobante"));
                 comp.setTipoComprobante(rs.getString("tipo_comprobante"));
@@ -26,72 +73,43 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
                 venta.setIdVenta(rs.getInt("id_venta"));
                 comp.setVenta(venta);
 
-                lista.add(comp);
+                return comp;
             }
         }
-        return lista;
     }
+    return null;
+}
 
-    @Override
-    public void insertar(Comprobante comp) throws SQLException {
-        String query = "INSERT INTO comprobantes (id_venta, tipo_comprobante, fecha_emision) VALUES (?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getVenta().getIdVenta());
-            pst.setString(2, comp.getTipoComprobante());
-            pst.setDate(3, new java.sql.Date(comp.getFechaEmision().getTime()));
-            pst.executeUpdate();
-        }
+@Override
+public void editar(Comprobante comp) throws SQLException {
+    String sql = "{CALL editarComprobante(?, ?, ?, ?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, comp.getId_comprobante());
+        cs.setInt(2, comp.getVenta().getIdVenta());
+        cs.setString(3, comp.getTipoComprobante());
+        cs.setTimestamp(4, new java.sql.Timestamp(comp.getFechaEmision().getTime()));
+
+        cs.executeUpdate();
     }
+}
 
-    @Override
-    public Comprobante leer(int id) throws SQLException {
-        String query = "SELECT * FROM comprobantes WHERE id_comprobante = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Comprobante comp = new Comprobante();
-                    comp.setId_comprobante(rs.getInt("id_comprobante"));
-                    comp.setTipoComprobante(rs.getString("tipo_comprobante"));
-                    comp.setFechaEmision(rs.getTimestamp("fecha_emision"));
 
-                    Venta venta = new Venta();
-                    venta.setIdVenta(rs.getInt("id_venta"));
-                    comp.setVenta(venta);
+  @Override
+public void eliminar(int id) throws SQLException {
+    String sql = "{CALL eliminarComprobante(?)}";
+    
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
 
-                    return comp;
-                }
-            }
-        }
-        return null;
+        cs.setInt(1, id);
+        cs.executeUpdate();
     }
+}
 
-    @Override
-    public void editar(Comprobante comp) throws SQLException {
-        String query = "UPDATE comprobantes SET id_venta = ?, tipo_comprobante = ?, fecha_emision = ? WHERE id_comprobante = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getVenta().getIdVenta());
-            pst.setString(2, comp.getTipoComprobante());
-            pst.setDate(3, new java.sql.Date(comp.getFechaEmision().getTime()));
-            pst.setInt(4, comp.getId_comprobante());
-            pst.executeUpdate();
-        }
-    }
-
-    @Override
-    public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM comprobantes WHERE id_comprobante = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
-    }
 }

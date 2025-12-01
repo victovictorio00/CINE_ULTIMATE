@@ -6,73 +6,91 @@ import Conexion.Conexion;
 
 public class SalaDao implements DaoCrud<Sala> {
     //los CRUD y otros métodos no fueron integrados a procedure, son básicos
+  @Override
+public List<Sala> listar() throws SQLException {
+    List<Sala> salas = new ArrayList<>();
+    String sql = "{CALL listarSalas()}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql);
+         ResultSet rs = cst.executeQuery()) {
+
+        while (rs.next()) {
+            Sala sala = new Sala();
+            sala.setIdSala(rs.getInt("id_sala"));
+            sala.setNombre(rs.getString("nombre"));
+            sala.setCapacidad(rs.getInt("capacidad"));
+            salas.add(sala);
+        }
+    }
+    return salas;
+}
+
+
+  @Override
+public void insertar(Sala emp) throws SQLException {
+    String sql = "{CALL insertarSala(?, ?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
+
+        cst.setString(1, emp.getNombre());
+        cst.setInt(2, emp.getCapacidad());
+
+        cst.executeUpdate();
+    }
+}
+
+
     @Override
-    public List<Sala> listar() throws SQLException {
-        List<Sala> salas = new ArrayList<>();
-        String query = "SELECT * FROM salas";
-        try (Connection con = Conexion.getConnection();
-            PreparedStatement pst = con.prepareStatement(query);
-            ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
+public Sala leer(int id) throws SQLException {
+    String sql = "{CALL leerSala(?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
+
+        cst.setInt(1, id);
+
+        try (ResultSet rs = cst.executeQuery()) {
+            if (rs.next()) {
                 Sala sala = new Sala();
                 sala.setIdSala(rs.getInt("id_sala"));
                 sala.setNombre(rs.getString("nombre"));
                 sala.setCapacidad(rs.getInt("capacidad"));
-                salas.add(sala);
+                return sala;
             }
         }
-        return salas;
     }
+    return null;
+}
+
 
     @Override
-    public void insertar(Sala emp) throws SQLException {
-        String query = "INSERT INTO salas (nombre, capacidad) VALUES (?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setString(1, emp.getNombre());
-            pst.setInt(2, emp.getCapacidad());
-            pst.executeUpdate();
-        }
-    }
+public void editar(Sala emp) throws SQLException {
+    String sql = "{CALL editarSala(?, ?, ?)}";
 
-    @Override
-    public Sala leer(int id) throws SQLException {
-        String query = "SELECT * FROM salas WHERE id_sala = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    Sala sala = new Sala();
-                    sala.setIdSala(rs.getInt("id_sala"));
-                    sala.setNombre(rs.getString("nombre"));
-                    sala.setCapacidad(rs.getInt("capacidad"));
-                    return sala;
-                }
-            }
-        }
-        return null;
-    }
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
 
-    @Override
-    public void editar(Sala emp) throws SQLException {
-        String query = "UPDATE salas SET nombre = ?, capacidad = ? WHERE id_sala = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setString(1, emp.getNombre());
-            pst.setInt(2, emp.getCapacidad());
-            pst.setInt(3, emp.getIdSala());
-            pst.executeUpdate();
-        }
-    }
+        cst.setInt(1, emp.getIdSala());
+        cst.setString(2, emp.getNombre());
+        cst.setInt(3, emp.getCapacidad());
 
-    @Override
-    public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM salas WHERE id_sala = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
+        cst.executeUpdate();
     }
+}
+
+
+   @Override
+public void eliminar(int id) throws SQLException {
+    String sql = "{CALL eliminarSala(?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
+
+        cst.setInt(1, id);
+        cst.executeUpdate();
+    }
+}
+
 }
