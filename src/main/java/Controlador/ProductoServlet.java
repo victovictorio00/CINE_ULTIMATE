@@ -148,36 +148,37 @@ public class ProductoServlet extends HttpServlet {
     }
 
     private void actualizarProducto(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException, ServletException {
+        throws SQLException, IOException, ServletException {
 
-        int id = parseIntSafe(request.getParameter("id"), 0);
-        String nombre = request.getParameter("nombre");
-        String descripcion = request.getParameter("descripcion");
-        double precio = parseDoubleSafe(request.getParameter("precio"), 0.0);
-        int stock = parseIntSafe(request.getParameter("stock"), 0);
+    int id = parseIntSafe(request.getParameter("id"), 0);
+    String nombre = request.getParameter("nombre");
+    String descripcion = request.getParameter("descripcion");
+    double precio = parseDoubleSafe(request.getParameter("precio"), 0.0);
+    int stock = parseIntSafe(request.getParameter("stock"), 0);
 
-        // Imagen: si no suben nueva, conservar la actual
-        byte[] fotoNueva = leerBytesDeParte(request.getPart("foto"));
-        byte[] fotoFinal = fotoNueva;
+    // Foto opcional (si no suben, mantiene la existente)
+    byte[] fotoNueva = leerBytesDeParte(request.getPart("foto"));
+    byte[] fotoFinal = fotoNueva;
 
-        if (fotoNueva == null || fotoNueva.length == 0) {
-            Producto existente = productoDao.leer(id);
-            if (existente != null) {
-                fotoFinal = existente.getFoto();
-            }
+    if (fotoNueva == null || fotoNueva.length == 0) {
+        Producto existente = productoDao.leer(id);
+        if (existente != null) {
+            fotoFinal = existente.getFoto();
         }
-
-        Producto p = new Producto();
-        p.setIdProducto(id);
-        p.setNombre(nombre);
-        p.setDescripcion(descripcion);
-        p.setFoto(fotoFinal);
-        p.setStock(stock);
-        p.setPrecio(precio);
-
-        productoDao.editar(p); // o productoDao.actualizar(p) si dejaste ese alias
-        response.sendRedirect("ProductoServlet?action=listar");
     }
+
+    Producto p = new Producto();
+    p.setIdProducto(id);
+    p.setNombre(nombre);
+    p.setDescripcion(descripcion);
+    p.setPrecio(precio);
+    p.setStock(stock);
+    p.setFoto(fotoFinal);
+
+    productoDao.editar(p);
+    response.sendRedirect("ProductoServlet?action=listar");
+}
+
 
     /* ======================= Helpers ======================= */
     private static int parseIntSafe(String s, int def) {
