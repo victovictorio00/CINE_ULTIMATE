@@ -64,12 +64,10 @@
                 <option value="3" <%= f.getEstadoFuncion().getIdEstadoFuncion() == 3 ? "selected" : "" %>>Finalizada</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>Asientos Disponibles</label>
             <input type="number" name="asientos_disponibles" class="form-control" value="<%= f.getAsientosDisponibles() %>">
         </div>
-
         <button type="submit" class="btn btn-primary">Actualizar</button>
         <a href="FuncionServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>

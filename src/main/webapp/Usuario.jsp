@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Usuario.css">
 </head>
 <body>
-
     <!-- Barra lateral -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>

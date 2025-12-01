@@ -1,8 +1,3 @@
-<%-- 
-    Document   : EditarProducto
-    Created on : 26 may. 2025, 18:08:19
-    Author     : Proyecto
---%>
 <%@ page import="modelo.Producto" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>

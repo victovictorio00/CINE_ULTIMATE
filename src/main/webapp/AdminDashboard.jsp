@@ -101,51 +101,28 @@
         </div>
     </main>
 
-    <!-- JS -->
+    <!-- JS de Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
+    <%-- Preparar datos de ventas mensuales --%>
     <%
-    List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
-    if (ventasMensuales == null) {
-        ventasMensuales = java.util.Collections.nCopies(12, 0.0);
-    }
-%>
-<script>
-    const ctx = document.getElementById('ventasChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            datasets: [{
-                label: 'Ventas Mensuales (S/)',
-                data: <%= ventasMensuales.toString() %>,
-                backgroundColor: 'rgba(13, 110, 253, 0.8)',
-                borderColor: '#0d6efd',
-                borderWidth: 2,
-                hoverBackgroundColor: '#084298'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true },
-                x: {}
-            },
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Ventas Mensuales - 2025',
-                    color: '#084298',
-                    font: { size: 18, weight: 'bold' }
-                }
-            }
+        List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
+        if (ventasMensuales == null) {
+            ventasMensuales = java.util.Collections.nCopies(12, 0.0);
         }
-    });
-</script>
+    %>
 
+    <%-- Inicializar datos del dashboard --%>
+    <script>
+        window.adminDashboardData = {
+            ventasMensuales: <%= ventasMensuales.toString() %>,
+            meses: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+        };
+    </script>
 
+    <%-- Cargar lógica del gráfico --%>
+    <script src="<%= request.getContextPath() %>/Admin/JS/adminDashboardChart.js"></script>
 </body>
 </html>

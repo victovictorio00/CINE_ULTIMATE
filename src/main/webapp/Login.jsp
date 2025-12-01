@@ -59,15 +59,6 @@
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-<script>
-document.getElementById("loginForm").addEventListener("submit", function(e){
-    let passInput = this.querySelector('input[name="password"]');
-    
-    if(passInput.value) {
-        // reemplazamos el valor por el hash SHA-256
-        passInput.value = sha256(passInput.value);
-    }
-});
-</script>
+<script src="${pageContext.request.contextPath}/Cliente/JS/Login.js"></script>
 </body>
 </html>
