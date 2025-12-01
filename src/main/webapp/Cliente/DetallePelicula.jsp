@@ -106,44 +106,6 @@
             </div>
         </div>
         
-        <script src="https://www.youtube.com/iframe_api"></script>
-        <script>
-            const overlay = document.getElementById('playOverlay');
-            const container = document.getElementById('playerContainer');
-            const videoId = "<%= trailer.substring(trailer.lastIndexOf('/') + 1)%>";
-            let player;
-
-            overlay.addEventListener('click', () => {
-                player = new YT.Player('playerContainer', {
-                    videoId: videoId,
-                    width: '100%',
-                    height: '100%',
-                    playerVars: {
-                        autoplay: 1,
-                        controls: 0,
-                        rel: 0,
-                        modestbranding: 1,
-                        disablekb: 1,
-                        playsinline: 1,
-                        loop: 1,
-                        playlist: videoId
-                    },
-                    events: {
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
-
-                overlay.style.display = 'none';
-            });
-
-            function onPlayerStateChange(event) {
-                if (event.data === YT.PlayerState.ENDED) {
-                    player.seekTo(0);
-                    player.playVideo();
-                }
-            }
-        </script>
-        
         <div class="container movie-details-container">
             <div class="row d-flex align-items-start justify-content-center">
                 <!-- Imagen -->
@@ -178,7 +140,7 @@
                     <h3>Horarios</h3>
                     <div class="mb-3">
                         <%
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a"); // 12h + AM/PM
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("hh:mm a");
 
                             // Contar funciones activas
                             int contadorActivas = 0;
@@ -219,11 +181,11 @@
                                 <%= horarioInicio%> - <%= horarioFin%>
                             </button>
                             <%
-                                } // for
+                                }
                             %>
                         </div>
                         <%
-                            } // else
+                            }
                         %>
                     </div>
                     <div class="mt-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
@@ -254,63 +216,22 @@
             <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
         </footer>
 
+        <%-- Inicializar datos de configuración para JavaScript --%>
         <script>
-            (function () {
-                const horarioBtns = Array.from(document.querySelectorAll('.horario-btn'));
-                const btnReservar = document.getElementById('btnReservar');
-                const inputIdFuncion = document.getElementById('inputIdFuncion');
-                const precioServidor = "<%= precioFormateado.replace("\"", "\\\"")%>";
-                if (!btnReservar || !inputIdFuncion)
-                    return;
-                btnReservar.disabled = true;
-                btnReservar.setAttribute('aria-disabled', 'true');
-
-                function clearSelection() {
-                    horarioBtns.forEach(b => {
-                        b.classList.remove('active');
-                        b.style.background = '';
-                        b.style.color = '';
-                        b.style.borderColor = '';
-                    });
-                    inputIdFuncion.value = '';
-                    btnReservar.disabled = true;
-                    btnReservar.setAttribute('aria-disabled', 'true');
-                    btnReservar.title = "Selecciona un horario";
-                    btnReservar.innerHTML = "🎟 Reservar";
-                }
-
-                clearSelection();
-                horarioBtns.forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const wasSelected = this.classList.contains('active');
-                        clearSelection();
-                        if (!wasSelected) {
-                            this.classList.add('active');
-                            this.style.background = window.getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#FF5733';
-                            this.style.color = '#fff';
-                            this.style.borderColor = 'transparent';
-
-                            const id = this.dataset.idfuncion;
-                            inputIdFuncion.value = id;
-
-                            btnReservar.disabled = false;
-                            btnReservar.removeAttribute('aria-disabled');
-                            btnReservar.title = "Reservar " + (this.dataset.label || '');
-                            // Actualizar texto del botón con el precio
-                            btnReservar.innerHTML = "🎟 Reservar · " + precioServidor;
-                            btnReservar.focus();
-                        }
-                    });
-                    btn.addEventListener('keydown', function (e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            this.click();
-                        }
-                    });
-                });
-
-            })();
+            window.detallePeliculaData = {
+                videoId: "<%= trailer.substring(trailer.lastIndexOf('/') + 1)%>",
+                precioFormateado: "<%= precioFormateado.replace("\"", "\\\"")%>"
+            };
         </script>
+
+        <%-- API de YouTube (debe cargarse primero) --%>
+        <script src="https://www.youtube.com/iframe_api"></script>
+        
+        <%-- Scripts externos de la aplicación --%>
+        <script src="<%= request.getContextPath()%>/Cliente/JS/youtubePlayer.js"></script>
+        <script src="<%= request.getContextPath()%>/Cliente/JS/seleccionHorario.js"></script>
+        
+        <%-- Bootstrap y dependencias --%>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
