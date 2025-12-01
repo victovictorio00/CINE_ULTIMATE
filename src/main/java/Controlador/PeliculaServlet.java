@@ -29,14 +29,16 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
@@ -66,8 +68,8 @@ public class PeliculaServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -93,7 +95,6 @@ public class PeliculaServlet extends HttpServlet {
     // ==============================
     // MÉTODOS CRUD
     // ==============================
-
     private void listarPeliculas(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
 
@@ -139,9 +140,10 @@ public class PeliculaServlet extends HttpServlet {
 
     private void insertarPelicula(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
-
-        String nombre = request.getParameter("nombre");
-        String sinopsis = request.getParameter("sinopsis");
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        String nombre = new String(request.getParameter("nombre").getBytes("ISO-8859-1"), "UTF-8");
+        String sinopsis = new String(request.getParameter("sinopsis").getBytes("ISO-8859-1"), "UTF-8");
         int idGenero = Integer.parseInt(request.getParameter("idGenero"));
         java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
         double precio = Double.parseDouble(request.getParameter("precio"));
@@ -155,7 +157,7 @@ public class PeliculaServlet extends HttpServlet {
             }
         }
 
-        String trailerUrl = request.getParameter("trailerUrl");
+        String trailerUrl = new String(request.getParameter("trailerUrl").getBytes("ISO-8859-1"), "UTF-8");
 
         Pelicula pelicula = new Pelicula();
         pelicula.setNombre(nombre);
@@ -172,10 +174,11 @@ public class PeliculaServlet extends HttpServlet {
 
     private void actualizarPelicula(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
-        String nombre = request.getParameter("nombre");
-        String sinopsis = request.getParameter("sinopsis");
+        String nombre = new String(request.getParameter("nombre").getBytes("ISO-8859-1"), "UTF-8");
+        String sinopsis = new String(request.getParameter("sinopsis").getBytes("ISO-8859-1"), "UTF-8");
         int idGenero = Integer.parseInt(request.getParameter("idGenero"));
         java.sql.Date fechaEstreno = java.sql.Date.valueOf(request.getParameter("fechaEstreno"));
         double precio = Double.parseDouble(request.getParameter("precio"));
@@ -189,7 +192,7 @@ public class PeliculaServlet extends HttpServlet {
             }
         }
 
-        String trailerUrl = request.getParameter("trailerUrl");
+        String trailerUrl = new String(request.getParameter("trailerUrl").getBytes("ISO-8859-1"), "UTF-8");
 
         Pelicula pelicula = new Pelicula();
         pelicula.setIdPelicula(id);
@@ -201,7 +204,7 @@ public class PeliculaServlet extends HttpServlet {
         pelicula.setTrailerUrl(trailerUrl);
 
         if (foto != null) {
-            pelicula.setFoto(foto); // 👈 solo si subiste una nueva
+            pelicula.setFoto(foto);
         }
 
         peliculaDao.editar(pelicula);

@@ -27,14 +27,15 @@
 
     <p>¿Está seguro de eliminar al siguiente empleado?</p>
     <table class="table">
-        <tr><td>ID:</td><td><%= empleado.getId() %></td></tr>
+        <tr><td>ID:</td><td><%= empleado.getIdEmpleado() %></td></tr>
         <tr><td>Nombre:</td><td><%= empleado.getNombre() %></td></tr>
         <tr><td>Dirección:</td><td><%= empleado.getDireccion() %></td></tr>
         <tr><td>Teléfono:</td><td><%= empleado.getTelefono() %></td></tr>
     </table>
 
     <form action="EmpleadoServlet?action=eliminar" method="post">
-        <input type="hidden" name="id" value="<%= empleado.getId() %>">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
+        <input type="hidden" name="id" value="<%= empleado.getIdEmpleado() %>">
         <button type="submit" class="btn btn-danger">Eliminar</button>
         <a href="EmpleadoServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>

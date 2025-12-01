@@ -6,6 +6,7 @@ import Conexion.Conexion;
 
 public class ComprobanteDao implements DaoCrud<Comprobante> {
 
+    //los CRUD no fueron integrados a procedure, son básicos
     @Override
     public List<Comprobante> listar() throws SQLException {
         List<Comprobante> lista = new ArrayList<>();
@@ -18,12 +19,12 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
             while (rs.next()) {
                 Comprobante comp = new Comprobante();
                 comp.setId_comprobante(rs.getInt("id_comprobante"));
-                comp.setTipo_comprobante(rs.getString("tipo_comprobante"));
-                comp.setFecha_emision(rs.getDate("fecha_emision"));
+                comp.setTipoComprobante(rs.getString("tipo_comprobante"));
+                comp.setFechaEmision(rs.getTimestamp("fecha_emision"));
 
                 Venta venta = new Venta();
                 venta.setIdVenta(rs.getInt("id_venta"));
-                comp.setId_venta(venta);
+                comp.setVenta(venta);
 
                 lista.add(comp);
             }
@@ -37,9 +38,9 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getId_venta().getIdVenta());
-            pst.setString(2, comp.getTipo_comprobante());
-            pst.setDate(3, new java.sql.Date(comp.getFecha_emision().getTime()));
+            pst.setInt(1, comp.getVenta().getIdVenta());
+            pst.setString(2, comp.getTipoComprobante());
+            pst.setDate(3, new java.sql.Date(comp.getFechaEmision().getTime()));
             pst.executeUpdate();
         }
     }
@@ -55,12 +56,12 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
                 if (rs.next()) {
                     Comprobante comp = new Comprobante();
                     comp.setId_comprobante(rs.getInt("id_comprobante"));
-                    comp.setTipo_comprobante(rs.getString("tipo_comprobante"));
-                    comp.setFecha_emision(rs.getDate("fecha_emision"));
+                    comp.setTipoComprobante(rs.getString("tipo_comprobante"));
+                    comp.setFechaEmision(rs.getTimestamp("fecha_emision"));
 
                     Venta venta = new Venta();
                     venta.setIdVenta(rs.getInt("id_venta"));
-                    comp.setId_venta(venta);
+                    comp.setVenta(venta);
 
                     return comp;
                 }
@@ -75,9 +76,9 @@ public class ComprobanteDao implements DaoCrud<Comprobante> {
         try (Connection con = Conexion.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
 
-            pst.setInt(1, comp.getId_venta().getIdVenta());
-            pst.setString(2, comp.getTipo_comprobante());
-            pst.setDate(3, new java.sql.Date(comp.getFecha_emision().getTime()));
+            pst.setInt(1, comp.getVenta().getIdVenta());
+            pst.setString(2, comp.getTipoComprobante());
+            pst.setDate(3, new java.sql.Date(comp.getFechaEmision().getTime()));
             pst.setInt(4, comp.getId_comprobante());
             pst.executeUpdate();
         }

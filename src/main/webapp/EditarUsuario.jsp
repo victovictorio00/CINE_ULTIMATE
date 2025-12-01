@@ -20,6 +20,7 @@
     %>
 
     <form action="<%= request.getContextPath() %>/UsuarioServlet" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="action" value="actualizar">
         <input type="hidden" name="idUsuario" value="<%= usuario.getIdUsuario() %>">
 
@@ -87,5 +88,31 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+async function hashPasswordIfNeeded() {
+    const passwordField = document.querySelector('input[name="password"]');
+
+    // Si está vacío → NO cambiar contraseña → no hash
+    if (!passwordField.value.trim()) return true;
+
+    // HASH SHA-256
+    const encoder = new TextEncoder();
+    const data = encoder.encode(passwordField.value);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    passwordField.value = hashHex;
+    return true;
+}
+
+// Reemplazar el submit del formulario
+document.querySelector("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await hashPasswordIfNeeded();
+    e.target.submit();
+});
+</script>
+
 </body>
 </html>

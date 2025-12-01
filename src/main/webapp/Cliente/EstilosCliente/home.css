@@ -125,3 +125,16 @@
     background-color: var(--dark-bg) !important;
     color: #fff;
 }
+.carousel-item {
+    background-color: #000; /* Fondo negro para posters verticales */
+    text-align: center;
+}
+.carousel-item img {
+    max-height: 70vh;   /* Altura fija */
+    width: auto;        /* Mantiene proporción */
+    object-fit: contain; /* No recorta, muestra imagen completa */
+    margin: 0 auto;
+}
+.carousel {
+    margin-top:0;
+}

@@ -15,7 +15,6 @@ public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 🔐 Cierra la sesión actual si existe
         HttpSession sesion = request.getSession(false);
         if (sesion != null) {
             sesion.invalidate();

@@ -1,13 +1,4 @@
-
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package modelo;
-/**
- *
- * @author ERICK
- */
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +6,6 @@ import javax.swing.JOptionPane;
 import Conexion.Conexion;
 
 public class RolDao {
-
     // Método para obtener todos los roles
     public List<Rol> getTodosLosRoles() {
         List<Rol> lista = new ArrayList<>();

@@ -1,21 +1,22 @@
-<%-- 
-    Document   : AdminDashboard
-    Created on : 26 may. 2025, 16:02:00
-    Author     : Proyecto
---%>
-
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List, java.util.ArrayList, java.util.Collections" %>
 
 <%
-    // 🔐 VERIFICACIÓN DE SESIÓN ADMINISTRADOR
     HttpSession sesion = request.getSession(false);
-
     if (sesion == null || sesion.getAttribute("rol") == null ||
         !"admin".equals(sesion.getAttribute("rol"))) {
-        // Si no hay sesión o el rol no es admin → redirige al login
         response.sendRedirect(request.getContextPath() + "/Login.jsp");
         return;
     }
+
+    double totalVentas = (request.getAttribute("totalVentas") != null)
+            ? (Double) request.getAttribute("totalVentas") : 0.0;
+    int totalProductos = (request.getAttribute("totalProductos") != null)
+            ? (Integer) request.getAttribute("totalProductos") : 0;
+    int totalEmpleados = (request.getAttribute("totalEmpleados") != null)
+            ? (Integer) request.getAttribute("totalEmpleados") : 0;
+    int totalPeliculas = (request.getAttribute("totalPeliculas") != null)
+            ? (Integer) request.getAttribute("totalPeliculas") : 0;
 %>
 
 <!DOCTYPE html>
@@ -24,109 +25,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard Administrador</title>
-
-    <!-- Bootstrap 4 CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
-    <style>
-        /* Barra lateral fija */
-        body {
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
-        }
-        .sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            background-color: #0d6efd;
-            color: white;
-            min-height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            padding-top: 1rem;
-        }
-        .sidebar .sidebar-header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile img {
-            width: 80px;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-        }
-        .sidebar .profile h5, .sidebar .profile small {
-            margin: 0;
-        }
-        .sidebar .nav-link {
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: #084298;
-            color: white;
-        }
-
-        /* Contenido principal */
-        .content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: 100%;
-        }
-
-        /* Tarjetas resumen */
-        .stats-card {
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            box-shadow: 0 0 10px rgb(0 0 0 / 0.05);
-            text-align: center;
-        }
-        .stats-card h5 {
-            font-weight: 600;
-        }
-        .stats-card p {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        /* Gráfico simulado */
-        #chart-placeholder {
-            height: 300px;
-            background: #ffe5e5;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 2rem;
-            color: #b30000;
-            font-weight: bold;
-            text-align: center;
-            line-height: 300px;
-            font-size: 1.25rem;
-            user-select: none;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/AdminDashboard.css">
 </head>
-<body>
 
+<body>
+    <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
-
         <div class="profile">
             <img src="Cliente/images/User.png" alt="Administrador" />
             <h5>Administrador</h5>
             <small>Admin</small>
         </div>
-
         <nav class="nav flex-column">
             <a href="AdminDashboard.jsp" class="nav-link active">
                 <i class="fas fa-th-large mr-2"></i>Dashboard
@@ -149,48 +62,90 @@
             <a href="<%= request.getContextPath() %>/LogoutServlet" class="nav-link">
                 <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
             </a>
-
         </nav>
     </nav>
 
+    <!-- CONTENIDO -->
     <main class="content">
-        <h2>Dashboard</h2>
+        <h2 class="mb-5">Dashboard</h2>
 
         <div class="row text-center">
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Ventas</h5>
-                    <p>$ 10,000</p>
+                    <p>S/ <%= String.format("%.2f", totalVentas) %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Productos</h5>
-                    <p>150</p>
+                    <p><%= totalProductos %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Total Empleados</h5>
-                    <p>25</p>
+                    <p><%= totalEmpleados %></p>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stats-card">
                     <h5>Películas en Inventario</h5>
-                    <p>30</p>
+                    <p><%= totalPeliculas %></p>
                 </div>
             </div>
         </div>
 
-        <div id="chart-placeholder">
-            Ventas Mensuales (Gráfico de ejemplo)
+        <div id="chart-container">
+            <canvas id="ventasChart"></canvas>
         </div>
     </main>
 
-    <!-- JS y dependencias de Bootstrap -->
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <%
+    List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
+    if (ventasMensuales == null) {
+        ventasMensuales = java.util.Collections.nCopies(12, 0.0);
+    }
+%>
+<script>
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            datasets: [{
+                label: 'Ventas Mensuales (S/)',
+                data: <%= ventasMensuales.toString() %>,
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: '#0d6efd',
+                borderWidth: 2,
+                hoverBackgroundColor: '#084298'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true },
+                x: {}
+            },
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Ventas Mensuales - 2025',
+                    color: '#084298',
+                    font: { size: 18, weight: 'bold' }
+                }
+            }
+        }
+    });
+</script>
+
+
 </body>
 </html>

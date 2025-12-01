@@ -14,8 +14,8 @@ import modelo.ProductoDao;
 
 @WebServlet("/ProductoServlet")
 @MultipartConfig( // límites opcionales
-    maxFileSize = 5 * 1024 * 1024,       // 5 MB por archivo
-    maxRequestSize = 10 * 1024 * 1024    // 10 MB por request
+        maxFileSize = 5 * 1024 * 1024, // 5 MB por archivo
+        maxRequestSize = 10 * 1024 * 1024 // 10 MB por request
 )
 public class ProductoServlet extends HttpServlet {
 
@@ -29,11 +29,11 @@ public class ProductoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        
 
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
@@ -62,7 +62,9 @@ public class ProductoServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        if (action == null) action = "";
+        if (action == null) {
+            action = "";
+        }
 
         try {
             switch (action) {
@@ -81,7 +83,6 @@ public class ProductoServlet extends HttpServlet {
     }
 
     /* ======================= GET actions ======================= */
-
     private void listarProductos(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
 
@@ -124,7 +125,6 @@ public class ProductoServlet extends HttpServlet {
     }
 
     /* ======================= POST actions ======================= */
-
     private void insertarProducto(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
 
@@ -180,17 +180,26 @@ public class ProductoServlet extends HttpServlet {
     }
 
     /* ======================= Helpers ======================= */
-
     private static int parseIntSafe(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     private static double parseDoubleSafe(String s, double def) {
-        try { return Double.parseDouble(s); } catch (Exception e) { return def; }
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     private static byte[] leerBytesDeParte(Part part) throws IOException {
-        if (part == null || part.getSize() <= 0) return null;
+        if (part == null || part.getSize() <= 0) {
+            return null;
+        }
         try (InputStream is = part.getInputStream()) {
             return is.readAllBytes();
         }

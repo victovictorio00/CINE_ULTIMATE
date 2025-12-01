@@ -9,19 +9,8 @@ import org.mindrot.jbcrypt.BCrypt;
 public class UsuarioDao implements DaoCrud<Usuario> {
 
     // Columnas explícitas (evita SELECT *)
-    private static final String COLS = String.join(",",
-            "id_usuario",
-            "id_rol",
-            "id_estado_usuario",
-            "nombre_completo",
-            "dni",
-            "username",
-            "password",
-            "telefono",
-            "email",
-            "direccion",
-            "numero_intentos"
-    );
+    private static final String COLS = String.join(",", "id_usuario", "id_rol", "id_estado_usuario", "nombre_completo",
+            "dni", "username", "password", "telefono", "email", "direccion", "numero_intentos");
 
     private static final int ESTADO_ACTIVO_ID = 1;
 
@@ -70,9 +59,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     public List<Usuario> listar() throws SQLException {
         List<Usuario> lista = new ArrayList<>();
         String sql = "SELECT " + COLS + " FROM usuarios";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 lista.add(mapRow(rs));
             }
@@ -83,17 +70,15 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     //  Nuevo método: lista con nombres de Rol y Estado
     public List<Usuario> listarConDetalles() throws SQLException {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT u.id_usuario, u.nombre_completo, u.dni, u.username, u.password, " +
-                     "u.telefono, u.email, u.direccion, u.numero_intentos, " +
-                     "r.id_rol, r.nombre AS nombre_rol, " +
-                     "e.id_estado_usuario, e.nombre AS nombre_estado " +
-                     "FROM usuarios u " +
-                     "LEFT JOIN roles r ON u.id_rol = r.id_rol " +
-                     "LEFT JOIN estado_usuarios e ON u.id_estado_usuario = e.id_estado_usuario";
+        String sql = "SELECT u.id_usuario, u.nombre_completo, u.dni, u.username, u.password, "
+                + "u.telefono, u.email, u.direccion, u.numero_intentos, "
+                + "r.id_rol, r.nombre AS nombre_rol, "
+                + "e.id_estado_usuario, e.nombre AS nombre_estado "
+                + "FROM usuarios u "
+                + "LEFT JOIN roles r ON u.id_rol = r.id_rol "
+                + "LEFT JOIN estado_usuarios e ON u.id_estado_usuario = e.id_estado_usuario";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
                 Usuario u = new Usuario();
@@ -125,22 +110,21 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     @Override
     public void insertar(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO usuarios "
-                + "(id_rol, id_estado_usuario, nombre_completo, dni, username, password, telefono, email, direccion, numero_intentos) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String rawOrHash = usuario.getPassword();
+        String hash = looksLikeBCrypt(rawOrHash) ? rawOrHash
+                : BCrypt.hashpw(rawOrHash, BCrypt.gensalt());
 
-            setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
-            setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
+        String sql = "INSERT INTO usuarios (id_rol, id_estado_usuario, nombre_completo, dni, username, password, "
+                + "telefono, email, direccion, numero_intentos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pst.setInt(1, usuario.getIdRol().getIdRol());
+            pst.setInt(2, usuario.getIdEstadoUsuario().getIdEstadoUsuario());
             pst.setString(3, usuario.getNombreCompleto());
             pst.setString(4, usuario.getDni());
             pst.setString(5, usuario.getUsername());
-
-            String rawOrHash = usuario.getPassword();
-            String toStore = looksLikeBCrypt(rawOrHash) ? rawOrHash : BCrypt.hashpw(rawOrHash, BCrypt.gensalt());
-            pst.setString(6, toStore);
-
+            pst.setString(6, hash);
             pst.setString(7, usuario.getTelefono());
             pst.setString(8, usuario.getEmail());
             pst.setString(9, usuario.getDireccion());
@@ -159,8 +143,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     @Override
     public Usuario leer(int id) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -177,8 +160,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
                 + "id_rol = ?, id_estado_usuario = ?, nombre_completo = ?, dni = ?, username = ?, password = ?, "
                 + "telefono = ?, email = ?, direccion = ?, numero_intentos = ? "
                 + "WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
             setNullableInt(pst, 1, usuario.getIdRol() != null ? usuario.getIdRol().getIdRol() : null);
             setNullableInt(pst, 2, usuario.getIdEstadoUsuario() != null ? usuario.getIdEstadoUsuario().getIdEstadoUsuario() : null);
@@ -204,8 +186,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
     @Override
     public void eliminar(int id) throws SQLException {
         String sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, id);
             pst.executeUpdate();
         }
@@ -218,8 +199,7 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     public Usuario getByUsername(String username) throws SQLException {
         String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? LIMIT 1";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, username);
             try (ResultSet rs = pst.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
@@ -227,36 +207,37 @@ public class UsuarioDao implements DaoCrud<Usuario> {
         }
     }
 
-    public Usuario validateUser(String username, String plainPassword) throws SQLException {
-        String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setString(1, username);
-            pst.setInt(2, ESTADO_ACTIVO_ID);
+   public Usuario validateUser(String username, String Password) throws SQLException {
+    String sql = "SELECT " + COLS + " FROM usuarios WHERE username = ? AND id_estado_usuario = ?";
+    try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+        pst.setString(1, username);
+        pst.setInt(2, ESTADO_ACTIVO_ID);
 
-            try (ResultSet rs = pst.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
+        try (ResultSet rs = pst.executeQuery()) {
+            if (!rs.next()) return null;
 
-                Usuario u = mapRow(rs);
-                String stored = u.getPassword();
+            Usuario u = mapRow(rs);
+            String stored = u.getPassword(); // bcrypt en la DB
 
-                boolean ok;
-                if (looksLikeBCrypt(stored)) {
-                    ok = BCrypt.checkpw(plainPassword, stored);
-                } else {
-                    ok = plainPassword != null && plainPassword.equals(stored);
-                }
-                return ok ? u : null;
+            if (stored == null || Password == null) return null;
+
+            // validar bcrypt de la contraseña SHA-256
+            if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+                return BCrypt.checkpw(Password, stored) ? u : null;
             }
+
+            // soporte legacy solo si lo necesitas (plain text)
+            return Password.equals(stored) ? u : null;
         }
     }
+}
 
+
+
+    //no lo usa la bd, es creada por si se necesita usar después
     public void aumentarIntentos(int idUsuario) throws SQLException {
         String sql = "UPDATE usuarios SET numero_intentos = numero_intentos + 1 WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
             pst.executeUpdate();
         }
@@ -264,26 +245,26 @@ public class UsuarioDao implements DaoCrud<Usuario> {
 
     public void resetearIntentos(int idUsuario) throws SQLException {
         String sql = "UPDATE usuarios SET numero_intentos = 0 WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, idUsuario);
             pst.executeUpdate();
         }
     }
 
+    //no lo usa la bd, es creada por si se necesita usar después
     public void bloquearUsuario(int idUsuario, int estadoBloqueadoId) throws SQLException {
         String sql = "UPDATE usuarios SET id_estado_usuario = ? WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setInt(1, estadoBloqueadoId);
             pst.setInt(2, idUsuario);
             pst.executeUpdate();
         }
     }
+
+    //no lo usa la bd, es creada por si se necesita usar después
     public boolean existeUsername(String username) throws SQLException {
         String sql = "SELECT COUNT(*) FROM usuarios WHERE username = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
@@ -291,23 +272,31 @@ public class UsuarioDao implements DaoCrud<Usuario> {
             }
         }
     }
+
     public void registrarIntentoFallido(int idUsuario) throws SQLException {
-        aumentarIntentos(idUsuario); // +1
-        String sql = "SELECT numero_intentos FROM usuarios WHERE id_usuario = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setInt(1, idUsuario);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next() && rs.getInt("numero_intentos") >= LIMITE_INTENTOS) {
+        String sqlUpdate = "UPDATE usuarios SET numero_intentos = numero_intentos + 1 WHERE id_usuario = ?";
+        String sqlCheck = "SELECT numero_intentos FROM usuarios WHERE id_usuario = ?";
+
+        try (Connection con = Conexion.getConnection(); PreparedStatement psUpd = con.prepareStatement(sqlUpdate); PreparedStatement psChk = con.prepareStatement(sqlCheck)) {
+
+            // incrementar
+            psUpd.setInt(1, idUsuario);
+            psUpd.executeUpdate();
+
+            // consultar
+            psChk.setInt(1, idUsuario);
+            try (ResultSet rs = psChk.executeQuery()) {
+                if (rs.next() && rs.getInt(1) >= LIMITE_INTENTOS) {
                     bloquearUsuario(idUsuario, 2); // 2 = bloqueado
                 }
             }
         }
     }
+
+    //no lo usa la bd, es creada por si se necesita usar después
     public boolean existeDNI(String dni) throws SQLException {
         String sql = "SELECT COUNT(*) FROM usuarios WHERE dni = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, dni);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
@@ -315,38 +304,91 @@ public class UsuarioDao implements DaoCrud<Usuario> {
             }
         }
     }
-    // Listar todos los roles
-public List<Rol> listarRoles() throws SQLException {
-    List<Rol> lista = new ArrayList<>();
-    String sql = "SELECT id_rol, nombre FROM roles";
-    try (Connection con = Conexion.getConnection();
-         PreparedStatement pst = con.prepareStatement(sql);
-         ResultSet rs = pst.executeQuery()) {
-        while (rs.next()) {
-            Rol r = new Rol();
-            r.setIdRol(rs.getInt("id_rol"));
-            r.setNombre(rs.getString("nombre"));
-            lista.add(r);
+
+    public List<Rol> listarRoles() throws SQLException {
+        List<Rol> lista = new ArrayList<>();
+        String sql = "SELECT id_rol, nombre FROM roles";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Rol r = new Rol();
+                r.setIdRol(rs.getInt("id_rol"));
+                r.setNombre(rs.getString("nombre"));
+                lista.add(r);
+            }
+        }
+        return lista;
+    }
+
+    public List<EstadoUsuario> listarEstados() throws SQLException {
+        List<EstadoUsuario> lista = new ArrayList<>();
+        String sql = "SELECT id_estado_usuario, nombre FROM estado_usuarios";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                EstadoUsuario e = new EstadoUsuario();
+                e.setIdEstadoUsuario(rs.getInt("id_estado_usuario"));
+                e.setNombre(rs.getString("nombre"));
+                lista.add(e);
+            }
+        }
+        return lista;
+    }
+    public void actualizarDatos(int idUsuario, String nombreCompleto, String telefono, String email, String direccion) {
+        String sql = "UPDATE usuarios SET nombre_completo=?, telefono=?, email=?, direccion=? WHERE id_usuario=?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombreCompleto);
+            ps.setString(2, telefono);
+            ps.setString(3, email);
+            ps.setString(4, direccion);
+            ps.setInt(5, idUsuario);
+
+            int filas = ps.executeUpdate();
+            System.out.println("→ Filas actualizadas: " + filas); 
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    return lista;
-}
-
-// Listar todos los estados de usuario
-public List<EstadoUsuario> listarEstados() throws SQLException {
-    List<EstadoUsuario> lista = new ArrayList<>();
-    String sql = "SELECT id_estado_usuario, nombre FROM estado_usuarios";
-    try (Connection con = Conexion.getConnection();
-         PreparedStatement pst = con.prepareStatement(sql);
-         ResultSet rs = pst.executeQuery()) {
-        while (rs.next()) {
-            EstadoUsuario e = new EstadoUsuario();
-            e.setIdEstadoUsuario(rs.getInt("id_estado_usuario"));
-            e.setNombre(rs.getString("nombre"));
-            lista.add(e);
+    public Usuario leerPorId(int idUsuario) {
+        Usuario u = null;
+        String sql = "SELECT * FROM usuarios WHERE id_usuario=?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    u = new Usuario();
+                    u.setIdUsuario(rs.getInt("id_usuario"));
+                    u.setNombreCompleto(rs.getString("nombre_completo"));
+                    u.setDni(rs.getString("dni"));
+                    u.setUsername(rs.getString("username"));
+                    u.setPassword(rs.getString("password"));
+                    u.setTelefono(rs.getString("telefono"));
+                    u.setEmail(rs.getString("email"));
+                    u.setDireccion(rs.getString("direccion"));
+                    u.setNumeroIntentos(rs.getInt("numero_intentos"));
+                    Rol rol = new Rol();
+                    rol.setIdRol(rs.getInt("id_rol"));
+                    u.setIdRol(rol);
+                    EstadoUsuario est = new EstadoUsuario();
+                    est.setIdEstadoUsuario(rs.getInt("id_estado_usuario"));
+                    u.setIdEstadoUsuario(est);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return u;
+    }
+    public void actualizarPassword(int idUsuario, String hashedPassword) throws SQLException {
+        String sql = "UPDATE usuarios SET password = ? WHERE id_usuario = ?";
+        try (Connection conn = Conexion.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, idUsuario);
+            int filas = ps.executeUpdate();
+            System.out.println("Filas afectadas en actualizarPassword(): " + filas);
         }
     }
-    return lista;
 }
-}
-

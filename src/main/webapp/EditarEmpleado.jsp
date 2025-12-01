@@ -18,6 +18,7 @@
     %>
 
     <form action="EmpleadoServlet?action=actualizar" method="post">
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <!-- Corregido: usar getIdEmpleado() -->
         <input type="hidden" name="id" value="<%= empleado.getIdEmpleado() %>">
 

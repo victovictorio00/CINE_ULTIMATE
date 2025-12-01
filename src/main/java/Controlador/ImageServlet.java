@@ -11,9 +11,11 @@ import modelo.PeliculaDao;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/ImageServlet")
 public class ImageServlet extends HttpServlet {
+
     private static final Logger logger = Logger.getLogger(ImageServlet.class.getName());
     private PeliculaDao peliculaDao;
 
@@ -25,6 +27,7 @@ public class ImageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         String idParam = request.getParameter("id");
         if (idParam == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID de película requerido.");

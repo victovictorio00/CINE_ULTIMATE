@@ -10,10 +10,13 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
     @Override
     public List<Pelicula> listar() throws SQLException {
         List<Pelicula> peliculas = new ArrayList<>();
-        String query = "SELECT * FROM peliculas";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
+        String query
+                = "SELECT p.id_pelicula, p.nombre, p.sinopsis, p.foto, p.id_genero, "
+                + "       p.fecha_estreno, p.precio, p.trailer_url, "
+                + "       g.nombre AS nombre_genero "
+                + "FROM peliculas p "
+                + "JOIN generos g ON p.id_genero = g.id_genero";
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
                 Pelicula pelicula = new Pelicula();
@@ -21,7 +24,7 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
                 pelicula.setNombre(rs.getString("nombre"));
                 pelicula.setSinopsis(rs.getString("sinopsis"));
                 pelicula.setFoto(rs.getBytes("foto"));
-                pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
+                pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), rs.getString("nombre_genero")));
                 pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                 pelicula.setPrecio(rs.getDouble("precio"));
                 pelicula.setTrailerUrl(rs.getString("trailer_url"));
@@ -39,8 +42,7 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
     public void insertar(Pelicula pelicula) throws SQLException {
         String sql = "INSERT INTO peliculas (nombre, sinopsis, id_genero, foto, fecha_estreno, precio, trailer_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setString(1, pelicula.getNombre());
             pst.setString(2, pelicula.getSinopsis());
@@ -80,13 +82,12 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
 
     @Override
     public Pelicula leer(int id) throws SQLException {
-        String query = "SELECT p.*, g.nombre AS nombre_genero " +
-                       "FROM peliculas p " +
-                       "INNER JOIN generos g ON p.id_genero = g.id_genero " +
-                       "WHERE p.id_pelicula = ?";
+        String query = "SELECT p.*, g.nombre AS nombre_genero "
+                + "FROM peliculas p "
+                + "INNER JOIN generos g ON p.id_genero = g.id_genero "
+                + "WHERE p.id_pelicula = ?";
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
 
             pst.setInt(1, id);
 
@@ -108,39 +109,38 @@ public class PeliculaDao implements DaoCrud<Pelicula> {
         return null;
     }
 
-   @Override
-public void editar(Pelicula pelicula) throws SQLException {
-    String sqlConFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=?, foto=? WHERE id_pelicula=?";
-    String sqlSinFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=? WHERE id_pelicula=?";
+    @Override
+    public void editar(Pelicula pelicula) throws SQLException {
+        String sqlConFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=?, foto=? WHERE id_pelicula=?";
+        String sqlSinFoto = "UPDATE peliculas SET nombre=?, sinopsis=?, id_genero=?, fecha_estreno=?, precio=?, trailer_url=? WHERE id_pelicula=?";
 
-    try (Connection con = Conexion.getConnection()) {
-        if (pelicula.getFoto() != null) { // 👉 si viene una nueva foto
-            try (PreparedStatement pst = con.prepareStatement(sqlConFoto)) {
-                pst.setString(1, pelicula.getNombre());
-                pst.setString(2, pelicula.getSinopsis());
-                pst.setInt(3, pelicula.getIdGenero().getIdGenero());
-                pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-                pst.setDouble(5, pelicula.getPrecio());
-                pst.setString(6, pelicula.getTrailerUrl());
-                pst.setBytes(7, pelicula.getFoto());  // se guarda la nueva foto
-                pst.setInt(8, pelicula.getIdPelicula());
-                pst.executeUpdate();
-            }
-        } else { // 👉 no hay foto nueva → mantener la anterior
-            try (PreparedStatement pst = con.prepareStatement(sqlSinFoto)) {
-                pst.setString(1, pelicula.getNombre());
-                pst.setString(2, pelicula.getSinopsis());
-                pst.setInt(3, pelicula.getIdGenero().getIdGenero());
-                pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
-                pst.setDouble(5, pelicula.getPrecio());
-                pst.setString(6, pelicula.getTrailerUrl());
-                pst.setInt(7, pelicula.getIdPelicula());
-                pst.executeUpdate();
+        try (Connection con = Conexion.getConnection()) {
+            if (pelicula.getFoto() != null) { // 👉 si viene una nueva foto
+                try (PreparedStatement pst = con.prepareStatement(sqlConFoto)) {
+                    pst.setString(1, pelicula.getNombre());
+                    pst.setString(2, pelicula.getSinopsis());
+                    pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+                    pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+                    pst.setDouble(5, pelicula.getPrecio());
+                    pst.setString(6, pelicula.getTrailerUrl());
+                    pst.setBytes(7, pelicula.getFoto());  // se guarda la nueva foto
+                    pst.setInt(8, pelicula.getIdPelicula());
+                    pst.executeUpdate();
+                }
+            } else { // 👉 no hay foto nueva → mantener la anterior
+                try (PreparedStatement pst = con.prepareStatement(sqlSinFoto)) {
+                    pst.setString(1, pelicula.getNombre());
+                    pst.setString(2, pelicula.getSinopsis());
+                    pst.setInt(3, pelicula.getIdGenero().getIdGenero());
+                    pst.setDate(4, new java.sql.Date(pelicula.getFechaEstreno().getTime()));
+                    pst.setDouble(5, pelicula.getPrecio());
+                    pst.setString(6, pelicula.getTrailerUrl());
+                    pst.setInt(7, pelicula.getIdPelicula());
+                    pst.executeUpdate();
+                }
             }
         }
     }
-}
-
 
     @Override
     public void eliminar(int id) throws SQLException {
@@ -164,8 +164,7 @@ public void editar(Pelicula pelicula) throws SQLException {
     // Obtener foto por id (para ImageServlet)
     public byte[] obtenerFotoPorId(int idPelicula) throws SQLException {
         String sql = "SELECT foto FROM peliculas WHERE id_pelicula = ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setInt(1, idPelicula);
             try (ResultSet rs = pst.executeQuery()) {
@@ -180,13 +179,18 @@ public void editar(Pelicula pelicula) throws SQLException {
     // Listar con filtros dinámicos (género y fecha)
     public List<Pelicula> getPeliculasFiltradas(String generoIdString, String fechaSeleccionadaString) throws SQLException {
         List<Pelicula> peliculas = new ArrayList<>();
-        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM peliculas WHERE 1=1");
+        StringBuilder queryBuilder = new StringBuilder(
+                "SELECT p.*, g.nombre AS nombre_genero "
+                + "FROM peliculas p "
+                + "LEFT JOIN generos g ON p.id_genero = g.id_genero "
+                + "WHERE 1=1"
+        );
         List<Object> parameters = new ArrayList<>();
 
         if (generoIdString != null && !generoIdString.isEmpty()) {
             try {
                 int idGenero = Integer.parseInt(generoIdString);
-                queryBuilder.append(" AND id_genero = ?");
+                queryBuilder.append(" AND p.id_genero = ?");
                 parameters.add(idGenero);
             } catch (NumberFormatException e) {
                 // ignorar error de formato
@@ -198,8 +202,7 @@ public void editar(Pelicula pelicula) throws SQLException {
             parameters.add(java.sql.Date.valueOf(fechaSeleccionadaString));
         }
 
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(queryBuilder.toString())) {
+        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(queryBuilder.toString())) {
 
             for (int i = 0; i < parameters.size(); i++) {
                 pst.setObject(i + 1, parameters.get(i));
@@ -212,7 +215,7 @@ public void editar(Pelicula pelicula) throws SQLException {
                     pelicula.setNombre(rs.getString("nombre"));
                     pelicula.setSinopsis(rs.getString("sinopsis"));
                     pelicula.setFoto(rs.getBytes("foto"));
-                    pelicula.setIdGenero(new Genero(rs.getInt("id_genero"), null));
+                    pelicula.setIdGenero(new Genero(rs.getInt("id_genero"),rs.getString("nombre_genero")));
                     pelicula.setFechaEstreno(rs.getDate("fecha_estreno"));
                     pelicula.setPrecio(rs.getDouble("precio"));
                     pelicula.setTrailerUrl(rs.getString("trailer_url"));

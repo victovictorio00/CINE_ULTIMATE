@@ -1,18 +1,19 @@
 package modelo;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
+import java.util.Date;
+import java.util.List;
 public class Venta {
+    // variables de entrada
     private int idVenta;
     private Usuario idUsuarioCliente;
     private Date fecha;
     private double total;
     private String metodoPago;
-
-    // Constructor
+private List<DetalleVenta> detalles;
+    // Constructor vacío
     public Venta() {}
 
+    // Constructor con parámetros
     public Venta(int idVenta, Usuario idUsuarioCliente, Date fecha, double total, String metodoPago) {
         this.idVenta = idVenta;
         this.idUsuarioCliente = idUsuarioCliente;
@@ -21,15 +22,14 @@ public class Venta {
         this.metodoPago = metodoPago;
     }
 
-    
-     public void setTotal(double total) {
-           if (total < 0) {
-               throw new IllegalArgumentException("El total no puede ser negativo");
-           }
-           this.total = total; // ya sin caracteres raros
-       }
-     
-     
+    // getters y setters
+    public void setTotal(double total) {
+        if (total < 0) {
+            throw new IllegalArgumentException("El total no puede ser negativo");
+        }
+        this.total = total;
+    }
+
     public int getIdVenta() {
         return idVenta;
     }
@@ -50,37 +50,33 @@ public class Venta {
         return fecha;
     }
 
-    public void setFecha(String fechaStr) {
+    public void setFecha(Date fechaStr) {
         if (fechaStr == null) {
             throw new IllegalArgumentException("La fecha no puede ser nula");
         }
-
-        // Patrón específico
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy - HH:mm");
-        sdf.setLenient(false); // no acepta fechas "raras" como 32/13/25
-
-        try {
-            Date fecha = sdf.parse(fechaStr);
-            this.fecha = fecha;
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Formato de fecha inválido. Debe ser dd/MM/yy - HH:mm");
-        }
+        this.fecha = fechaStr;
     }
 
     public double getTotal() {
         return total;
     }
 
-   
-
     public String getMetodoPago() {
         return metodoPago;
     }
 
     public void setMetodoPago(String metodoPago) {
+        if (metodoPago == null || metodoPago.trim().isEmpty()) {
+            throw new IllegalArgumentException("El método de pago no puede estar vacío");
+        }
         this.metodoPago = metodoPago;
     }
+    
+    public List<DetalleVenta> getDetalles() {
+    return detalles;
+}
 
-    
-    
+public void setDetalles(List<DetalleVenta> detalles) {
+    this.detalles = detalles;
+}
 }

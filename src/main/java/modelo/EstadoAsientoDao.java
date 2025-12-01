@@ -6,6 +6,7 @@ import Conexion.Conexion;
 
 public class EstadoAsientoDao implements DaoCrud<EstadoAsiento> {
 
+    //los CRUD no fueron integrados a procedure, son básicos
     @Override
     public List<EstadoAsiento> listar() throws SQLException {
         List<EstadoAsiento> lista = new ArrayList<>();

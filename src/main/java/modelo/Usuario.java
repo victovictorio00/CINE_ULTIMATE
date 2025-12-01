@@ -1,11 +1,7 @@
 package modelo;
 
-/**
- *
- * @author Desktop
- */
 public class Usuario {
-
+    // variables de entrada
     private int idUsuario;
     private Rol idRol;
     private EstadoUsuario idEstadoUsuario;
@@ -18,10 +14,10 @@ public class Usuario {
     private String direccion;
     private int numeroIntentos;
 
-    // Constructor
-    public Usuario() {
-    }
+    // Constructor vacío
+    public Usuario() {}
 
+    // Constructor con parámetros
     public Usuario(int idUsuario, Rol idRol, EstadoUsuario idEstadoUsuario, String nombreCompleto, String dni, String username, String password, String telefono, String email, String direccion, int numeroIntentos) {
         this.idUsuario = idUsuario;
         this.idRol = idRol;
@@ -35,12 +31,15 @@ public class Usuario {
         this.direccion = direccion;
         this.numeroIntentos = numeroIntentos;
     }
-
+    
+    // getters y setters
     public int getIdUsuario() {
         return idUsuario;
     }
 
     public void setIdUsuario(int idUsuario) {
+        if (idUsuario < 0)
+            throw new IllegalArgumentException("El ID de usuario no puede ser negativo.");
         this.idUsuario = idUsuario;
     }
 
@@ -49,6 +48,8 @@ public class Usuario {
     }
 
     public void setIdRol(Rol idRol) {
+        if (idRol == null)
+            throw new IllegalArgumentException("El rol del usuario no puede ser nulo.");
         this.idRol = idRol;
     }
 
@@ -57,6 +58,8 @@ public class Usuario {
     }
 
     public void setIdEstadoUsuario(EstadoUsuario idEstadoUsuario) {
+        if (idEstadoUsuario == null)
+            throw new IllegalArgumentException("El estado del usuario no puede ser nulo.");
         this.idEstadoUsuario = idEstadoUsuario;
     }
 
@@ -65,7 +68,11 @@ public class Usuario {
     }
 
     public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
+        if (nombreCompleto == null) {
+            this.nombreCompleto = null;
+            return;
+        }
+        this.nombreCompleto = nombreCompleto.trim().replaceAll("\\s{2,}", " ");
     }
 
     public String getDni() {
@@ -73,6 +80,8 @@ public class Usuario {
     }
 
     public void setDni(String dni) {
+        if (dni == null || !dni.matches("\\d{8}"))
+            throw new IllegalArgumentException("El DNI debe tener exactamente 8 dígitos numéricos.");
         this.dni = dni;
     }
 
@@ -81,6 +90,10 @@ public class Usuario {
     }
 
     public void setUsername(String username) {
+        if (username == null || username.trim().isEmpty())
+            throw new IllegalArgumentException("El nombre de usuario no puede estar vacío.");
+        if (username.length() < 4)
+            throw new IllegalArgumentException("El nombre de usuario debe tener al menos 4 caracteres.");
         this.username = username;
     }
 
@@ -89,6 +102,8 @@ public class Usuario {
     }
 
     public void setPassword(String password) {
+        if (password == null || password.length() < 6)
+            throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres.");
         this.password = password;
     }
 
@@ -97,6 +112,8 @@ public class Usuario {
     }
 
     public void setTelefono(String telefono) {
+        if (telefono != null && !telefono.trim().isEmpty() && !telefono.matches("\\d{9}"))
+            throw new IllegalArgumentException("El teléfono debe tener exactamente 9 dígitos.");
         this.telefono = telefono;
     }
 
@@ -105,6 +122,8 @@ public class Usuario {
     }
 
     public void setEmail(String email) {
+        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$"))
+            throw new IllegalArgumentException("El correo electrónico no tiene un formato válido.");
         this.email = email;
     }
 
@@ -113,6 +132,8 @@ public class Usuario {
     }
 
     public void setDireccion(String direccion) {
+        if (direccion == null || direccion.trim().isEmpty())
+            throw new IllegalArgumentException("La dirección no puede estar vacía.");
         this.direccion = direccion;
     }
 
@@ -121,6 +142,8 @@ public class Usuario {
     }
 
     public void setNumeroIntentos(int numeroIntentos) {
+        if (numeroIntentos < 0)
+            throw new IllegalArgumentException("El número de intentos no puede ser negativo.");
         this.numeroIntentos = numeroIntentos;
     }
 }

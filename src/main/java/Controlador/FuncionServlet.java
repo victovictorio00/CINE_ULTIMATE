@@ -33,16 +33,18 @@ public class FuncionServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+       
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
@@ -73,8 +75,8 @@ public class FuncionServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("rol") == null ||
-            !"admin".equals(session.getAttribute("rol"))) {
+        if (session == null || session.getAttribute("rol") == null
+                || !"admin".equals(session.getAttribute("rol"))) {
             response.sendRedirect(request.getContextPath() + "/Login.jsp");
             return;
         }
@@ -97,7 +99,6 @@ public class FuncionServlet extends HttpServlet {
     // ==============================
     // MÉTODOS CRUD
     // ==============================
-
     private void listarFunciones(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         try {
@@ -137,9 +138,15 @@ public class FuncionServlet extends HttpServlet {
         int asientosDisponibles = Integer.parseInt(request.getParameter("asientos_disponibles"));
 
         Funcion f = new Funcion();
-        Pelicula pelicula = new Pelicula(); pelicula.setIdPelicula(idPelicula); f.setPelicula(pelicula);
-        Sala sala = new Sala(); sala.setIdSala(idSala); f.setSala(sala);
-        EstadoFuncion estado = new EstadoFuncion(); estado.setIdEstadoFuncion(idEstadoFuncion); f.setEstadoFuncion(estado);
+        Pelicula pelicula = new Pelicula();
+        pelicula.setIdPelicula(idPelicula);
+        f.setPelicula(pelicula);
+        Sala sala = new Sala();
+        sala.setIdSala(idSala);
+        f.setSala(sala);
+        EstadoFuncion estado = new EstadoFuncion();
+        estado.setIdEstadoFuncion(idEstadoFuncion);
+        f.setEstadoFuncion(estado);
 
         Timestamp inicio = Timestamp.valueOf(fechaInicio.replace("T", " ") + ":00");
         Timestamp fin = Timestamp.valueOf(fechaFin.replace("T", " ") + ":00");
@@ -199,9 +206,15 @@ public class FuncionServlet extends HttpServlet {
         Funcion f = new Funcion();
         f.setIdFuncion(idFuncion);
 
-        Pelicula p = new Pelicula(); p.setIdPelicula(idPelicula); f.setPelicula(p);
-        Sala s = new Sala(); s.setIdSala(idSala); f.setSala(s);
-        EstadoFuncion e = new EstadoFuncion(); e.setIdEstadoFuncion(idEstadoFuncion); f.setEstadoFuncion(e);
+        Pelicula p = new Pelicula();
+        p.setIdPelicula(idPelicula);
+        f.setPelicula(p);
+        Sala s = new Sala();
+        s.setIdSala(idSala);
+        f.setSala(s);
+        EstadoFuncion e = new EstadoFuncion();
+        e.setIdEstadoFuncion(idEstadoFuncion);
+        f.setEstadoFuncion(e);
 
         f.setFechaInicio(inicio);
         f.setFechaFin(fin);

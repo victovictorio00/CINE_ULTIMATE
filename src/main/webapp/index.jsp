@@ -1,7 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="modelo.Pelicula" %>
-<jsp:include page="CarteleraServlet" />
+<%
+    response.sendRedirect("DashboardServlet");
+%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,7 +16,7 @@
 <body>
 
     <!-- CARRUSEL -->
-    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="margin-top:0;">
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
             <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
@@ -69,7 +71,7 @@
                         Hola, <%= (nombreCompleto != null && !nombreCompleto.isEmpty()) ? nombreCompleto.split(" ")[0] : username %>
                     </a>
                     <div class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item text-white bg-dark" href="#">Mi Perfil</a>
+                        <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/Cliente/PerfilCliente.jsp">Mi Perfil</a>
                         <a class="dropdown-item text-white bg-dark" href="#">Mis Reservas</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item text-white bg-dark" href="<%= request.getContextPath()%>/LogoutServlet">Cerrar Sesión</a>

@@ -19,7 +19,7 @@
 
     <h3>Editar Función</h3>
     <form action="FuncionServlet?action=actualizar" method="post">
-
+        <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
         <input type="hidden" name="id_funcion" value="<%= f.getIdFuncion() %>">
 
         <div class="form-group">
