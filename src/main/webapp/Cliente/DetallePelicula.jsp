@@ -195,7 +195,7 @@
                             <input type="hidden" name="action" value="reservar_p">
                             <input type="hidden" name="id" value="<%= pelicula.getIdPelicula()%>">
                             <input type="hidden" name="idFuncion" id="inputIdFuncion" value="">
-                            <button id="btnReservar" type="submit" class="btn btn-dark" disabled>
+                            <button id="btnReservar" type="submit" class="btn btn-dark mt-2" disabled>
                                 🎟 Reservar
                             </button>
                         </form>
