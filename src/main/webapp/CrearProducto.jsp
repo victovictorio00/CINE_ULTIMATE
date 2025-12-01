@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Crear Producto</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/CrearProducto.css">
     <script src="${pageContext.request.contextPath}/Cliente/JS/CrearProducto.js"></script>
 </head>

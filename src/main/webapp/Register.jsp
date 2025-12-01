@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>Registro</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Register.css">
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
@@ -78,7 +78,7 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+<script src="<%= request.getContextPath() %>/Cliente/lib/sha256/sha256.min.js"></script>
 <script src="${pageContext.request.contextPath}/Cliente/JS/Register.js"></script>
 
 </body>

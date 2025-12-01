@@ -11,7 +11,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Detalle de Película | CineMax</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/DetallePelicula.css">
     </head>
     <body>
@@ -232,8 +232,8 @@
         <script src="<%= request.getContextPath()%>/Cliente/JS/seleccionHorario.js"></script>
         
         <%-- Bootstrap y dependencias --%>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap.min.js"></script>
     </body>
 </html>

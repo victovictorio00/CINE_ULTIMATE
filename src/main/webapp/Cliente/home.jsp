@@ -8,7 +8,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>CineMax</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/home.css">
     </head>
     <body>
@@ -46,7 +46,7 @@
                 <div class="carousel-item <%= (i == 0) ? "active" : ""%>">
                     <img src="<%= imageUrl%>" alt="<%= title%>"
                          onerror="this.src='<%= request.getContextPath()%>/Cliente/images/fallback.jpg'">
-                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-3">
+                    <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.75); border-radius:10px; padding: 1rem;">
                         <h5><%= title%></h5>
                         <p><%= sinopsis.length() > 100 ? sinopsis.substring(0, 100) + "..." : sinopsis%></p>
                     </div>
@@ -163,8 +163,8 @@
             <p><a href="#" class="text-white">Política de Privacidad</a> | <a href="#" class="text-white">Términos y Condiciones</a></p>
         </footer>
         <!-- SCRIPTS -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
     </body>
 </html>

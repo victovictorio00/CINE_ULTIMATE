@@ -23,7 +23,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Perfil | CineMax</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/PerfilCliente.css">
 </head>
 
@@ -166,9 +166,9 @@
     © 2025 CineMax | Todos los derechos reservados
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+<script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+<script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap.min.js"></script>
 <script src="${pageContext.request.contextPath}/Cliente/JS/PerfilCliente.js"></script>
 </body>
 </html>
