@@ -5,18 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const trigger = document.getElementById('a11y-trigger');
     const menu = document.getElementById('a11y-menu-options');
 
-    // ----------------------------------------------------
-    // constantes y variables generales
-    // ----------------------------------------------------
+    // constantes y variables
     let currentFontSize = parseFloat(getComputedStyle(body).fontSize) || 16; 
     let DEFAULT_FONT_SIZE = currentFontSize;
     const MAX_FONT_SIZE = 24;
     const MIN_FONT_SIZE = 12;
     const STEP = 2;
 
-    // ----------------------------------------------------
+
     // objeto ColorBlindnessFilter
-    // ----------------------------------------------------
+
     const ColorBlindnessFilter = {
         // matrices para los filtros de ceguera de color (protanopia, deuteranopia, tritanopia)
         filters: {
@@ -55,9 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ----------------------------------------------------
-    // logica de interaccion (menu)
-    // ----------------------------------------------------
+
+    // logica de interaccion
+
     function toggleMenu() {
         const isVisible = menu.classList.contains('visible');
         menu.classList.toggle('visible');
@@ -68,9 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-cerrar').addEventListener('click', toggleMenu);
 
 
-    // ----------------------------------------------------
     // funciones de accesibilidad
-    // ----------------------------------------------------
+
 
     // aumentar/disminuir texto
     document.getElementById('btn-increase-text').addEventListener('click', () => {
@@ -146,23 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnDyslexia.classList.toggle('btn-a11y-active', active);
     });
 
-    // ----------------------------------------------------
-    // modo concentracion (implementacion con overlay js/css)
-    // ----------------------------------------------------
+    // Modo Sabio Concentracion
     (() => {
         const btn = document.getElementById('btn-concentracion');
         
-        // 1. crear el overlay
+        // creo el overlay
         const overlay = document.createElement('div');
         overlay.id = 'focus-overlay';
         document.body.appendChild(overlay);
 
-
-
-        // 3. variables de estado
         let activo = false;
 
-        // 4. funcionalidad del boton
+        //logica del bton
         if (!btn) {
             console.error('el boton concentracion no fue encontrado.');
             return;
@@ -184,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 5. funcion seguir al raton
+        // uncion seguir al raton
         function followMouse(e) {
             // calcula la posicion y del cursor en porcentaje de la ventana
             const porcentajeY = (e.clientY / window.innerHeight) * 100;
@@ -194,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.style.backgroundPosition = `0 ${p}%`;
         }
 
-        // 6. bonus: salir con escape
+        // escape para salir
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && activo) {
                 btn.click();
@@ -208,9 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
     
-    // ----------------------------------------------------
-    // reset all
-    // ----------------------------------------------------
+    // RESETEO PEO
     document.getElementById('btn-reset-all').addEventListener('click', () => {
         // llama a la funcion de reset de concentracion
         window.resetConcentration();
@@ -223,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'a11y-dyslexia', 
             'a11y-spacing', 
             'a11y-seizure-safe'
-            // las clases no usadas o obsoletas fueron removidas
         );
         ColorBlindnessFilter.disable();
         document.getElementById('a11y-seizure-safe-style')?.remove();
@@ -232,9 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // ----------------------------------------------------
-    // inicializacion
-    // ----------------------------------------------------
+    // INCIO PS
     window.addEventListener('load', () => {
         currentFontSize = parseFloat(getComputedStyle(body).fontSize) || 16;
         DEFAULT_FONT_SIZE = currentFontSize;

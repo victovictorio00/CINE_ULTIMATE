@@ -1,6 +1,4 @@
-/* ---------------------------------------------------- */
 /* contenedor del widget */
-/* ---------------------------------------------------- */
 #a11y-widget-container {
     position: fixed;
     bottom: 20px;
@@ -9,9 +7,8 @@
     isolation: isolate;
 }
 
-/* ---------------------------------------------------- */
-/* boton circular (trigger) */
-/* ---------------------------------------------------- */
+/* boton circular trigger */
+
 #a11y-trigger {
     position: fixed;
     bottom: 20px;
@@ -40,9 +37,7 @@
     filter: invert(1);
 }
 
-/* ---------------------------------------------------- */
 /* menu de opciones */
-/* ---------------------------------------------------- */
 #a11y-menu-options {
     position: fixed;
     bottom: 85px;
@@ -185,7 +180,6 @@ body.a11y-concentracion {
     left: 0;
     width: 100%;
     height: 15px;
-    /* el truco: invierte el filtro para que el contenido dentro de la banda se vea normal */
     filter: brightness(1) contrast(1);
     z-index: 99999;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -220,10 +214,7 @@ body.a11y-concentracion {
 }
 #focus-overlay.active { display: block; }
 
-/* estilos del boton de concentracion para que se destaque (opcional) */
-#btn-concentracion {
 
-}
 #btn-concentracion.active {
     background: dodgerblue !important;
     color: white !important;
@@ -235,14 +226,14 @@ body.a11y-concentracion {
     border-color: #3b82f6 !important;
 }
 
-/* NUEVA REGLA: Anula cualquier filtro aplicado al body que pueda afectar al widget. */
+
 body.a11y-high-contrast #a11y-widget-container,
 body.a11y-high-contrast #a11y-trigger,
 body.a11y-high-contrast #a11y-menu-options {
     /* CRUCIAL: Resetea la propiedad filter */
     filter: none !important;
 }
-/* Fuerza al widget a quedar en su propia capa, inmune a filtros del body */
+
 #a11y-widget-container,
 #a11y-trigger,
 #a11y-menu-options {
@@ -252,7 +243,7 @@ body.a11y-high-contrast #a11y-menu-options {
     isolation: isolate !important;
 }
 
-/* El widget nunca debe heredar el filtro del body */
+
 body.a11y-high-contrast #a11y-widget-container,
 body.a11y-high-contrast #a11y-trigger,
 body.a11y-high-contrast #a11y-menu-options,
