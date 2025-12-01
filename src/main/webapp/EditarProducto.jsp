@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/EditarProducto.css">
 </head>
 <body>
-    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <div class="form-container">
         <h3>Editar Producto</h3>
         <form action="ProductoServlet?action=actualizar" method="POST"  enctype="multipart/form-data">
@@ -29,7 +28,8 @@
             </div>
             <div class="form-group">
                     <label for="foto">Foto del producto</label>
-                    <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*" required>
+                    <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*">
+
                 </div>
             <button type="submit" class="btn btn-primary btn-block">Actualizar Producto</button>
         </form>
