@@ -102,7 +102,6 @@
             </table>
         </div>
     </main>
-
     <!-- Modal Nueva Función -->
     <div class="modal fade" id="modalNuevaFuncion" tabindex="-1" role="dialog" aria-labelledby="modalNuevaFuncionLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -181,7 +180,6 @@
             </div>
         </div>
     </div>
-
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>

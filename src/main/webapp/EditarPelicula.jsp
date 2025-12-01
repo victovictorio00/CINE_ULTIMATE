@@ -101,12 +101,10 @@
                 Si no seleccionas ninguna, se mantendrá la foto actual.
             </small>
         </div>
-
         <!-- Botones -->
         <button type="submit" class="btn btn-primary">Actualizar Película</button>
         <a href="PeliculaServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
-
 </body>
 </html>

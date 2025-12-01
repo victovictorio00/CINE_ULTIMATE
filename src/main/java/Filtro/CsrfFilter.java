@@ -20,7 +20,7 @@ public class CsrfFilter implements Filter {
         // 🔒 Anti-Clickjacking
         httpRes.setHeader("X-Frame-Options", "DENY");
         httpRes.setHeader("X-Content-Type-Options", "nosniff");
-
+        
         // 1. Crear token solo si NO existe
         String csrfToken = (String) session.getAttribute("csrfToken");
         if (csrfToken == null) {

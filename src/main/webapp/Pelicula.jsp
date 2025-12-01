@@ -49,7 +49,6 @@
             </a>
         </nav>
     </nav>
-
     <!-- Contenido principal -->
     <main class="content">
         <div class="table-container">
@@ -121,7 +120,6 @@
             </table>
         </div>
     </main>
-
     <!-- Bootstrap JS y dependencias -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
