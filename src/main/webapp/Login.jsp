@@ -47,11 +47,10 @@
                    placeholder="Contraseña"
                    required
                    autocomplete="current-password" />
-
-            
-
             <a href="#" class="forgot-link">Olvidé mi contraseña</a>
-
+                    <div class="g-recaptcha" 
+                         data-sitekey="6LdvIx4sAAAAALLnDTj8-WorjZmcFCnaqrWNr3dH">
+                    </div>
             <input type="hidden" name="redirect"
                    value="${param.redirect != null ? param.redirect : ''}">
             <button type="submit" class="btn btn-login">Entrar</button>

@@ -6,6 +6,7 @@
         <title>Registro</title>
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Register.css">
+        
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
@@ -68,7 +69,7 @@
                     <input type="text" name="direccion" class="form-control" placeholder="Dirección" maxlength="200" />
 
                     <div class="g-recaptcha" 
-                         data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
+                         data-sitekey="6LdvIx4sAAAAALLnDTj8-WorjZmcFCnaqrWNr3dH">
                     </div>
                     <button type="submit" class="btn btn-login mt-2">Registrar</button>
                     <button type="button" class="btn btn-register" onclick="window.location.href = 'Login.jsp'">Regresar</button>

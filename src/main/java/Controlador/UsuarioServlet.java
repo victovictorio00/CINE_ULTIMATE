@@ -94,7 +94,7 @@ public class UsuarioServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-/*
+
         // Solo verificar reCAPTCHA para registro público
         if ("insertarcliente".equals(action)) {
             String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
@@ -116,7 +116,7 @@ public class UsuarioServlet extends HttpServlet {
                 return;
             }
         }
-*/
+
         try {
             switch (action) {
                 case "insertarcliente":

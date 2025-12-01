@@ -1,12 +1,12 @@
 <%-- /Cliente/Componentes/accesibilidad.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
-<link rel="stylesheet" href="Cliente/accesibilidad/accesibilidad.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/Cliente/accesibilidad/accesibilidad.css">
 
 <div id="a11y-widget-container">
     
     <button id="a11y-trigger" aria-label="Abrir menú de accesibilidad">
-        <img src="Cliente/accesibilidad/access.svg" alt="Icono de Accesibilidad">
+        <img src="${pageContext.request.contextPath}/Cliente/accesibilidad/access.svg" alt="Icono de Accesibilidad">
     </button>
     
     <div id="a11y-menu-options" aria-hidden="true">
@@ -36,7 +36,7 @@
 
 </div>
 
-<script src="Cliente/accesibilidad/accesibilidad.js"></script>
+<script src="${pageContext.request.contextPath}/Cliente/accesibilidad/accesibilidad.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const widget = document.getElementById("a11y-widget-container");
