@@ -8,22 +8,23 @@ import Conexion.Conexion;
 public class RolDao {
     // Método para obtener todos los roles
     public List<Rol> getTodosLosRoles() {
-        List<Rol> lista = new ArrayList<>();
-        String query = "SELECT id_rol, nombre FROM roles";
-        
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement pst = con.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
-            
-            while (rs.next()) {
-                Rol r = new Rol();
-                r.setIdRol(rs.getInt("id_rol"));
-                r.setNombre(rs.getString("nombre"));
-                lista.add(r);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al cargar los roles: " + e.getMessage());
+    List<Rol> lista = new ArrayList<>();
+    String sql = "{CALL listarRoles()}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql);
+         ResultSet rs = cst.executeQuery()) {
+
+        while (rs.next()) {
+            Rol r = new Rol();
+            r.setIdRol(rs.getInt("id_rol"));
+            r.setNombre(rs.getString("nombre"));
+            lista.add(r);
         }
-        return lista;
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al cargar los roles: " + e.getMessage());
     }
+    return lista;
+}
+
 }

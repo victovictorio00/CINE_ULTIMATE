@@ -1,19 +1,23 @@
+/* ===== COLORES BASE (mismos que ya tenías) ===== */
 :root {
-    --accent: #FF5733;      
-    --main-bg: #FFFFFF;          
-    --main-text: #333333;       
-    --secondary-text: #6c757d;     
-    --border-color: #dee2e6;      
-    --card-bg: #f8f9fa;            
+    --accent: #FF5733;
+    --main-bg: #FFFFFF;
+    --main-text: #333333;
+    --secondary-text: #6c757d;
+    --border-color: #dee2e6;
+    --card-bg: #f8f9fa;
     --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+
+/* ===== BODY ===== */
 body {
     background-color: var(--main-bg);
     color: var(--main-text);
     font-family: 'Poppins', sans-serif;
-    padding-top: 80px; 
+    padding-top: 50px; /* espacio navbar fijo */
 }
 
+/* ===== NAVBAR (igual que antes) ===== */
 .navbar {
     position: fixed;
     top: 0;
@@ -24,21 +28,10 @@ body {
     height: 80px;
     padding-top: 10px;
 }
-
-.navbar-brand, 
-.nav-link {
-    color: white !important;
-    transition: color .3s ease;
-}
-
-.nav-link:hover {
-    color: var(--accent) !important;
-}
-
-.nav-item.active .nav-link {
-    color: var(--accent) !important;
-}
-
+.navbar-brand,
+.nav-link { color: white !important; transition: color .3s ease; }
+.nav-link:hover { color: var(--accent) !important; }
+.nav-item.active .nav-link { color: var(--accent) !important; }
 .nav-item.active::after {
     content: '';
     position: absolute;
@@ -48,50 +41,32 @@ body {
     bottom: 0;
     left: 0;
 }
+.navbar-nav { width: 100%; display: flex; justify-content: center; }
+.nav-item { margin: 0 15px; position: relative; }
+.navbar .dropdown-menu { background-color: #343a40 !important; border: 1px solid rgba(255,255,255,.15); }
+.navbar .dropdown-item { color: #f8f9fa !important; background: transparent !important; }
+.navbar .dropdown-item:hover { background-color: var(--accent) !important; color: white !important; }
 
-.navbar-nav {
-    width:100%;
-    display:flex;
-    justify-content:center;
-}
-
-.nav-item {
-    margin:0 15px;
-    position:relative;
-}
-
-/* Dropdown oscuro */
-.navbar .dropdown-menu {
-    background-color: #343a40 !important;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.navbar .dropdown-item {
-    color: #f8f9fa !important;
-    background-color: transparent !important;
-}
-
-.navbar .dropdown-item:hover {
-    background-color: var(--accent) !important;
-    color: white !important;
-}
-
-/* ===== PERFIL ===== */
-.profile-container {
+/* ===== CONTENEDOR PRINCIPAL (sustituye al style inline del div.profile-container) ===== */
+.loco {
     max-width: 900px;
-    margin: 100px auto 50px;
+    margin: 100px auto 50px; /* 100px arriba para navbar fijo */
     background: var(--card-bg);
     border-radius: 12px;
     box-shadow: var(--shadow);
     padding: 40px 50px;
 }
+.profile-container p {
+    font-size: 0.9rem; color: #666;
+}
 
+/* ===== TÍTULOS / SECCIONES ===== */
 h2 {
     color: var(--accent);
     font-weight: 700;
     margin-bottom: 25px;
+    text-align: center; /* centrado del <h2>Mis Reservas</h2> */
 }
-
 .section-title {
     font-weight: 600;
     color: var(--main-text);
@@ -100,30 +75,12 @@ h2 {
     display: inline-block;
 }
 
-label {
-    font-weight: 500;
-    color: var(--secondary-text);
-}
+/* ===== TABLA ===== */
+.table-responsive { margin-top: 1.1rem;}
+.table-dark.table-hover { background-color: #212529; }
+.table-dark td { vertical-align: middle; }
 
-input, select {
-    background-color: #f8f9fa !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--main-text) !important;
-    border-radius: 8px;
-    transition: border-color 0.2s ease-in-out;
-}
-
-input:focus, select:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 0.15rem rgba(255,87,51,0.25);
-}
-
-input:disabled {
-    background-color: #e9ecef !important;
-    color: #6c757d !important;
-}
-
-/* Botones */
+/* ===== BOTONES ===== */
 .btn-orange {
     background: var(--accent);
     border: none;
@@ -133,13 +90,11 @@ input:disabled {
     border-radius: 50px;
     transition: all 0.3s ease;
 }
-
 .btn-orange:hover {
     background: #e14c2f;
     transform: translateY(-2px);
     box-shadow: 0 5px 10px rgba(255,87,51,0.3);
 }
-
 .btn-outline-orange {
     border: 2px solid var(--accent);
     color: var(--accent);
@@ -148,32 +103,42 @@ input:disabled {
     background: transparent;
     transition: all 0.3s ease;
 }
-
 .btn-outline-orange:hover {
     background: var(--accent);
     color: white;
 }
+
+/* ===== FORMULARIOS / CAMPOS ===== */
+label { font-weight: 500; color: var(--secondary-text); }
+input, select {
+    background-color: #f8f9fa !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--main-text) !important;
+    border-radius: 8px;
+    transition: border-color 0.2s ease-in-out;
+}
+input:focus, select:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 0.15rem rgba(255,87,51,0.25);
+}
+input:disabled {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+}
+
+/* ===== ALERTAS ===== */
+.alert-info.text-center {
+    margin-top: 3rem !important;
+    text-align: center;
+}
+
+/* ===== DIVIDER ===== */
 .divider {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border-color);
     margin: 30px 0;
 }
 
-a {
-    color: var(--accent);
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    border-radius: 8px;
-    font-weight: 500;
-}
+/* ===== FOOTER ===== */
 footer {
     text-align: center;
     color: var(--secondary-text);

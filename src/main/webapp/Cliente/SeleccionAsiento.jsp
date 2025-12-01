@@ -16,21 +16,21 @@
         <title>Seleccionar Butacas</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/SeleccionAsiento.css">
+        <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/SeleccionAsiento.css">
     </head>
     <body>
         <%
-        List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
-    %>
+            List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
+        %>
         <header class="custom-header">
             <h1>Selecciona tus butacas</h1>
         </header>
-        <% if (request.getAttribute("mensaje") != null) { %>
+        <% if (request.getAttribute("mensaje") != null) {%>
         <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055;">
             <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
-                        <strong>¡Upss!</strong> <%= request.getAttribute("mensaje") %>
+                        <strong>¡Upss!</strong> <%= request.getAttribute("mensaje")%>
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
                 </div>
@@ -91,7 +91,9 @@
 
                     // Ordenar asientos por número
                     for (List<Asiento> asientosFila : porFila.values()) {
-                        asientosFila.sort((a1, a2) -> {
+                        asientosFila.sort(( a1,   
+                              
+                            a2) -> {
                             try {
                                 int num1 = Integer.parseInt(a1.getCodigo().substring(1));
                                 int num2 = Integer.parseInt(a2.getCodigo().substring(1));
@@ -107,7 +109,7 @@
                 <div class="column-numbers">
                     <div class="column-number" style="width: 30px;"></div>
                     <% for (int i = 1; i <= maxColumnas; i++) {%>
-                        <div class="column-number"><%= i%></div>
+                    <div class="column-number"><%= i%></div>
                     <% }%>
                     <div class="column-number" style="width: 30px;"></div>
                 </div>
@@ -147,7 +149,7 @@
                 <div class="column-numbers">
                     <div class="column-number" style="width: 30px;"></div>
                     <% for (int i = 1; i <= maxColumnas; i++) {%>
-                        <div class="column-number"><%= i%></div>
+                    <div class="column-number"><%= i%></div>
                     <% }%>
                     <div class="column-number" style="width: 30px;"></div>
                 </div>
@@ -228,170 +230,16 @@
             <p><a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a></p>
         </footer>
 
+        <%-- Inicializar datos de configuración --%>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                console.log('🎬 Sistema de selección de asientos iniciado');
-
-                // === CONFIGURACIÓN ===
-                const PRECIO_UNITARIO = <%= precioButaca %>;
-                const MAX_ASIENTOS = 8;
-
-                // === ELEMENTOS DEL DOM ===
-                const selectedSeats = new Set();
-                const selectedSeatsDiv = document.getElementById('selected-seats-list');
-                const selectedCountSpan = document.getElementById('selected-count');
-                const subtotalSpan = document.getElementById('subtotal');
-                const totalSpan = document.getElementById('total');
-                const btnContinue = document.getElementById('btnContinue');
-                const inputSelectedSeats = document.getElementById('inputSelectedSeats');
-                const formAsientos = document.getElementById('formAsientos');
-
-                // Verificar elementos
-                if (!selectedSeatsDiv || !btnContinue || !inputSelectedSeats) {
-                    console.error('❌ Error: Elementos del DOM no encontrados');
-                    return;
-                }
-
-                // === FUNCIONES ===
-
-                /**
-                 * Actualiza el resumen de compra en el panel derecho
-                 */
-                function updateSummary() {
-                    const count = selectedSeats.size;
-                    const total = count * PRECIO_UNITARIO;
-
-                    // Actualizar contadores
-                    selectedCountSpan.textContent = count;
-                    subtotalSpan.textContent = total.toFixed(2);
-                    totalSpan.textContent = total.toFixed(2);
-
-                    // Actualizar lista de asientos
-                    if (count > 0) {
-                        const asientosOrdenados = Array.from(selectedSeats).sort();
-                        selectedSeatsDiv.textContent = asientosOrdenados.join(', ');
-                        selectedSeatsDiv.classList.add('has-selection');
-                    } else {
-                        selectedSeatsDiv.textContent = 'Ninguna butaca seleccionada';
-                        selectedSeatsDiv.classList.remove('has-selection');
-                    }
-
-                    // Actualizar input oculto para el formulario
-                    inputSelectedSeats.value = Array.from(selectedSeats).join(',');
-
-                    // Habilitar/deshabilitar botón
-                    if (count > 0) {
-                        btnContinue.disabled = false;
-                        btnContinue.textContent = 'Continuar · S/. ' + total.toFixed(2);
-                    } else {
-                        btnContinue.disabled = true;
-                        btnContinue.textContent = 'Continuar';
-                    }
-
-                    console.log('📊 Resumen:', {
-                        asientos: Array.from(selectedSeats),
-                        cantidad: count,
-                        total: 'S/. ' + total.toFixed(2)
-                    });
-                }
-
-                /**
-                 * Alterna la selección de un asiento
-                 */
-                function toggleSeat(seatElement) {
-                    const seatCode = seatElement.dataset.seat;
-                    const isAvailable = seatElement.dataset.available === 'true';
-
-                    console.log('🎯 Click en asiento:', seatCode, '| Disponible:', isAvailable);
-
-                    // Validar disponibilidad
-                    if (!isAvailable) {
-                        alert('⚠️ Este asiento no está disponible');
-                        return;
-                    }
-
-                    // Toggle selección
-                    if (selectedSeats.has(seatCode)) {
-                        // Deseleccionar
-                        selectedSeats.delete(seatCode);
-                        seatElement.classList.remove('selected');
-                        console.log('➖ Deseleccionado:', seatCode);
-                    } else {
-                        // Validar límite máximo
-                        if (selectedSeats.size >= MAX_ASIENTOS) {
-                            alert('⚠️ Solo puedes seleccionar hasta ' + MAX_ASIENTOS + ' asientos por compra');
-                            return;
-                        }
-
-                        // Seleccionar
-                        selectedSeats.add(seatCode);
-                        seatElement.classList.add('selected');
-                        console.log('➕ Seleccionado:', seatCode);
-                    }
-
-                    updateSummary();
-                }
-
-                // === EVENT LISTENERS ===
-
-                // Adjuntar eventos a todos los asientos disponibles
-                const asientosDisponibles = document.querySelectorAll('.seat.available');
-                console.log('✅ Asientos disponibles encontrados:', asientosDisponibles.length);
-
-                if (asientosDisponibles.length === 0) {
-                    console.warn('⚠️ No hay asientos disponibles');
-                    selectedSeatsDiv.textContent = 'No hay asientos disponibles para esta función';
-                }
-
-                asientosDisponibles.forEach((seat, index) => {
-                    // Click
-                    seat.addEventListener('click', function () {
-                        toggleSeat(this);
-                    });
-
-                    // Teclado (accesibilidad)
-                    seat.addEventListener('keydown', function (e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            toggleSeat(this);
-                        }
-                    });
-
-                    // Hacer focusable
-                    seat.setAttribute('tabindex', '0');
-                });
-
-                // Validación al enviar formulario
-                formAsientos.addEventListener('submit', function (e) {
-                    if (selectedSeats.size === 0) {
-                        e.preventDefault();
-                        alert('⚠️ Debe seleccionar al menos un asiento para continuar');
-                        return false;
-                    }
-
-                    // Confirmación
-                    const asientosStr = Array.from(selectedSeats).sort().join(', ');
-                    const total = (selectedSeats.size * PRECIO_UNITARIO).toFixed(2);
-                    const confirmMsg = '¿Confirmar la reserva de ' + selectedSeats.size + ' asiento(s)?\n\n' +
-                            'Asientos: ' + asientosStr + '\n' +
-                            'Total: S/. ' + total;
-
-                    if (!confirm(confirmMsg)) {
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    // Deshabilitar botón para evitar doble submit
-                    btnContinue.disabled = true;
-                    btnContinue.textContent = 'Procesando...';
-                    console.log('✅ Enviando formulario:', inputSelectedSeats.value);
-                });
-
-                // === INICIALIZACIÓN ===
-                updateSummary();
-                console.log('✅ Sistema listo');
-                console.log('💰 Precio unitario: S/.', PRECIO_UNITARIO);
-            });
+            window.asientosData = {
+                precioUnitario: <%= precioButaca%>,
+                maxAsientos: 8
+                        // ✅ NO incluir selectedSeats aquí
+            };
         </script>
+
+        <%-- Cargar lógica de negocio --%>
+        <script src="<%= request.getContextPath()%>/Cliente/JS/SeleccionAsientosLogic.js"></script>
     </body>
 </html>

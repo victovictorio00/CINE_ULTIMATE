@@ -55,7 +55,7 @@
             </div>
         </nav>
 
-        <div class="profile-container" style="max-width: 95%; margin: auto; margin-top: 40px;">
+        <div class="loco mt-5">
             <%
                 Collection<FilaReservaDTO> filas = (Collection<FilaReservaDTO>) request.getAttribute("filas");
                 if (filas == null) {
@@ -65,7 +65,7 @@
                 if (ventas != null && !ventas.isEmpty()) {
             %>
             <h2 class="text-center"><i class="fas fa-ticket-alt"></i> Mis Reservas</h2>
-            <div class="table-responsive mt-4">
+            <div class="table-responsive mt-2 w-75 mx-auto">
                 <table class="table table-dark table-hover">
                     <thead>
                         <tr>

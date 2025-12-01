@@ -10,142 +10,119 @@ public class DetalleVentaDao implements DaoCrud<DetalleVenta> {
     /* ============================
        CRUD BÁSICO
        ============================ */
-    @Override
-    public List<DetalleVenta> listar() throws SQLException {
-        List<DetalleVenta> detalles = new ArrayList<>();
-        String sql = "SELECT * FROM detalle_ventas";
+   @Override
+public List<DetalleVenta> listar() throws SQLException {
+    List<DetalleVenta> detalles = new ArrayList<>();
+    String sql = "{CALL listarDetalleVentas()}";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
 
-            while (rs.next()) {
-                detalles.add(mapear(rs));
-            }
-        }
-        return detalles;
-    }
-
-    @Override
-    public void insertar(DetalleVenta detalle) throws SQLException {
-
-        String sql = "INSERT INTO detalle_ventas "
-                + "(id_venta, id_producto, id_funcion, id_asiento_funcion, cantidad, tipo_item, precio_unitario) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            pst.setInt(1, detalle.getVenta().getIdVenta());
-
-            // Producto
-            if (detalle.getProducto() != null && detalle.getProducto().getIdProducto() > 0) {
-                pst.setInt(2, detalle.getProducto().getIdProducto());
-            } else {
-                pst.setNull(2, Types.INTEGER);
-            }
-
-            // Función
-            if (detalle.getFuncion() != null && detalle.getFuncion().getIdFuncion() > 0) {
-                pst.setInt(3, detalle.getFuncion().getIdFuncion());
-            } else {
-                pst.setNull(3, Types.INTEGER);
-            }
-
-            // AsientoFuncion
-            if (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0) {
-                pst.setInt(4, detalle.getIdAsientoFuncion().getIdAsientoFuncion());
-            } else {
-                pst.setNull(4, Types.INTEGER);
-            }
-
-            pst.setInt(5, detalle.getCantidad());
-            pst.setInt(6, detalle.getTipoItem());
-            pst.setDouble(7, detalle.getPrecioUnitario());
-
-            pst.executeUpdate();
-
-            try (ResultSet keys = pst.getGeneratedKeys()) {
-                if (keys.next()) {
-                    detalle.setIdDetalleVenta(keys.getInt(1));
-                }
-            }
+        while (rs.next()) {
+            detalles.add(mapear(rs));
         }
     }
+    return detalles;
+}
+
+
+   @Override
+public void insertar(DetalleVenta detalle) throws SQLException {
+    String sql = "{CALL insertarDetalleVenta(?, ?, ?, ?, ?, ?, ?, ?)}";
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, detalle.getVenta().getIdVenta());
+        cs.setObject(2, detalle.getProducto() != null ? detalle.getProducto().getIdProducto() : null, Types.INTEGER);
+        cs.setObject(3, detalle.getFuncion() != null ? detalle.getFuncion().getIdFuncion() : null, Types.INTEGER);
+        cs.setObject(4, detalle.getIdAsientoFuncion() != null ? detalle.getIdAsientoFuncion().getIdAsientoFuncion() : null, Types.INTEGER);
+        cs.setInt(5, detalle.getCantidad());
+        cs.setInt(6, detalle.getTipoItem());
+        cs.setDouble(7, detalle.getPrecioUnitario());
+        cs.registerOutParameter(8, Types.INTEGER);
+
+        cs.execute();
+
+        detalle.setIdDetalleVenta(cs.getInt(8));
+    }
+}
+
 
     @Override
-    public DetalleVenta leer(int id) throws SQLException {
-        String sql = "SELECT * FROM detalle_ventas WHERE id_detalle_venta = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                return rs.next() ? mapear(rs) : null;
-            }
+public DetalleVenta leer(int id) throws SQLException {
+    String sql = "{CALL leerDetalleVenta(?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, id);
+
+        try (ResultSet rs = cs.executeQuery()) {
+            return rs.next() ? mapear(rs) : null;
         }
     }
+}
+
 
     @Override
-    public void editar(DetalleVenta detalle) throws SQLException {
-        String sql = "UPDATE detalle_ventas SET "
-                + "id_venta = ?, id_producto = ?, id_funcion = ?, id_asiento_funcion = ?, "
-                + "cantidad = ?, tipo_item = ?, precio_unitario = ? "
-                + "WHERE id_detalle_venta = ?";
+public void editar(DetalleVenta detalle) throws SQLException {
+    String sql = "{CALL actualizarDetalleVenta(?, ?, ?, ?, ?, ?, ?, ?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
+        cs.setInt(1, detalle.getIdDetalleVenta());
+        cs.setInt(2, detalle.getVenta().getIdVenta());
 
-            pst.setInt(1, detalle.getVenta().getIdVenta());
-            pst.setInt(2, (detalle.getProducto() != null && detalle.getProducto().getIdProducto() > 0)
-                    ? detalle.getProducto().getIdProducto() : Types.NULL);
-            pst.setInt(3, (detalle.getFuncion() != null && detalle.getFuncion().getIdFuncion() > 0)
-                    ? detalle.getFuncion().getIdFuncion() : Types.NULL);
-            pst.setInt(4, (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0)
-                    ? detalle.getIdAsientoFuncion().getIdAsientoFuncion() : Types.NULL);
-            pst.setInt(5, detalle.getCantidad());
-            pst.setInt(6, detalle.getTipoItem());
-            pst.setDouble(7, detalle.getPrecioUnitario());
-            pst.setInt(8, detalle.getIdDetalleVenta());
+        cs.setObject(3, (detalle.getProducto() != null && detalle.getProducto().getIdProducto() > 0)
+                ? detalle.getProducto().getIdProducto() : null, java.sql.Types.INTEGER);
+        cs.setObject(4, (detalle.getFuncion() != null && detalle.getFuncion().getIdFuncion() > 0)
+                ? detalle.getFuncion().getIdFuncion() : null, java.sql.Types.INTEGER);
+        cs.setObject(5, (detalle.getIdAsientoFuncion() != null && detalle.getIdAsientoFuncion().getIdAsientoFuncion() > 0)
+                ? detalle.getIdAsientoFuncion().getIdAsientoFuncion() : null, java.sql.Types.INTEGER);
 
-            pst.executeUpdate();
-        }
+        cs.setInt(6, detalle.getCantidad());
+        cs.setInt(7, detalle.getTipoItem());
+        cs.setDouble(8, detalle.getPrecioUnitario());
+
+        cs.executeUpdate();
     }
+}
 
-    @Override
-    public void eliminar(int id) throws SQLException {
-        String sql = "DELETE FROM detalle_ventas WHERE id_detalle_venta = ?";
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
+
+   @Override
+public void eliminar(int id) throws SQLException {
+    String sql = "{CALL eliminarDetalleVenta(?)}";
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+        cs.setInt(1, id);
+        cs.executeUpdate();
     }
+}
+
 
     /* ============================
        MÉTODOS EXTRA
        ============================ */
-    public List<DetalleVenta> listarPorVenta(int idVenta) throws SQLException {
-        List<DetalleVenta> lista = new ArrayList<>();
-        String sql = "SELECT dv.*,\n"
-                + "       p.id_producto, p.nombre AS p_nombre, p.precio AS p_precio,\n"
-                + "       f.id_funcion, f.fecha_inicio, f.fecha_fin,\n"
-                + "       pel.id_pelicula, pel.nombre AS pel_nombre,\n"
-                + "       s.id_sala, s.nombre AS s_nombre,\n"
-                + "       a.id_asiento, a.codigo AS codigo   -- <-- ¡acá está el código!\n"
-                + "FROM detalle_ventas dv\n"
-                + "LEFT JOIN productos p ON p.id_producto = dv.id_producto\n"
-                + "LEFT JOIN funciones f ON f.id_funcion = dv.id_funcion\n"
-                + "LEFT JOIN peliculas pel ON pel.id_pelicula = f.id_pelicula\n"
-                + "LEFT JOIN salas s ON s.id_sala = f.id_sala\n"
-                + "LEFT JOIN asiento_funcion af ON af.id_asiento_funcion = dv.id_asiento_funcion\n"
-                + "LEFT JOIN asientos a ON a.id_asiento = af.id_asiento\n"
-                + "WHERE dv.id_venta = ?\n"
-                + "ORDER BY dv.id_detalle_venta;";
+    
+public List<DetalleVenta> listarPorVenta(int idVenta) throws SQLException {
+    List<DetalleVenta> lista = new ArrayList<>();
+    String sql = "{CALL listarDetallePorVenta(?)}";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
-            pst.setInt(1, idVenta);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(mapear(rs));
-                }
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+
+        cs.setInt(1, idVenta);
+
+        try (ResultSet rs = cs.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
             }
         }
-        return lista;
     }
+    return lista;
+}
+
 
     /* ============================
        HELPERS PRIVADOS

@@ -5,99 +5,7 @@
         <meta charset="UTF-8" />
         <title>Registro</title>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
-        <style>
-            body, html {
-                height: 100%;
-                margin: 0;
-                font-family: 'Arial', sans-serif;
-            }
-            .video-bg {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                z-index: -2;
-            }
-            .video-bg video {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-            .overlay-red {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(178,0,0,0.7);
-                z-index: -1;
-            }
-            .login-container {
-                height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 15px;
-            }
-            .login-card {
-                background: #fff;
-                padding: 50px 40px;
-                border-radius: 8px;
-                max-width: 520px;
-                width: 100%;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            }
-            .login-card h3 {
-                font-weight: 700;
-                text-align: center;
-                margin-bottom: 25px;
-                color: #3b0000;
-            }
-            .form-control {
-                border-radius: 0;
-                margin-bottom: 14px;
-                box-shadow: none;
-            }
-            .btn-login {
-                background-color: #b20000;
-                border: none;
-                width: 100%;
-                padding: 12px;
-                font-weight: bold;
-                color: white;
-                border-radius: 0;
-                transition: .3s ease;
-            }
-            .btn-login:hover {
-                background-color: #7f0000;
-            }
-            .btn-register {
-                border: 1px solid #b20000;
-                background: transparent;
-                color: #b20000;
-                width: 100%;
-                padding: 12px;
-                font-weight: bold;
-                margin-top: 10px;
-                border-radius: 0;
-                transition: .3s ease;
-            }
-            .btn-register:hover {
-                background-color: #b20000;
-                color: #fff;
-            }
-            .row-compact .col {
-                padding-right: 7px;
-                padding-left: 7px;
-            }
-            .small-note {
-                font-size: .85rem;
-                color: #555;
-                margin-top: 4px;
-            }
-        </style>
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Register.css">
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
@@ -111,7 +19,7 @@
 
         <div class="overlay-red"></div>
 
-        <div class="login-container">
+        <div class="login-container mt-2">
             <div class="login-card">
                 <h3>Crear cuenta</h3>
 
@@ -171,38 +79,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-<script>
-(function () {
-    const form = document.getElementById("registroForm");
-    form.addEventListener("submit", function (event) {
-        const pass = document.getElementById("password").value.trim();
-        const confirm = document.getElementById("passwordconfirm").value.trim();
-
-            // Validación HTML5 general
-            //if (!form.checkValidity()) {
-            //  event.preventDefault();
-            //event.stopPropagation();
-            //alert("Revisa los campos resaltados. Asegúrate de completar los obligatorios y con el formato correcto.");
-            //return;
-            //}
-        if (pass !== confirm) {
-            event.preventDefault();
-            alert("Las contraseñas no coinciden.");
-            return;
-        }
-
-        if (pass.length < 6) {
-            event.preventDefault();
-            alert("La contraseña debe tener al menos 6 caracteres.");
-            return;
-        }
-
-        // Generar SHA-256 y guardarlo en el input oculto
-        document.getElementById("password").value = sha256(pass);
-        document.getElementById("passwordconfirm").value = "";
-    }, false);
-})();
-</script>
+<script src="${pageContext.request.contextPath}/Cliente/JS/Register.js"></script>
 
 </body>
 </html>

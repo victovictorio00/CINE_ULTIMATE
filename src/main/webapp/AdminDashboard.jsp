@@ -28,82 +28,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
-        }
-        .sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            background-color: #0d6efd;
-            color: white;
-            min-height: 100vh;
-            position: fixed;
-            top: 0; left: 0;
-            padding-top: 1rem;
-        }
-        .sidebar .sidebar-header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile img {
-            width: 80px;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-        }
-        .sidebar .nav-link {
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: #084298;
-            color: white;
-        }
-        .content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: 100%;
-            background-color: #f8f9fa;
-        }
-        .stats-card {
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            background: #ffffff;
-            box-shadow: 0 0 10px rgb(0 0 0 / 0.05);
-            text-align: center;
-        }
-        .stats-card h5 {
-            font-weight: 600;
-            color: #343a40;
-        }
-        .stats-card p {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 0;
-            color: #0d6efd;
-        }
-        #chart-container {
-            background: #fff;
-            border-radius: 0.5rem;
-            box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
-            padding: 1rem 2rem;
-            margin-top: 2rem;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/AdminDashboard.css">
 </head>
 
 <body>
-
     <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
@@ -139,7 +67,7 @@
 
     <!-- CONTENIDO -->
     <main class="content">
-        <h2>Dashboard</h2>
+        <h2 class="mb-5">Dashboard</h2>
 
         <div class="row text-center">
             <div class="col-md-3 mb-3">
@@ -173,56 +101,28 @@
         </div>
     </main>
 
-    <!-- JS -->
+    <!-- JS de Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
+    <%-- Preparar datos de ventas mensuales --%>
     <%
-    List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
-    if (ventasMensuales == null) {
-        ventasMensuales = java.util.Collections.nCopies(12, 0.0);
-    }
-%>
-
-<div id="chart-container">
-    <canvas id="ventasChart"></canvas>
-</div>
-
-<script>
-    const ctx = document.getElementById('ventasChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            datasets: [{
-                label: 'Ventas Mensuales (S/)',
-                data: <%= ventasMensuales.toString() %>,
-                backgroundColor: 'rgba(13, 110, 253, 0.8)',
-                borderColor: '#0d6efd',
-                borderWidth: 2,
-                hoverBackgroundColor: '#084298'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true },
-                x: {}
-            },
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Ventas Mensuales - 2025',
-                    color: '#084298',
-                    font: { size: 18, weight: 'bold' }
-                }
-            }
+        List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
+        if (ventasMensuales == null) {
+            ventasMensuales = java.util.Collections.nCopies(12, 0.0);
         }
-    });
-</script>
+    %>
 
+    <%-- Inicializar datos del dashboard --%>
+    <script>
+        window.adminDashboardData = {
+            ventasMensuales: <%= ventasMensuales.toString() %>,
+            meses: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+        };
+    </script>
 
+    <%-- Cargar lógica del gráfico --%>
+    <script src="<%= request.getContextPath() %>/Admin/JS/adminDashboardChart.js"></script>
 </body>
 </html>

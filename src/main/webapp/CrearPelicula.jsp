@@ -8,22 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Película</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    
-    <script>
-        // Validar tamaño de imagen antes de enviar
-        function validarFormulario() {
-            const inputFoto = document.getElementById("foto");
-            const archivo = inputFoto.files[0];
-            const maxSize = 1024 * 1024; // 1 MB
-
-            if (archivo && archivo.size > maxSize) {
-                alert("La imagen es demasiado grande. El tamaño máximo permitido es 1 MB.");
-                inputFoto.value = ""; 
-                return false;
-            }
-            return true;
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/Cliente/JS/CrearPelicula.js"></script>
 </head>
 <body>
 

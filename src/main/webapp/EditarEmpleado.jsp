@@ -51,6 +51,5 @@
         <a href="EmpleadoServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
-
 </body>
 </html>

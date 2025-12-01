@@ -102,6 +102,47 @@ body {
     font-weight: 600;
 }
 
+/* ESTILOS EXTRAÍDOS DEL JSP PARA INPUTS Y BOTONES */
+/* ------------------------------------------------ */
+
+/* Estilo del input de fecha de estreno (extraído del JSP) */
+/* Aplicado al input en el sidebar */
+.sidebar .form-group input.form-control {
+    color: var(--main-text);
+    background-color: var(--main-bg);
+    border-color: var(--border-color);
+}
+/*-------------------------------------------------------*/
+/* Estilo del botón "Filtrar Día" (extraído del JSP) */
+.sidebar .form-group input.form-control {
+    color: var(--main-text);
+    background-color: var(--main-bg);
+    border-color: var(--border-color);
+}
+/* 1. BOTÓN FILTRAR DÍA (CORREGIDO: Color Sólido) */
+.sidebar .filter-section form .btn-block {
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: white !important;
+    border-width: 1px !important;
+}
+.sidebar .filter-section form .btn-block:hover {
+    background-color: var(--accent-dark) !important;
+    border-color: var(--accent-dark) !important;
+}
+/*---------------------------------------------------------*/
+/* Estilo del botón "Limpiar Filtros" (extraído del JSP) */
+.sidebar .filter-section .btn.btn-outline-light {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    font-weight: 600 !important;
+}
+.sidebar .filter-section .btn.btn-outline-light:hover {
+    background-color: var(--accent) !important;
+    color: white !important;
+}
+
+
 /* ESTILO DE LOS ENLACES DE FILTRO */
 .filter-list a {
     display: block;
@@ -123,7 +164,7 @@ body {
     padding-left: 30px;
 }
 
-/* TARJETAS DE PELÍCULAS (Mantenemos tu efecto de HOVER) */
+/* TARJETAS DE PELÍCULAS */
 .pelicula-card {
     position: relative;
     overflow: hidden;
@@ -201,7 +242,7 @@ body {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Placeholder (Mantenemos un fondo oscuro para consistencia con el estilo de la tarjeta) */
+/* Placeholder */
 .placeholder-img {
     background: #6c757d; /* Gris oscuro para el placeholder */
     display: none;
@@ -214,7 +255,14 @@ body {
     border-radius: 8px 8px 0 0;
 }
 
-/* Botón Ver Más */
+/* Mensaje "No hay películas" */
+.main-content .alert.alert-info {
+    background-color: var(--card-bg) !important;
+    color: var(--secondary-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Botón Ver Más (No se encontró en el JSP, pero se mantiene si es un estilo genérico) */
 .btn-ver-mas {
     color: var(--accent);
     border-color: var(--accent);
@@ -235,4 +283,22 @@ body {
 }
 .footer a:hover {
     color: var(--accent);
+}
+
+/* Media Query de ejemplo (no se modificó, solo se mantiene) */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .movie-list-container {
+        padding-left: 0;
+    }
 }

@@ -12,8 +12,12 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/home.css">
     </head>
     <body>
+<<<<<<< HEAD
         <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="margin-top:0;">
+=======
+        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+>>>>>>> e7adc536dd96723fdd8f224e36cee3298729749d
             <ol class="carousel-indicators">
                 <%
                     List<Pelicula> peliculas = (List<Pelicula>) request.getAttribute("peliculas");
