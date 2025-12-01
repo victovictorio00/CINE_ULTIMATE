@@ -48,7 +48,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/DulceriaCliente.css">
     </head>
     <body>
-
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <%-- NAVBAR --%>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineMax</a>

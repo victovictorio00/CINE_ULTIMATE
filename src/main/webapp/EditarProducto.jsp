@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/EditarProducto.css">
 </head>
 <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <div class="form-container">
         <h3>Editar Producto</h3>
         <form action="ProductoServlet?action=actualizar" method="POST"  enctype="multipart/form-data">

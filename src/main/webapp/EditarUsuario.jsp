@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
+<jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <div class="container mt-5">
     <h3>Editar Usuario</h3>
     <%

@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
 </head>
 <body class="container mt-4">
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <h3>Editar Función</h3>
     <form action="FuncionServlet?action=actualizar" method="post">
         <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">

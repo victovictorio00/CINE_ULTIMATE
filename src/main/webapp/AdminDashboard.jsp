@@ -32,6 +32,7 @@
 </head>
 
 <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>

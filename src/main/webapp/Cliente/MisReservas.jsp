@@ -24,6 +24,7 @@
     </head>
 
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
             <a class="navbar-brand" href="<%= request.getContextPath()%>/DashboardServlet">CineMax</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"

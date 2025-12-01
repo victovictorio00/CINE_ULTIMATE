@@ -54,6 +54,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/Confirmacion.css">
     </head>
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <header class="custom-header">
             <h1><i class="fas fa-check-circle mb-2"></i> Confirmación de Compra</h1>
             <button type="button" class="btn-back" onclick="history.back()">

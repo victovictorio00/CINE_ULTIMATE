@@ -13,6 +13,7 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
+<jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <div class="video-bg">
     <video autoplay muted loop>
         <source src="Cliente/videos/video.mp4" type="video/mp4" />

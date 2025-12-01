@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="Estilos/dashClienteStyle.css">
 </head>
 <body>
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- CARRUSEL -->
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">

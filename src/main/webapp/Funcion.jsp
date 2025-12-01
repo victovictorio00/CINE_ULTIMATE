@@ -25,6 +25,7 @@
 </head>
 
 <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
@@ -84,8 +85,8 @@
                         <td><%= f.getAsientosDisponibles() %></td>
                         <td class="acciones">
                             <a href="FuncionServlet?action=editar&id=<%= f.getIdFuncion() %>" 
-                               class="btn btn-primary btn-sm">
-                               <i class="fas fa-edit"></i>
+                               class="btn btn-primary btn-sm d-block mb-2" style="width: 100px;">
+                               Editar
                             </a>
                         </td>
                     </tr>

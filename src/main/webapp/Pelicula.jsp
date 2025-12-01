@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Pelicula.css">
 </head>
 <body>
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- Barra lateral -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>

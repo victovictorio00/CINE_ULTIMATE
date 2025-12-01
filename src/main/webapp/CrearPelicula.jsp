@@ -11,7 +11,7 @@
     <script src="${pageContext.request.contextPath}/Cliente/JS/CrearPelicula.js"></script>
 </head>
 <body>
-
+<jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <%
     List<Genero> generos = (List<Genero>) request.getAttribute("listaGeneros");
 %>

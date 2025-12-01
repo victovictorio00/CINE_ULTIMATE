@@ -77,6 +77,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/Voucher.css">
     </head>
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <header class="voucher-header">
             <a href="<%= request.getContextPath()%>/DashboardServlet" class="back-link">
                 <i class="fas fa-arrow-left"></i> Volver al Inicio

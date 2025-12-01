@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <%
     Pelicula peli = (Pelicula) request.getAttribute("pelicula");
     List<Genero> generos = (List<Genero>) request.getAttribute("listaGeneros");

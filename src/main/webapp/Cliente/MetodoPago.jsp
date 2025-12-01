@@ -34,6 +34,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/MetodoPago.css">
     </head>
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <header class="custom-header">
             <h1>Método de Pago</h1>
         </header>

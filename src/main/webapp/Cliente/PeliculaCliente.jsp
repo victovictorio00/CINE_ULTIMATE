@@ -17,8 +17,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/PeliculaCliente.css">
     </head>
     <body>
-                <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
-
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineMax</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"

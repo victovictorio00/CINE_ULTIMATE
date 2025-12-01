@@ -10,6 +10,7 @@
     <script src="${pageContext.request.contextPath}/Cliente/JS/CrearProducto.js"></script>
 </head>
 <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <div class="form-container">
         <h3>Agregar Producto</h3>
         <form action="ProductoServlet?action=insertar" method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">

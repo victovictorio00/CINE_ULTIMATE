@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/DetallePelicula.css">
     </head>
     <body>
-
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <%
             String peliculaId = request.getParameter("id");
             int id = Integer.parseInt(peliculaId);

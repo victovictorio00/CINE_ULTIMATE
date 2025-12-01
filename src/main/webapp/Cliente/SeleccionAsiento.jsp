@@ -19,9 +19,11 @@
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/SeleccionAsiento.css">
     </head>
     <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <%
             List<Asiento> chk = (List<Asiento>) request.getAttribute("asientosFuncion");
         %>
+        
         <header class="custom-header">
             <h1>Selecciona tus butacas</h1>
         </header>
