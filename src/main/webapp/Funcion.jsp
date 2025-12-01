@@ -181,6 +181,6 @@
     </div>
     <!-- Scripts -->
         <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
-    <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
 </body>
 </html>

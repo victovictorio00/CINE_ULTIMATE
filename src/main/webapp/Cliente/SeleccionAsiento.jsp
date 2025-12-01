@@ -15,7 +15,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Seleccionar Butacas</title>
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
-        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Cliente/EstilosCliente/SeleccionAsiento.css">
     </head>
     <body>

@@ -65,7 +65,7 @@
         </form>
     </div>
 
-    <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
     <script src="${pageContext.request.contextPath}/Cliente/JS/CrearUsuario.js"></script>
 
     </body>
