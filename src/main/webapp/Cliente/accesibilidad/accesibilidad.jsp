@@ -28,7 +28,7 @@
                 <button id="btn-color-blindness3" title="" class="flex-fill">trita</button>
             </div>
             
-            <button id="btn-seizure-safe" title="Desactivar Animaciones">Seguro Convulsión</button>
+            <button id="btn-seizure-safe" title="Desactivar Animaciones">Desactivar Animaciones</button>
             <button id="btn-dyslexia" title="Alternar Fuente Amigable con Dislexia">Fuente Dislexia</button>
             <button id="btn-concentracion" title="Sector de concentracion">Concentracion</button>
         </div>

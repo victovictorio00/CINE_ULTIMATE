@@ -1,3 +1,9 @@
+:root {
+    --color_1: #ff4000;   /* naranja */
+    --color_2: #ff4000;   /* naranja */
+    --color_3: #ff4000;   /* naranja naranja */
+}
+
 /* contenedor del widget */
 #a11y-widget-container {
     position: fixed;
@@ -16,7 +22,7 @@
     z-index: 10000;
     width: 55px;
     height: 55px;
-    background-color: dodgerblue;
+    background-color: var(--color_1);
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -28,7 +34,7 @@
 }
 #a11y-trigger:hover{
     transform: scale(1.1);
-    background-color: #0d6efd;
+    background-color: var(--color_2);
 }
 
 #a11y-trigger img {
@@ -72,7 +78,7 @@
     background: transparent !important; /* ✅ QUITAR FONDO */
     padding: 0 10px !important; /* Ajustar padding para que sean más compactos */
     font-weight: bold;
-    color: dodgerblue; /* Color de texto sutil */
+    color: var(--color_1); /* Color de texto sutil */
     font-size: 1.1rem;
 }
 .a11y-control-btn:hover {
@@ -105,7 +111,7 @@
     /* correccion: uso de rem */
     font-size: 1rem;
     font-weight: bold;
-    color: dodgerblue;
+    color: var(--color_1);
 }
 #a11y-menu-options button {
     padding: 8px;
@@ -216,14 +222,14 @@ body.a11y-concentracion {
 
 
 #btn-concentracion.active {
-    background: dodgerblue !important;
+    background: var(--color_1) !important;
     color: white !important;
 }
 
 .btn-a11y-active {
-    background: dodgerblue !important; /* Azul */
+    background: var(--color_1) !important; /* Azul */
     color: white !important;
-    border-color: #3b82f6 !important;
+    border-color: var(--color_3) !important;
 }
 
 
