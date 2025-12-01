@@ -22,77 +22,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            min-width: 250px;
-            max-width: 250px;
-            background-color: #0d6efd;
-            color: white;
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding-top: 1rem;
-        }
-        .sidebar .sidebar-header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .sidebar .profile img {
-            width: 80px;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-        }
-        .sidebar .nav-link {
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: #084298;
-            color: white;
-        }
-        .content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: 100%;
-        }
-        .table-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-            max-width: 1100px;
-            margin: auto;
-        }
-        .acciones {
-            text-align: center;
-        }
-        .acciones a {
-            display: block;
-            width: 100px;
-            margin: 0 auto 6px auto;
-        }
-
-        /* 🔒 Ocultar la columna ID */
-        th:first-child,
-        td:first-child {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Funcion.css">
 </head>
 
 <body>

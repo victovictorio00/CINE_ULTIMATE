@@ -6,25 +6,7 @@
     <meta charset="UTF-8" />
     <title>Crear Producto</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-        }
-        .form-container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 0 12px rgb(0 0 0 / 0.1);
-        }
-        h3 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/CrearProducto.css">
     <script>
         // Validación de tamaño de imagen antes de enviar
         function validarFormulario() {
