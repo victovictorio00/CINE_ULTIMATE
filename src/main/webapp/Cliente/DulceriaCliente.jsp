@@ -42,13 +42,13 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dulcería | Productos</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/fontawesome/css/all.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath()%>/Estilos/peliculaClienteStyle.css"> 
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/DulceriaCliente.css">
     </head>
     <body>
-
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <%-- NAVBAR --%>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">CineMax</a>
@@ -198,7 +198,6 @@
         <% if (esFlujoDeCompra) { %>
         <button class="btn-flotante btn btn-success" id="btnContinuar" onclick="continuarConCompra()">
             <i class="fas fa-arrow-right"></i> Continuar
-            <span id="totalDulceria"> · S/. 0.00</span>
         </button>
 
         <%-- FORMULARIO OCULTO --%>
@@ -209,97 +208,30 @@
         </form>
         <% } %>
 
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
         <script>
-            const carritoState = {};
-            const esFlujoCompra = <%= esFlujoDeCompra %>;
-            <%
-                for (Map.Entry<Integer, Integer> entry : carritoExistente.entrySet()) {
-                    if (entry.getValue() > 0) {
-            %>
-            carritoState[<%= entry.getKey()%>] = <%= entry.getValue()%>;
-            <%
-                    }
-                }
-            %>
-            function actualizarBotonFlotante() {
-                if (!esFlujoCompra) return;
-
-                let totalItems = 0;
-                let totalPrecio = 0;
-
-                document.querySelectorAll('.quantity-control').forEach(control => {
-                    const idProducto = parseInt(control.dataset.id);
-                    const precio = parseFloat(control.dataset.precio);
-                    const cantidad = carritoState[idProducto] || 0;
-
-                    totalItems += cantidad;
-                    totalPrecio += precio * cantidad;
-                });
-
-                const spanTotal = document.getElementById('totalDulceria');
-                const btnContinuar = document.getElementById('btnContinuar');
-
-                if (totalItems > 0) {
-                    spanTotal.style.display = 'inline';
-                    spanTotal.textContent = ' · S/. ' + totalPrecio.toFixed(2);
-                    btnContinuar.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar (' + totalItems + ' productos)' + spanTotal.outerHTML;
-                } else {
-                    btnContinuar.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar sin dulcería';
-                }
-            }
-            function continuarConCompra() {
-                const form = document.getElementById('carritoForm');
-                const container = document.getElementById('productosHidden');
-                container.innerHTML = ''; // Limpiar
-
-                // Crear inputs con formato: producto_123=2
-                for (const [idProducto, cantidad] of Object.entries(carritoState)) {
-                    if (cantidad > 0) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'producto_' + idProducto;
-                        input.value = cantidad;
-                        container.appendChild(input);
-                    }
-                }
-                console.log('Enviando carrito:', carritoState);
-                form.submit();
-            }
-            document.addEventListener("DOMContentLoaded", () => {
-                actualizarBotonFlotante();
-                document.querySelectorAll('.quantity-control button').forEach(button => {
-                    button.addEventListener('click', e => {
-                        e.preventDefault();
-
-                        const controlContainer = e.target.closest('.quantity-control');
-                        const idProducto = parseInt(controlContainer.dataset.id);
-                        const span = controlContainer.querySelector('.quantity-value');
-                        let value = parseInt(span.textContent);
-
-                        const isDecrease = e.target.classList.contains('decrease') || 
-                                         e.target.parentNode.classList.contains('decrease');
-                        const isIncrease = e.target.classList.contains('increase') || 
-                                         e.target.parentNode.classList.contains('increase');
-
-                        if (isDecrease && value > 0) {
-                            value--;
-                        } else if (isIncrease) {
-                            value++;
-                        }
-                        span.textContent = value;
-                        if (value > 0) {
-                            carritoState[idProducto] = value;
-                        } else {
-                            delete carritoState[idProducto];
-                        }
-                        actualizarBotonFlotante();
-                    });
-                });
-            });
+            window.dulceriaData = {
+                esFlujoCompra: <%= esFlujoDeCompra%>,
+                carritoState: {}
+            };
         </script>
+
+        <%
+            // Carga de la persistencia del carrito desde la sesión
+            for (Map.Entry<Integer, Integer> entry : carritoExistente.entrySet()) {
+                if (entry.getValue() > 0) {
+        %>
+        <script>
+            window.dulceriaData.carritoState[<%= entry.getKey()%>] = <%= entry.getValue()%>;
+        </script>
+        <%
+                }
+            }
+        %>
+
+        <script src="<%= request.getContextPath()%>/Cliente/JS/DulceriaData.js"></script>
+        <script src="<%= request.getContextPath()%>/Cliente/JS/DulceriaLogic.js"></script>
     </body>
 </html>

@@ -94,7 +94,7 @@ public class UsuarioServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-/*
+
         // Solo verificar reCAPTCHA para registro público
         if ("insertarcliente".equals(action)) {
             String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
@@ -116,7 +116,7 @@ public class UsuarioServlet extends HttpServlet {
                 return;
             }
         }
-*/
+
         try {
             switch (action) {
                 case "insertarcliente":
@@ -254,32 +254,54 @@ public class UsuarioServlet extends HttpServlet {
     /* ===============================
        REGISTRAR CLIENTE
        =============================== */
-    private void insertarUsuarioCliente(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException {
+   private void insertarUsuarioCliente(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException, SQLException {
 
-        String nombreCompleto = request.getParameter("nombreCompleto");
-        String dni = request.getParameter("dni");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        String telefono = request.getParameter("telefono");
-        String email = request.getParameter("email");
-        String direccion = request.getParameter("direccion");
 
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        Rol rol = new Rol(1, "Cliente");
-        EstadoUsuario estado = new EstadoUsuario(1, "Activo");
+    String nombreCompleto = request.getParameter("nombreCompleto");
+    String dni = request.getParameter("dni");
+    String username = request.getParameter("username");
+    String password = request.getParameter("password");
+    String telefono = request.getParameter("telefono");
+    String email = request.getParameter("email");
+    String direccion = request.getParameter("direccion");
 
-        Usuario usuario = new Usuario(
-                0, rol, estado, nombreCompleto, dni, username,
-                hashedPassword, telefono, email, direccion, 0
-        );
-
-        String ipAddress = request.getRemoteAddr();
-        logger.info("AUDITORIA: Registro de nuevo cliente. Username={}, IP={}", username, ipAddress);
-
-        usuarioDao.insertar(usuario);
-        response.sendRedirect("Login.jsp");
+    // =============================
+    // VALIDACIÓN: DNI YA EXISTE
+    // =============================
+    if (usuarioDao.existeDNI(dni)) {
+        request.setAttribute("error", "El DNI ya está registrado.");
+        request.getRequestDispatcher("Register.jsp").forward(request, response);
+        return;
     }
+
+    // =============================
+    // VALIDACIÓN: USERNAME YA EXISTE
+    // =============================
+    if (usuarioDao.existeUsername(username)) {
+        request.setAttribute("error", "El nombre de usuario ya existe.");
+        request.getRequestDispatcher("Register.jsp").forward(request, response);
+        return;
+    }
+
+    // =============================
+    // CREAR USUARIO
+    // =============================
+    String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+    Rol rol = new Rol(1, "Cliente");
+    EstadoUsuario estado = new EstadoUsuario(1, "Activo");
+
+    Usuario usuario = new Usuario(
+            0, rol, estado, nombreCompleto, dni, username,
+            hashedPassword, telefono, email, direccion, 0
+    );
+
+    String ipAddress = request.getRemoteAddr();
+    logger.info("AUDITORIA: Registro de nuevo cliente. Username={}, IP={}", username, ipAddress);
+
+    usuarioDao.insertar(usuario);
+    response.sendRedirect("Login.jsp");
+}
 
     /* ===============================
        VALIDACIÓN DE reCAPTCHA

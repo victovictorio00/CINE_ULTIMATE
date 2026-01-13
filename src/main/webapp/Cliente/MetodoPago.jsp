@@ -29,11 +29,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Método de Pago</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/fontawesome/css/all.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/MetodoPago.css">
     </head>
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <header class="custom-header">
             <h1>Método de Pago</h1>
         </header>
@@ -172,57 +173,6 @@
             <br />
             <a href="#">Política de Privacidad</a> | <a href="#">Términos y Condiciones</a>
         </footer>
-        <script>
-            const formPago = document.getElementById('formPago');
-            const btnContinuar = document.getElementById('btnContinuar');
-
-            const campos = {
-                nombre: document.getElementById('nombreCompleto'),
-                email: document.getElementById('correoElectronico'),
-                metodoPago: document.getElementsByName('metodoPago'),
-                terminos: document.getElementById('terminos'),
-                finalidades: document.getElementById('finalidades')
-            };
-            function validarFormulario() {
-                const nombreValido = campos.nombre.value.trim().length >= 3;
-                const emailValido = campos.email.value.trim().includes('@');
-                const metodoSeleccionado = Array.from(campos.metodoPago).some(r => r.checked);
-                const terminosAceptados = campos.terminos.checked;
-                const finalidadesAceptadas = campos.finalidades.checked;
-
-                const todoValido = nombreValido && 
-                                 emailValido && 
-                                 metodoSeleccionado && 
-                                 terminosAceptados && 
-                                 finalidadesAceptadas;
-
-                btnContinuar.disabled = !todoValido;
-                if (todoValido) {
-                    btnContinuar.textContent = 'Continuar a Confirmación';
-                } else {
-                    btnContinuar.textContent = 'Completa todos los campos';
-                }
-            }
-            campos.nombre.addEventListener('input', validarFormulario);
-            campos.email.addEventListener('input', validarFormulario);
-            campos.terminos.addEventListener('change', validarFormulario);
-            campos.finalidades.addEventListener('change', validarFormulario);
-
-            Array.from(campos.metodoPago).forEach(radio => {
-                radio.addEventListener('change', validarFormulario);
-            });
-            formPago.addEventListener('submit', function(e) {
-                if (btnContinuar.disabled) {
-                    e.preventDefault();
-                    alert('Por favor, completa todos los campos obligatorios');
-                    return false;
-                }
-                btnContinuar.disabled = true;
-                btnContinuar.textContent = 'Procesando...';
-            });
-            validarFormulario();
-            console.log('Formulario de pago inicializado');
-            console.log('Total a pagar: S/. <%= String.format("%.2f", totalGeneral) %>');
-        </script>
+        <script src="${pageContext.request.contextPath}/Cliente/JS/MetodoPago.js"></script>
     </body>
 </html>

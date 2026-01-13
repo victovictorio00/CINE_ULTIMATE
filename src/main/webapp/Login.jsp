@@ -8,11 +8,12 @@
 <head>
     <meta charset="UTF-8" />
     <title>Login</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="Estilos/loginStyle.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
+<jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <div class="video-bg">
     <video autoplay muted loop>
         <source src="Cliente/videos/video.mp4" type="video/mp4" />
@@ -46,11 +47,10 @@
                    placeholder="Contraseña"
                    required
                    autocomplete="current-password" />
-
-            
-
             <a href="#" class="forgot-link">Olvidé mi contraseña</a>
-
+                    <div class="g-recaptcha" 
+                         data-sitekey="6LdvIx4sAAAAALLnDTj8-WorjZmcFCnaqrWNr3dH">
+                    </div>
             <input type="hidden" name="redirect"
                    value="${param.redirect != null ? param.redirect : ''}">
             <button type="submit" class="btn btn-login">Entrar</button>
@@ -58,16 +58,7 @@
         </form>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-<script>
-document.getElementById("loginForm").addEventListener("submit", function(e){
-    let passInput = this.querySelector('input[name="password"]');
-    
-    if(passInput.value) {
-        // reemplazamos el valor por el hash SHA-256
-        passInput.value = sha256(passInput.value);
-    }
-});
-</script>
+<script src="<%= request.getContextPath() %>/Cliente/lib/sha256/sha256.min.js"></script>
+<script src="${pageContext.request.contextPath}/Cliente/JS/Login.js"></script>
 </body>
 </html>

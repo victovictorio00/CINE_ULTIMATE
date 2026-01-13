@@ -9,212 +9,198 @@ import java.sql.Types;
 public class VentaDao implements DaoCrud<Venta> {
 
     @Override
-    public List<Venta> listar() throws SQLException {
-        List<Venta> ventas = new ArrayList<>();
-        String query = "SELECT * FROM ventas";
+public List<Venta> listar() throws SQLException {
+    List<Venta> ventas = new ArrayList<>();
+    String sql = "{CALL listarVentas()}";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql);
+         ResultSet rs = cst.executeQuery()) {
 
-            while (rs.next()) {
-                Venta venta = new Venta();
+        while (rs.next()) {
+            Venta venta = new Venta();
+            venta.setIdVenta(rs.getInt("id_venta"));
+            venta.setTotal(rs.getDouble("total"));
+            venta.setMetodoPago(rs.getString("metodo_pago"));
+            venta.setFecha(rs.getTimestamp("fecha"));
 
-                venta.setIdVenta(rs.getInt("id_venta"));
-                venta.setTotal(rs.getDouble("total"));
-                venta.setMetodoPago(rs.getString("metodo_pago"));
-                venta.setFecha(rs.getTimestamp("fecha")); // se guarda como texto en tu modelo
+            Usuario usuario = new Usuario();
+            usuario.setIdUsuario(rs.getInt("id_usuario_cliente"));
+            usuario.setNombreCompleto(rs.getString("nombre_completo"));
+            venta.setIdUsuarioCliente(usuario);
 
-                // Mapeo del usuario cliente
-                Usuario usuario = new Usuario();
-                usuario.setIdUsuario(rs.getInt("id_usuario_cliente"));
-                venta.setIdUsuarioCliente(usuario);
-
-                ventas.add(venta);
-            }
+            ventas.add(venta);
         }
-        return ventas;
     }
+    return ventas;
+}
+
 
     @Override
-    public void insertar(Venta venta) throws SQLException {
-        String query = "INSERT INTO ventas (id_usuario_cliente, fecha, total, metodo_pago) VALUES (?, NOW(), ?, ?)";
+public void insertar(Venta venta) throws SQLException {
+    String sql = "{CALL insertarVenta(?, ?, ?)}";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
 
-            pst.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
-            pst.setDouble(2, venta.getTotal());
-            pst.setString(3, venta.getMetodoPago());
+        cst.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
+        cst.setDouble(2, venta.getTotal());
+        cst.setString(3, venta.getMetodoPago());
 
-            pst.executeUpdate();
-        }
+        cst.execute();
     }
+}
+
 
     /**
      * Inserta la venta y retorna el ID autogenerado.
      */
-    public int insertarYDevolverId(Venta venta) throws SQLException {
-        String query = "INSERT INTO ventas (id_usuario_cliente, fecha, total, metodo_pago) VALUES (?, NOW(), ?, ?)";
-        int idGenerado = 0;
+   public int insertarYDevolverId(Venta venta) throws SQLException {
+    String sql = "{CALL insertarVentaYDevolverId(?, ?, ?, ?)}";
+    int idGenerado = 0;
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
 
-            pst.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
-            pst.setDouble(2, venta.getTotal());
-            pst.setString(3, venta.getMetodoPago());
-            pst.executeUpdate();
+        cst.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
+        cst.setDouble(2, venta.getTotal());
+        cst.setString(3, venta.getMetodoPago());
+        cst.registerOutParameter(4, java.sql.Types.INTEGER);
 
-            ResultSet rs = pst.getGeneratedKeys();
+        cst.execute();
+
+        idGenerado = cst.getInt(4);
+        venta.setIdVenta(idGenerado);
+    }
+
+    return idGenerado;
+}
+
+
+   @Override
+public Venta leer(int id) throws SQLException {
+    String sql = "{CALL leerVenta(?)}";
+
+    Venta venta = null;
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
+
+        cst.setInt(1, id);
+        try (ResultSet rs = cst.executeQuery()) {
             if (rs.next()) {
-                idGenerado = rs.getInt(1);
-                venta.setIdVenta(idGenerado);
+                venta = new Venta();
+                venta.setIdVenta(rs.getInt("id_venta"));
+                venta.setTotal(rs.getDouble("total"));
+                venta.setMetodoPago(rs.getString("metodo_pago"));
+                venta.setFecha(rs.getTimestamp("fecha"));
+
+                Usuario usuario = new Usuario();
+                usuario.setIdUsuario(rs.getInt("id_usuario_cliente"));
+                usuario.setNombreCompleto(rs.getString("nombre_completo"));
+                venta.setIdUsuarioCliente(usuario);
             }
         }
-        return idGenerado;
     }
+    return venta;
+}
 
-    @Override
-    public Venta leer(int id) throws SQLException {
-        String query = "SELECT v.id_venta,\n"
-                + "       v.fecha,\n"
-                + "       v.total,\n"
-                + "       v.metodo_pago,\n"
-                + "       v.id_usuario_cliente,\n"
-                + "       u.nombre_completo\n"
-                + "FROM ventas v\n"
-                + "JOIN usuarios u ON u.id_usuario = v.id_usuario_cliente\n"
-                + "WHERE v.id_venta = ?";
 
-        Venta venta = null;
+   @Override
+public void editar(Venta venta) throws SQLException {
+    String sql = "{CALL editarVenta(?, ?, ?, ?, ?)}";
 
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setInt(1, id);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    venta = new Venta();
-                    venta.setIdVenta(rs.getInt("id_venta"));
-                    venta.setTotal(rs.getDouble("total"));
-                    venta.setMetodoPago(rs.getString("metodo_pago"));
-                    venta.setFecha(rs.getTimestamp("fecha"));
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
 
-                    Usuario usuario = new Usuario();
-                    usuario.setIdUsuario(rs.getInt("id_usuario_cliente"));
-                    usuario.setNombreCompleto(rs.getString("nombre_completo")); // ✅ ¡esta línea!
-                    venta.setIdUsuarioCliente(usuario);
-                }
-            }
-        }
-        return venta;
+        cst.setInt(1, venta.getIdVenta());
+        cst.setInt(2, venta.getIdUsuarioCliente().getIdUsuario());
+        cst.setTimestamp(3, new Timestamp(venta.getFecha().getTime()));
+        cst.setDouble(4, venta.getTotal());
+        cst.setString(5, venta.getMetodoPago());
+
+        cst.execute();
     }
+}
 
-    @Override
-    public void editar(Venta venta) throws SQLException {
-        String query = "UPDATE ventas SET id_usuario_cliente = ?, fecha = ?, total = ?, metodo_pago = ? WHERE id_venta = ?";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
-            pst.setTimestamp(2, new Timestamp(venta.getFecha().getTime()));
-            pst.setDouble(3, venta.getTotal());
-            pst.setString(4, venta.getMetodoPago());
-            pst.setInt(5, venta.getIdVenta());
-
-            pst.executeUpdate();
-        }
-    }
 
     @Override
     public void eliminar(int id) throws SQLException {
-        String query = "DELETE FROM ventas WHERE id_venta = ?";
-
-        try (Connection con = Conexion.getConnection(); PreparedStatement pst = con.prepareStatement(query)) {
-
-            pst.setInt(1, id);
-            pst.executeUpdate();
-        }
-    }
-
-    public boolean guardarVenta(Venta venta, List<DetalleVenta> detalles) {
-        String sqlVenta = "INSERT INTO ventas (id_usuario_cliente, fecha, total, metodo_pago) VALUES (?, NOW(), ?, ?)";
-        String sqlDetalle = "INSERT INTO detalle_ventas (id_venta, cantidad, tipo_item, precio_unitario, id_producto, id_funcion, id_asiento_funcion) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection con = Conexion.getConnection()) {
-            con.setAutoCommit(false);
-
-            // 1. insertar venta
-            int idVenta;
-            try (PreparedStatement psVenta = con.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
-                psVenta.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
-                psVenta.setDouble(2, venta.getTotal());
-                psVenta.setString(3, venta.getMetodoPago());
-                psVenta.executeUpdate();
-
-                try (ResultSet keys = psVenta.getGeneratedKeys()) {
-                    if (!keys.next()) {
-                        throw new SQLException("No se generó ID de venta");
-                    }
-                    idVenta = keys.getInt(1);
-                    venta.setIdVenta(idVenta);
-                }
-            }
-
-            // 2. insertar detalles
-            try (PreparedStatement psDet = con.prepareStatement(sqlDetalle)) {
-                for (DetalleVenta d : detalles) {
-                    psDet.setInt(1, idVenta);
-                    psDet.setInt(2, d.getCantidad());
-                    psDet.setInt(3, d.getTipoItem());
-                    psDet.setDouble(4, d.getPrecioUnitario());
-
-                    // producto
-                    if (d.getProducto() != null && d.getProducto().getIdProducto() > 0) {
-                        psDet.setInt(5, d.getProducto().getIdProducto());
-                    } else {
-                        psDet.setNull(5, Types.INTEGER);
-                    }
-
-                    // función
-                    if (d.getFuncion() != null && d.getFuncion().getIdFuncion() > 0) {
-                        psDet.setInt(6, d.getFuncion().getIdFuncion());
-                    } else {
-                        psDet.setNull(6, Types.INTEGER);
-                    }
-
-                    // asiento_funcion
-                    AsientoFuncion af = d.getIdAsientoFuncion();
-                    if (af != null && af.getIdAsientoFuncion() > 0) {
-                        psDet.setInt(7, af.getIdAsientoFuncion());
-                    } else {
-                        psDet.setNull(7, Types.INTEGER);
-                    }
-
-                    psDet.addBatch();
-                }
-                psDet.executeBatch();
-            }
-
-            con.commit();
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    public List<Venta> obtenerReservasPorUsuario(int idUsuario) throws SQLException {
-    List<Venta> lista = new ArrayList<>();
-
-    String sql = "SELECT v.id_venta, v.fecha, v.total, v.metodo_pago, "
-               + "u.nombre_completo "
-               + "FROM ventas v "
-               + "JOIN usuarios u ON v.id_usuario_cliente = u.id_usuario "
-               + "WHERE v.id_usuario_cliente = ? "
-               + "ORDER BY v.fecha DESC";
+    String sql = "{CALL eliminarVentaCompleta(?)}";
 
     try (Connection con = Conexion.getConnection();
-         PreparedStatement pst = con.prepareStatement(sql)) {
+         CallableStatement cst = con.prepareCall(sql)) {
 
-        pst.setInt(1, idUsuario);
-        try (ResultSet rs = pst.executeQuery()) {
+        con.setAutoCommit(false); // opcional, ya que el procedimiento ya tiene START TRANSACTION
+
+        cst.setInt(1, id);
+        cst.execute();
+
+        con.commit(); // opcional
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw e; // propagar el error
+    }
+}
+
+
+   public boolean guardarVenta(Venta venta, List<DetalleVenta> detalles) {
+    String sqlVenta = "{CALL insertarVenta(?, ?, ?, ?)}";
+    String sqlDetalle = "{CALL insertarDetalle(?, ?, ?, ?, ?, ?, ?)}";
+
+    try (Connection con = Conexion.getConnection()) {
+        con.setAutoCommit(false);
+
+        int idVenta;
+
+        //  Insertar venta
+        try (CallableStatement csVenta = con.prepareCall(sqlVenta)) {
+            csVenta.setInt(1, venta.getIdUsuarioCliente().getIdUsuario());
+            csVenta.setDouble(2, venta.getTotal());
+            csVenta.setString(3, venta.getMetodoPago());
+            csVenta.registerOutParameter(4, java.sql.Types.INTEGER);
+
+            csVenta.execute();
+            idVenta = csVenta.getInt(4);
+            venta.setIdVenta(idVenta);
+        }
+
+        //  Insertar detalles
+        try (CallableStatement csDet = con.prepareCall(sqlDetalle)) {
+            for (DetalleVenta d : detalles) {
+                csDet.setInt(1, idVenta);
+                csDet.setInt(2, d.getCantidad());
+                csDet.setInt(3, d.getTipoItem());
+                csDet.setDouble(4, d.getPrecioUnitario());
+
+                csDet.setObject(5, d.getProducto() != null ? d.getProducto().getIdProducto() : null, java.sql.Types.INTEGER);
+                csDet.setObject(6, d.getFuncion() != null ? d.getFuncion().getIdFuncion() : null, java.sql.Types.INTEGER);
+                csDet.setObject(7, d.getIdAsientoFuncion() != null ? d.getIdAsientoFuncion().getIdAsientoFuncion() : null, java.sql.Types.INTEGER);
+
+                csDet.execute();
+            }
+        }
+
+        con.commit();
+        return true;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+    
+  public List<Venta> obtenerReservasPorUsuario(int idUsuario) throws SQLException {
+    List<Venta> lista = new ArrayList<>();
+
+    String sql = "{CALL obtenerReservasPorUsuario(?)}"; // Llamada al procedimiento
+
+    try (Connection con = Conexion.getConnection();
+         CallableStatement cst = con.prepareCall(sql)) {
+
+        cst.setInt(1, idUsuario);
+        try (ResultSet rs = cst.executeQuery()) {
             while (rs.next()) {
                 Venta venta = new Venta();
                 venta.setIdVenta(rs.getInt("id_venta"));
@@ -234,5 +220,6 @@ public class VentaDao implements DaoCrud<Venta> {
 
     return lista;
 }
+
 
 }

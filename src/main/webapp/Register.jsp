@@ -4,12 +4,13 @@
     <head>
         <meta charset="UTF-8" />
         <title>Registro</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Register.css">
+        
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
     <body>
-
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <div class="video-bg">
             <video autoplay muted loop>
                 <source src="Cliente/videos/video.mp4" type="video/mp4" />
@@ -68,7 +69,7 @@
                     <input type="text" name="direccion" class="form-control" placeholder="Dirección" maxlength="200" />
 
                     <div class="g-recaptcha" 
-                         data-sitekey="6LcDkRosAAAAAD7Ig-GC9IWUsxRQiKjVL8zCJA05">
+                         data-sitekey="6LdvIx4sAAAAALLnDTj8-WorjZmcFCnaqrWNr3dH">
                     </div>
                     <button type="submit" class="btn btn-login mt-2">Registrar</button>
                     <button type="button" class="btn btn-register" onclick="window.location.href = 'Login.jsp'">Regresar</button>
@@ -78,39 +79,8 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-<script>
-(function () {
-    const form = document.getElementById("registroForm");
-    form.addEventListener("submit", function (event) {
-        const pass = document.getElementById("password").value.trim();
-        const confirm = document.getElementById("passwordconfirm").value.trim();
-
-            // Validación HTML5 general
-            //if (!form.checkValidity()) {
-            //  event.preventDefault();
-            //event.stopPropagation();
-            //alert("Revisa los campos resaltados. Asegúrate de completar los obligatorios y con el formato correcto.");
-            //return;
-            //}
-        if (pass !== confirm) {
-            event.preventDefault();
-            alert("Las contraseñas no coinciden.");
-            return;
-        }
-
-        if (pass.length < 6) {
-            event.preventDefault();
-            alert("La contraseña debe tener al menos 6 caracteres.");
-            return;
-        }
-
-        // Generar SHA-256 y guardarlo en el input oculto
-        document.getElementById("password").value = sha256(pass);
-        document.getElementById("passwordconfirm").value = "";
-    }, false);
-})();
-</script>
+<script src="<%= request.getContextPath() %>/Cliente/lib/sha256/sha256.min.js"></script>
+<script src="${pageContext.request.contextPath}/Cliente/JS/Register.js"></script>
 
 </body>
 </html>

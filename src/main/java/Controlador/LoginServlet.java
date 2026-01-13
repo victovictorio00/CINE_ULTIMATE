@@ -28,7 +28,7 @@ public class LoginServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         usuarioDao = new UsuarioDao();
-        /*
+        
         Properties props = new Properties();
 
         try (InputStream input = getServletContext().getResourceAsStream("/WEB-INF/secrets_temp.properties")) {
@@ -50,14 +50,14 @@ public class LoginServlet extends HttpServlet {
             System.err.println("Error al leer el archivo de propiedades: " + e.getMessage());
             throw new ServletException("Fallo en la configuración de la clave secreta.", e);
         }
-         */
+         
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
        
-/*
+
         if (RECAPTCHA_SECRET_KEY == null || RECAPTCHA_SECRET_KEY.isEmpty()) {
             System.err.println("ERROR: RECAPTCHA_SECRET_KEY no cargada. No se pudo verificar reCAPTCHA.");
             request.setAttribute("error", "Error de configuración del servidor (Captcha).");
@@ -82,7 +82,7 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("Login.jsp").forward(request, response);
             return;
         }
-         */
+         
         request.setCharacterEncoding("UTF-8");
 String username = request.getParameter("username");
 String password = request.getParameter("password"); // SHA-256 enviado desde frontend

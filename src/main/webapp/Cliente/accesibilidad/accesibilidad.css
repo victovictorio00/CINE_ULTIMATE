@@ -1,0 +1,262 @@
+:root {
+    --color_1: #ff4000;   /* naranja */
+    --color_2: #ff4000;   /* naranja */
+    --color_3: #ff4000;   /* naranja naranja */
+}
+
+/* contenedor del widget */
+#a11y-widget-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10001;
+    isolation: isolate;
+}
+
+/* boton circular trigger */
+
+#a11y-trigger {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10000;
+    width: 55px;
+    height: 55px;
+    background-color: var(--color_1);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.9s;
+}
+#a11y-trigger:hover{
+    transform: scale(1.1);
+    background-color: var(--color_2);
+}
+
+#a11y-trigger img {
+    width: 110%;
+    height: auto;
+    filter: invert(1);
+}
+
+/* menu de opciones */
+#a11y-menu-options {
+    position: fixed;
+    bottom: 85px;
+    left: 20px;
+    z-index: 9999;
+    background: #FFF;
+    padding: 1rem; 
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border: 1px solid #DDD;
+    min-width: 15rem; 
+    
+    /* configuracion inicial para transicion de entrada/salida */
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none; 
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out; 
+    display: flex;
+    flex-direction: column;
+
+    /* correccion: uso de rem para espaciado estable */
+    gap: 0.8rem;
+}
+
+.a11y-header {
+    /* Define un poco de espacio debajo del encabezado si lo necesitas */
+    margin-bottom: 0.5rem; 
+}
+
+.a11y-control-btn {
+    border: none !important; /* ✅ QUITAR BORDE */
+    background: transparent !important; /* ✅ QUITAR FONDO */
+    padding: 0 10px !important; /* Ajustar padding para que sean más compactos */
+    font-weight: bold;
+    color: var(--color_1); /* Color de texto sutil */
+    font-size: 1.1rem;
+}
+.a11y-control-btn:hover {
+    color: red;
+}
+
+
+/* clase para mostrar el menu */
+#a11y-menu-options.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+/* estilo de grupos de botones */
+.a11y-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.a11y-group.controls {
+    grid-column: span 2; 
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #EEE;
+}
+#a11y-menu-options h3 {
+    margin: 0 0 5px 0;
+    /* correccion: uso de rem */
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--color_1);
+}
+#a11y-menu-options button {
+    padding: 8px;
+    border: 1px solid #CCC;
+    background-color: #F8F8F8;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.1s;
+    /* correccion: uso de rem */
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+/* ---------------------------------------------------- */
+/* clases de accesibilidad (inyeccion de estilos) */
+/* ---------------------------------------------------- */
+
+
+#btn-increase-text{
+    font-size: 1.2rem !important;
+}
+
+
+
+
+/* alto contraste */
+body.a11y-high-contrast {
+    background-color: #000 !important;
+    color: #FFF !important;
+    /* inversion de colores y ajuste de tono */
+    filter: invert(1) hue-rotate(180deg); 
+}
+body.a11y-high-contrast img, 
+body.a11y-high-contrast video {
+    /* reinvierte imagenes/videos para que se vean normales */
+    filter: invert(1) hue-rotate(180deg);
+}
+
+/* fuente dislexia */
+@font-face {
+    font-family: 'OpenDyslexic';
+    src:url('OpenDyslexic-Regular.woff2') format('woff2'), 
+        url('OpenDyslexic-Regular.otf') format('opentype');
+}
+body.a11y-dyslexia * {
+    font-family: 'OpenDyslexic', sans-serif !important;
+    font-weight: normal !important;
+}
+
+/* espaciado de texto aumentado */
+body.a11y-spacing * {
+    line-height: 1.5 !important;
+    word-spacing: 0.15em !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* modo concentracion (atenuacion del fondo) */
+body.a11y-concentracion {
+    min-height: 100vh;
+    /* necesario para posicionar la banda de enfoque */
+    position: relative;
+    /* hace que el contenido se vea atenuado */
+    filter: brightness(0.4) contrast(0.8);
+    transition: filter 0.3s ease;
+}
+
+/* la franja luminosa de concentracion */
+#a11y-focus-band {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    filter: brightness(1) contrast(1);
+    z-index: 99999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+    /* crucial: permite hacer clic en lo que esté debajo */ 
+    pointer-events: none;
+    transition: transform 0.05s linear;
+}
+
+
+
+#focus-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    /* crea el efecto de franja, dos zonas oscuras y una transparente en el centro */
+    background: linear-gradient(to bottom,
+        rgba(0,0,0,0.50) 0%,
+        rgba(0,0,0,0.50) calc(50% - 10vh),
+        transparent        calc(50% - 10vh),
+        transparent        calc(50% + 10vh),
+        rgba(0,0,0,0.50) calc(50% + 10vh),
+        rgba(0,0,0,0.50) 100%
+    );
+    background-size: 100% 200vh;
+    background-position: 0 50%;
+    background-repeat: no-repeat;
+}
+#focus-overlay.active { display: block; }
+
+
+#btn-concentracion.active {
+    background: var(--color_1) !important;
+    color: white !important;
+}
+
+.btn-a11y-active {
+    background: var(--color_1) !important; /* Azul */
+    color: white !important;
+    border-color: var(--color_3) !important;
+}
+
+
+body.a11y-high-contrast #a11y-widget-container,
+body.a11y-high-contrast #a11y-trigger,
+body.a11y-high-contrast #a11y-menu-options {
+    /* CRUCIAL: Resetea la propiedad filter */
+    filter: none !important;
+}
+
+#a11y-widget-container,
+#a11y-trigger,
+#a11y-menu-options {
+    position: fixed !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+    isolation: isolate !important;
+}
+
+
+body.a11y-high-contrast #a11y-widget-container,
+body.a11y-high-contrast #a11y-trigger,
+body.a11y-high-contrast #a11y-menu-options,
+#a11y-widget-container,
+#a11y-trigger,
+#a11y-menu-options {
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+}

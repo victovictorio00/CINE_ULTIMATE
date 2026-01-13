@@ -9,12 +9,12 @@
     <title>Lista de Películas</title>
 
     <!-- Bootstrap 4 CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/Pelicula.css">
 </head>
 <body>
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- Barra lateral -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
@@ -49,7 +49,6 @@
             </a>
         </nav>
     </nav>
-
     <!-- Contenido principal -->
     <main class="content">
         <div class="table-container">
@@ -121,10 +120,9 @@
             </table>
         </div>
     </main>
-
     <!-- Bootstrap JS y dependencias -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
 </body>
 </html>

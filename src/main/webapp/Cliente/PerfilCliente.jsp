@@ -23,7 +23,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Perfil | CineMax</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/PerfilCliente.css">
 </head>
 
@@ -166,36 +166,9 @@
     © 2025 CineMax | Todos los derechos reservados
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<script>
-async function hashPasswordChange(e) {
-    e.preventDefault();
-    const pass1 = document.querySelector("input[name='nuevaPass']");
-    const pass2 = document.querySelector("input[name='confirmPass']");
-
-    if (pass1.value !== pass2.value) {
-        alert("Las contraseñas no coinciden.");
-        return false;
-    }
-
-    const txt = pass1.value;
-    const encoder = new TextEncoder();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(txt));
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-
-    // Reemplazar por el hash
-    pass1.value = hashHex;
-    pass2.value = hashHex;
-
-    e.target.submit();
-}
-
-document.querySelector("form[action$='CambiarPasswordServlet']")
-    .addEventListener("submit", hashPasswordChange);
-</script>
-
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
+        <script src="${pageContext.request.contextPath}/Cliente/JS/PerfilCliente.js"></script>
 </body>
 </html>

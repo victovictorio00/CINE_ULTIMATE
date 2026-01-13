@@ -25,13 +25,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard Administrador</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/fontawesome/css/all.min.css">
+    <script src="<%= request.getContextPath() %>/Cliente/lib/chart/chart.min.js"></script>
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/AdminDashboard.css">
 </head>
 
 <body>
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <!-- SIDEBAR -->
     <nav class="sidebar">
         <div class="sidebar-header">CINEMAX</div>
@@ -101,51 +102,28 @@
         </div>
     </main>
 
-    <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- JS de Bootstrap -->
+        <script src="<%= request.getContextPath() %>/Cliente/lib/jquery/jquery-3.6.4.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/popper/popper.min.js"></script>
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
 
+    <%-- Preparar datos de ventas mensuales --%>
     <%
-    List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
-    if (ventasMensuales == null) {
-        ventasMensuales = java.util.Collections.nCopies(12, 0.0);
-    }
-%>
-<script>
-    const ctx = document.getElementById('ventasChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            datasets: [{
-                label: 'Ventas Mensuales (S/)',
-                data: <%= ventasMensuales.toString() %>,
-                backgroundColor: 'rgba(13, 110, 253, 0.8)',
-                borderColor: '#0d6efd',
-                borderWidth: 2,
-                hoverBackgroundColor: '#084298'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true },
-                x: {}
-            },
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Ventas Mensuales - 2025',
-                    color: '#084298',
-                    font: { size: 18, weight: 'bold' }
-                }
-            }
+        List<Double> ventasMensuales = (List<Double>) request.getAttribute("ventasMensuales");
+        if (ventasMensuales == null) {
+            ventasMensuales = java.util.Collections.nCopies(12, 0.0);
         }
-    });
-</script>
+    %>
 
+    <%-- Inicializar datos del dashboard --%>
+    <script>
+        window.adminDashboardData = {
+            ventasMensuales: <%= ventasMensuales.toString() %>,
+            meses: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+        };
+    </script>
 
+    <%-- Cargar lógica del gráfico --%>
+    <script src="<%= request.getContextPath() %>/Admin/JS/adminDashboardChart.js"></script>
 </body>
 </html>

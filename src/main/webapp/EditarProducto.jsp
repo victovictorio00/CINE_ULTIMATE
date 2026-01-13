@@ -1,8 +1,3 @@
-<%-- 
-    Document   : EditarProducto
-    Created on : 26 may. 2025, 18:08:19
-    Author     : Proyecto
---%>
 <%@ page import="modelo.Producto" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -10,7 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Editar Producto</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosAdmin/EditarProducto.css">
 </head>
 <body>
@@ -33,7 +28,8 @@
             </div>
             <div class="form-group">
                     <label for="foto">Foto del producto</label>
-                    <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*" required>
+                    <input type="file" class="form-control-file" name="foto" id="foto" accept="image/*">
+
                 </div>
             <button type="submit" class="btn btn-primary btn-block">Actualizar Producto</button>
         </form>

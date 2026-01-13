@@ -13,10 +13,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Función</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
 </head>
 <body class="container mt-4">
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
     <h3>Editar Función</h3>
     <form action="FuncionServlet?action=actualizar" method="post">
         <input type="hidden" name="csrf_token" value="${sessionScope.csrfToken}">
@@ -64,12 +64,10 @@
                 <option value="3" <%= f.getEstadoFuncion().getIdEstadoFuncion() == 3 ? "selected" : "" %>>Finalizada</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>Asientos Disponibles</label>
             <input type="number" name="asientos_disponibles" class="form-control" value="<%= f.getAsientosDisponibles() %>">
         </div>
-
         <button type="submit" class="btn btn-primary">Actualizar</button>
         <a href="FuncionServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>

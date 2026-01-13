@@ -19,7 +19,7 @@
     String metodoPago = (String) sesion.getAttribute("metodoPago");
     
     Funcion funcion = (Funcion) sesion.getAttribute("funcionSeleccionada");
-    String asientosSeleccionados = (String) sesion.getAttribute("asientosSeleccionados"); // String "A1,A2,B3"
+    String asientosSeleccionados = (String) sesion.getAttribute("asientosSeleccionados");
     Double totalAsientos = (Double) sesion.getAttribute("totalAsientos");
     Double totalDulces = (Double) sesion.getAttribute("totalDulces");
     Map<Integer, Integer> carritoDulceria = (Map<Integer, Integer>) sesion.getAttribute("carritoDulceria");
@@ -48,19 +48,20 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Confirmación de Compra</title>
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
+        <script src="<%= request.getContextPath() %>/Cliente/lib/bootstrap/js/bootstrap-4.6.2.min.js"></script>
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/fontawesome/css/all.min.css">
         <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/EstilosCliente/Confirmacion.css">
     </head>
     <body>
+        <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
         <header class="custom-header">
             <h1><i class="fas fa-check-circle mb-2"></i> Confirmación de Compra</h1>
             <button type="button" class="btn-back" onclick="history.back()">
                     <i class="fas fa-arrow-left"></i> Volver
             </button>
         </header>
+
         <% if (request.getAttribute("mensaje") != null) { %>
         <div class="position-fixed top-0 end-0 p-3">
             <div id="liveToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
@@ -73,6 +74,7 @@
             </div>
         </div>
         <% } %>
+
         <div class="confirmation-container">
             <div class="section">
                 <div class="alert-info">
@@ -81,6 +83,7 @@
                     Una vez confirmada, no se podrán hacer cambios ni devoluciones.
                 </div>
             </div>
+
             <!-- Función y Película -->
             <div class="section">
                 <div class="section-header">
@@ -107,6 +110,7 @@
                     <span class="info-value"><%= funcion.getSala().getNombre() %></span>
                 </div>
             </div>
+
             <!-- Asientos -->
             <div class="section">
                 <div class="section-header">
@@ -122,6 +126,7 @@
                     <% } %>
                 </ul>
             </div>
+
             <!-- Dulcería -->
             <% if (!carritoDulceria.isEmpty()) { %>
             <div class="section">
@@ -206,30 +211,19 @@
                 </form>
             </div>
         </div>
+
         <footer>
             © 2025 Cine Online | Todos los derechos reservados
         </footer>
+
+        <%-- Inicializar datos de configuración para JavaScript --%>
         <script>
-            const formConfirmar = document.getElementById('formConfirmar');
-            const btnConfirmar = document.getElementById('btnConfirmar');
-
-            formConfirmar.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const confirmacion = confirm(
-                    '¿Confirmar la compra por S/. <%= String.format("%.2f", totalGeneral) %>?\n\n' +
-                    'Esta acción es irreversible.'
-                );
-
-                if (confirmacion) {
-                    btnConfirmar.disabled = true;
-                    btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-                    formConfirmar.submit();
-                }
-            });
-
-            console.log('Confirmación de compra cargada');
-            console.log('Total: S/. <%= String.format("%.2f", totalGeneral) %>');
+            window.confirmacionData = {
+                totalGeneral: '<%= String.format("%.2f", totalGeneral) %>'
+            };
         </script>
+
+        <%-- Script externo de confirmación --%>
+        <script src="<%= request.getContextPath() %>/Cliente/JS/confirmacionLogic.js"></script>
     </body>
 </html>

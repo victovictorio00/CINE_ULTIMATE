@@ -9,10 +9,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Película</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Cliente/lib/bootstrap/css/bootstrap.min.css">
 </head>
 <body>
-
+    <jsp:include page="/Cliente/accesibilidad/accesibilidad.jsp" />
 <%
     Pelicula peli = (Pelicula) request.getAttribute("pelicula");
     List<Genero> generos = (List<Genero>) request.getAttribute("listaGeneros");
@@ -101,12 +101,10 @@
                 Si no seleccionas ninguna, se mantendrá la foto actual.
             </small>
         </div>
-
         <!-- Botones -->
         <button type="submit" class="btn btn-primary">Actualizar Película</button>
         <a href="PeliculaServlet?action=listar" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
-
 </body>
 </html>
